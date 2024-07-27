@@ -98,7 +98,7 @@ const ProductForm = () => {
             {message && <p className="success">{message}</p>}
             {error && <p className="error">{error}</p>}
             <div className="form-group">
-                <label htmlFor="name">Name:</label>
+                <label htmlFor="name">Name :</label>
                 <input
                     type="text"
                     id="name"
@@ -109,7 +109,7 @@ const ProductForm = () => {
                 />
             </div>
             <div className="form-group">
-                <label htmlFor="description">Description:</label>
+                <label htmlFor="description">Description :</label>
                 <input
                     type="text"
                     id="description"
@@ -120,7 +120,7 @@ const ProductForm = () => {
                 />
             </div>
             <div className="form-group">
-                <label htmlFor="category">Category:</label>
+                <label htmlFor="category">Category :</label>
                 <select
                     id="category"
                     value={category}
@@ -138,7 +138,7 @@ const ProductForm = () => {
             {shouldDisplayColorAndSize(category) && (
                 <>
                     <div className="form-group">
-                        <label htmlFor="color">Color:</label>
+                        <label htmlFor="color">Color :</label>
                         <select
                             id="color"
                             value={color}
@@ -153,7 +153,7 @@ const ProductForm = () => {
                         </select>
                     </div>
                     <div className="form-group">
-                        <label htmlFor="size">Size:</label>
+                        <label htmlFor="size">Size :</label>
                         <select
                             id="size"
                             value={size}
@@ -170,7 +170,7 @@ const ProductForm = () => {
                 </>
             )}
             <div className="form-group">
-                <label htmlFor="price">Price:</label>
+                <label htmlFor="price">Price :</label>
                 <input
                     type="number"
                     id="price"
@@ -181,8 +181,8 @@ const ProductForm = () => {
                 />
             </div>
             {photoPaths.map((path, index) => (
-                <div key={index} className="form-group">
-                    <label htmlFor={`photoPath${index}`}>Photo Path {index + 1}:</label>
+                <div key={index} className="form-group photo-group">
+                    <label htmlFor={`photoPath${index}`}>Photo Path {index + 1} :</label>
                     <input
                         type="text"
                         id={`photoPath${index}`}
@@ -190,7 +190,7 @@ const ProductForm = () => {
                         value={path}
                         onChange={(e) => handlePhotoPathChange(index, e.target.value)}
                     />
-                    <label>
+                    <label className="radio-label">
                         <input
                             type="radio"
                             name="mainImage"
@@ -201,8 +201,10 @@ const ProductForm = () => {
                     </label>
                 </div>
             ))}
-            <button type="button" onClick={addPhotoPathField}>Add another photo path</button>
-            <button type="submit">Create Product</button>
+            <div className="button-group">
+                <button type="button" onClick={addPhotoPathField}>Add another photo path</button>
+                <button type="submit">Create Product</button>
+            </div>
         </form>
     );
 };
