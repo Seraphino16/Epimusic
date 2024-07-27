@@ -3,6 +3,7 @@ import React from 'react';
 import './App.css';
 import Register from './Register';
 import Login from './Login';
+import Admin from './Admin';
 
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
                 <h1>Welcome to React and Symfony Integration</h1>
                 <Register />
                 <Login />
+                <Admin />
             </header>
         </div>
     );
