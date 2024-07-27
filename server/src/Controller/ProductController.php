@@ -22,15 +22,15 @@ class ProductController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        if (!isset($data['category'], $data['color'], $data['size'], $data['name'], $data['description'], $data['price'], $data['photoPaths'])) {
+        if (!isset($data['category'], $data['name'], $data['description'], $data['price'], $data['photoPaths'], $data['mainImageIndex'])) {
             return new JsonResponse(['error' => 'Invalid data'], 400);
         }
 
         $category = $entityManager->getRepository(Category::class)->find($data['category']);
-        $color = $entityManager->getRepository(Color::class)->find($data['color']);
-        $size = $entityManager->getRepository(Size::class)->find($data['size']);
+        $color = isset($data['color']) ? $entityManager->getRepository(Color::class)->find($data['color']) : null;
+        $size = isset($data['size']) ? $entityManager->getRepository(Size::class)->find($data['size']) : null;
 
-        if (!$category || !$color || !$size) {
+        if (!$category || ($data['color'] && !$color) || ($data['size'] && !$size)) {
             return new JsonResponse(['error' => 'Invalid references'], 404);
         }
 
@@ -42,18 +42,18 @@ class ProductController extends AbstractController
         // Create a new model
         $model = new Model();
         $model->setProduct($product);
-        $model->setColor($color);
-        $model->setSize($size);
+        if ($color) $model->setColor($color);
+        if ($size) $model->setSize($size);
         $model->setPrice($data['price']);
 
         $entityManager->persist($product);
         $entityManager->persist($model);
 
         // Handle photo paths
-        foreach ($data['photoPaths'] as $path) {
+        foreach ($data['photoPaths'] as $index => $path) {
             $image = new Image();
             $image->setPath($path);
-            $image->setMain($data['isMainImage']);
+            $image->setMain($index === $data['mainImageIndex']);
             $model->addImage($image);
             $entityManager->persist($image);
         }
