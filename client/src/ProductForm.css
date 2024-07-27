@@ -19,7 +19,7 @@ input, select {
 
 input::placeholder, select::placeholder {
     color: gray;
-    opacity: 1; /* Firefox */
+    opacity: 1;
 }
 
 select {

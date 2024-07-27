@@ -12,7 +12,7 @@ const ProductForm = () => {
     const [color, setColor] = useState('');
     const [size, setSize] = useState('');
     const [price, setPrice] = useState('');
-    const [imagePath, setImagePath] = useState('');
+    const [photoPaths, setPhotoPaths] = useState(['']); // State for photo paths
     const [isMainImage, setIsMainImage] = useState(false);
     const [message, setMessage] = useState('');  // State for the message
     const [error, setError] = useState('');  // State for the error
@@ -43,6 +43,16 @@ const ProductForm = () => {
             });
     }, []);
 
+    const handlePhotoPathChange = (index, value) => {
+        const paths = [...photoPaths];
+        paths[index] = value;
+        setPhotoPaths(paths);
+    };
+
+    const addPhotoPathField = () => {
+        setPhotoPaths([...photoPaths, '']);
+    };
+
     const handleSubmit = (event) => {
         event.preventDefault();
 
@@ -53,7 +63,7 @@ const ProductForm = () => {
             color: color,
             size: size,
             price: parseFloat(price),
-            imagePath: imagePath,
+            photoPaths: photoPaths.filter(path => path), // Filter out empty paths
             isMainImage: isMainImage
         };
 
@@ -67,7 +77,7 @@ const ProductForm = () => {
                 setColor('');
                 setSize('');
                 setPrice('');
-                setImagePath('');
+                setPhotoPaths(['']);
                 setIsMainImage(false);
             })
             .catch(error => {
@@ -162,17 +172,19 @@ const ProductForm = () => {
                     required
                 />
             </div>
-            <div className="form-group">
-                <label htmlFor="imagePath">Image Path:</label>
-                <input
-                    type="text"
-                    id="imagePath"
-                    placeholder="Enter image path"
-                    value={imagePath}
-                    onChange={(e) => setImagePath(e.target.value)}
-                    required
-                />
-            </div>
+            {photoPaths.map((path, index) => (
+                <div key={index} className="form-group">
+                    <label htmlFor={`photoPath${index}`}>Photo Path {index + 1}:</label>
+                    <input
+                        type="text"
+                        id={`photoPath${index}`}
+                        placeholder="Enter image path"
+                        value={path}
+                        onChange={(e) => handlePhotoPathChange(index, e.target.value)}
+                    />
+                </div>
+            ))}
+            <button type="button" onClick={addPhotoPathField}>Add another photo path</button>
             <div className="form-group">
                 <label htmlFor="isMainImage">Is Main Image:</label>
                 <input

@@ -7,8 +7,8 @@ use App\Entity\Product;
 use App\Entity\Category;
 use App\Entity\Color;
 use App\Entity\Size;
-use App\Entity\Model; // Assurez-vous que cette ligne est présente
-use App\Entity\Image; // Assurez-vous que cette ligne est présente
+use App\Entity\Image;
+use App\Entity\Model;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -22,7 +22,7 @@ class ProductController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        if (!isset($data['category'], $data['color'], $data['size'], $data['name'], $data['description'], $data['price'], $data['imagePath'], $data['isMainImage'])) {
+        if (!isset($data['category'], $data['color'], $data['size'], $data['name'], $data['description'], $data['price'], $data['photoPaths'])) {
             return new JsonResponse(['error' => 'Invalid data'], 400);
         }
 
@@ -46,15 +46,18 @@ class ProductController extends AbstractController
         $model->setSize($size);
         $model->setPrice($data['price']);
 
-        // Create a new image
-        $image = new Image();
-        $image->setPath($data['imagePath']);
-        $image->setMain($data['isMainImage']);
-        $model->addImage($image);
-
         $entityManager->persist($product);
         $entityManager->persist($model);
-        $entityManager->persist($image);
+
+        // Handle photo paths
+        foreach ($data['photoPaths'] as $path) {
+            $image = new Image();
+            $image->setPath($path);
+            $image->setMain($data['isMainImage']);
+            $model->addImage($image);
+            $entityManager->persist($image);
+        }
+
         $entityManager->flush();
 
         return new JsonResponse(['id' => $product->getId()], 201);
