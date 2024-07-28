@@ -5,6 +5,8 @@ import './ProductList.css'; // Import CSS file
 
 const ProductList = () => {
     const [products, setProducts] = useState([]);
+    const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -14,6 +16,7 @@ const ProductList = () => {
             })
             .catch(error => {
                 console.error('There was an error fetching the products!', error);
+                setError('There was an error fetching the products!');
             });
     }, []);
 
@@ -22,19 +25,25 @@ const ProductList = () => {
             axios.delete(`http://localhost:8000/api/products/${id}`)
                 .then(response => {
                     setProducts(products.filter(product => product.id !== id));
+                    setMessage('Product deleted successfully!');
+                    setError('');
                 })
                 .catch(error => {
                     console.error('There was an error deleting the product!', error);
+                    setError('There was an error deleting the product!');
+                    setMessage('');
                 });
         }
     };
 
-    const editProduct = (product) => {
-        navigate('/edit-product', { state: { product } });
+    const editProduct = (id) => {
+        navigate(`/edit-product/${id}`);
     };
 
     return (
         <div>
+            {message && <p className="success">{message}</p>}
+            {error && <p className="error">{error}</p>}
             <h1>Product List</h1>
             <Link to="/create-product">
                 <button className="create-button">Create a new product</button>
@@ -60,8 +69,8 @@ const ProductList = () => {
                                 </div>
                             </div>
                         ))}
+                        <button className="edit-button" onClick={() => editProduct(product.id)}>Edit</button>
                         <button className="delete-button" onClick={() => deleteProduct(product.id)}>Delete</button>
-                        <button className="edit-button" onClick={() => editProduct(product)}>Edit</button>
                     </div>
                 ))}
             </div>

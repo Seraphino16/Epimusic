@@ -1,34 +1,60 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import './ProductForm.css';  // Import the CSS file
+import { useParams, useNavigate } from 'react-router-dom';
+import './ProductForm.css'; // Import the CSS file
 
-const EditProductForm = () => {
-    const location = useLocation();
+const ProductEdit = () => {
+    const { id } = useParams();
     const navigate = useNavigate();
-    const { product } = location.state;
-
+    const [product, setProduct] = useState(null);
     const [categories, setCategories] = useState([]);
     const [colors, setColors] = useState([]);
     const [sizes, setSizes] = useState([]);
-    const [name, setName] = useState(product.name);
-    const [description, setDescription] = useState(product.description);
-    const [category, setCategory] = useState(product.category_id);
-    const [color, setColor] = useState(product.models[0]?.color || '');
-    const [size, setSize] = useState(product.models[0]?.size || '');
-    const [price, setPrice] = useState(product.models[0]?.price || '');
-    const [photoPaths, setPhotoPaths] = useState(product.models[0]?.images.map(img => img.path) || ['']);
-    const [mainImageIndex, setMainImageIndex] = useState(product.models[0]?.images.findIndex(img => img.is_main) || 0);
+    const [name, setName] = useState('');
+    const [description, setDescription] = useState('');
+    const [category, setCategory] = useState('');
+    const [color, setColor] = useState('');
+    const [size, setSize] = useState('');
+    const [price, setPrice] = useState('');
+    const [photoPaths, setPhotoPaths] = useState(['']); // State for photo paths
+    const [mainImageIndex, setMainImageIndex] = useState(0); // State for main image index
+    const [showColorAndSize, setShowColorAndSize] = useState(false); // State to show/hide color and size fields
     const [message, setMessage] = useState('');  // State for the message
     const [error, setError] = useState('');  // State for the error
 
     useEffect(() => {
+        axios.get(`http://localhost:8000/api/products/${id}`)
+            .then(response => {
+                const productData = response.data;
+                setProduct(productData);
+                setName(productData.name);
+                setDescription(productData.description);
+                setCategory(productData.category_id);
+                if (productData.models.length > 0) {
+                    const model = productData.models[0];
+                    setColor(model.color_id || '');
+                    setSize(model.size_id || '');
+                    setPrice(model.price);
+                    setPhotoPaths(model.images.map(img => img.path));
+                    setMainImageIndex(model.images.findIndex(img => img.is_main));
+                }
+                // Check if the product category is 'Vinyle' or 'Goodies'
+                if (productData.category_id === 2 || productData.category_id === 3) {
+                    setShowColorAndSize(true);
+                }
+            })
+            .catch(error => {
+                console.error('There was an error fetching the product!', error);
+                setError('There was an error fetching the product data!');
+            });
+
         axios.get('http://localhost:8000/api/categories')
             .then(response => {
                 setCategories(response.data);
             })
             .catch(error => {
                 console.error('There was an error fetching the categories!', error);
+                setError('There was an error fetching the categories!');
             });
 
         axios.get('http://localhost:8000/api/colors')
@@ -37,6 +63,7 @@ const EditProductForm = () => {
             })
             .catch(error => {
                 console.error('There was an error fetching the colors!', error);
+                setError('There was an error fetching the colors!');
             });
 
         axios.get('http://localhost:8000/api/sizes')
@@ -45,8 +72,19 @@ const EditProductForm = () => {
             })
             .catch(error => {
                 console.error('There was an error fetching the sizes!', error);
+                setError('There was an error fetching the sizes!');
             });
-    }, []);
+    }, [id]);
+
+    const handleCategoryChange = (value) => {
+        setCategory(value);
+        // Update the showColorAndSize state based on the selected category
+        if (value === '2' || value === '3') {
+            setShowColorAndSize(true);
+        } else {
+            setShowColorAndSize(false);
+        }
+    };
 
     const handlePhotoPathChange = (index, value) => {
         const paths = [...photoPaths];
@@ -72,7 +110,7 @@ const EditProductForm = () => {
             mainImageIndex: mainImageIndex // Send the main image index
         };
 
-        axios.put(`http://localhost:8000/api/products/${product.id}`, updatedProduct)
+        axios.put(`http://localhost:8000/api/products/${id}`, updatedProduct)
             .then(response => {
                 setMessage('Product updated successfully!');
                 setError('');
@@ -85,11 +123,7 @@ const EditProductForm = () => {
             });
     };
 
-    const shouldDisplayColorAndSize = category => {
-        const goodiesId = 2;
-        const vinylsId = 3;
-        return category === goodiesId.toString() || category === vinylsId.toString();
-    };
+    if (!product) return <div>Loading...</div>;
 
     return (
         <form onSubmit={handleSubmit}>
@@ -122,7 +156,7 @@ const EditProductForm = () => {
                 <select
                     id="category"
                     value={category}
-                    onChange={(e) => setCategory(e.target.value)}
+                    onChange={(e) => handleCategoryChange(e.target.value)}
                     required
                 >
                     <option value="" style={{ color: 'gray' }}>Select a category</option>
@@ -133,7 +167,7 @@ const EditProductForm = () => {
                     ))}
                 </select>
             </div>
-            {shouldDisplayColorAndSize(category) && (
+            {showColorAndSize && (
                 <>
                     <div className="form-group">
                         <label htmlFor="color">Color :</label>
@@ -207,4 +241,4 @@ const EditProductForm = () => {
     );
 };
 
-export default EditProductForm;
+export default ProductEdit;
