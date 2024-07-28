@@ -21,38 +21,6 @@ const ProductAdminList = () => {
             });
     }, []);
 
-    const handleSelectProduct = (id) => {
-        setSelectedProducts(prev =>
-            prev.includes(id) ? prev.filter(pid => pid !== id) : [...prev, id]
-        );
-    };
-
-    const deleteSelectedProducts = () => {
-        if (window.confirm('Are you sure you want to delete the selected products?')) {
-            axios.all(selectedProducts.map(id => axios.delete(`http://localhost:8000/api/admin/products/${id}`)))
-                .then(() => {
-                    setProducts(products.filter(product => !selectedProducts.includes(product.id)));
-                    setSelectedProducts([]);
-                    setMessage('Selected products deleted successfully!');
-                    setError('');
-                })
-                .catch(error => {
-                    console.error('There was an error deleting the selected products!', error);
-                    setError('There was an error deleting the selected products!');
-                    setMessage('');
-                });
-        }
-    };
-
-    const editSelectedProducts = () => {
-        if (selectedProducts.length === 1) {
-            navigate(`/admin/edit-product/${selectedProducts[0]}`);
-        } else {
-            setError('Please select only one product to edit!');
-            setMessage('');
-        }
-    };
-
     const deleteProduct = (id) => {
         if (window.confirm('Are you sure you want to delete this product?')) {
             axios.delete(`http://localhost:8000/api/admin/products/${id}`)
@@ -73,6 +41,31 @@ const ProductAdminList = () => {
         navigate(`/admin/edit-product/${id}`);
     };
 
+    const handleSelectProduct = (id) => {
+        if (selectedProducts.includes(id)) {
+            setSelectedProducts(selectedProducts.filter(productId => productId !== id));
+        } else {
+            setSelectedProducts([...selectedProducts, id]);
+        }
+    };
+
+    const editSelectedProducts = () => {
+        if (selectedProducts.length > 0) {
+            navigate(`/admin/edit-product/${selectedProducts[0]}?selectedProducts=${selectedProducts.join(',')}&currentEditIndex=0`);
+        } else {
+            alert('Please select at least one product to edit.');
+        }
+    };
+
+    const deleteSelectedProducts = () => {
+        if (window.confirm('Are you sure you want to delete the selected products?')) {
+            selectedProducts.forEach(id => {
+                deleteProduct(id);
+            });
+            setSelectedProducts([]);
+        }
+    };
+
     return (
         <div>
             {message && <p className="success">{message}</p>}
@@ -81,8 +74,8 @@ const ProductAdminList = () => {
             <Link to="/admin/create-product">
                 <button className="create-button">Create a new product</button>
             </Link>
-            <button onClick={deleteSelectedProducts} className="batch-delete-button">Delete Selected</button>
-            <button onClick={editSelectedProducts} className="batch-edit-button">Edit Selected</button>
+            <button className="delete-button" onClick={deleteSelectedProducts}>Delete Selected</button>
+            <button className="edit-button" onClick={editSelectedProducts}>Edit Selected</button>
             <div className="product-list">
                 {products.map(product => (
                     <div key={product.id} className="product-item">
