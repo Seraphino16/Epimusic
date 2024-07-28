@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import "../../styles/ProductForm.css";
 
 const ProductAdminForm = () => {
@@ -16,6 +17,7 @@ const ProductAdminForm = () => {
     const [mainImageIndex, setMainImageIndex] = useState(0); // State for main image index
     const [message, setMessage] = useState(""); // State for the message
     const [error, setError] = useState(""); // State for the error
+    const navigate = useNavigate();
 
     useEffect(() => {
         axios
@@ -78,14 +80,9 @@ const ProductAdminForm = () => {
             .then((response) => {
                 setMessage("Product created successfully!");
                 setError("");
-                setName("");
-                setDescription("");
-                setCategory("");
-                setColor("");
-                setSize("");
-                setPrice("");
-                setPhotoPaths([""]);
-                setMainImageIndex(0);
+                setTimeout(() => {
+                    navigate("/admin/");
+                }, 2000); // Wait for 2 seconds before redirecting
             })
             .catch((error) => {
                 setError("There was an error creating the product!");
@@ -111,7 +108,7 @@ const ProductAdminForm = () => {
             <div className="max-w-5xl mx-auto px-6 sm:px-6 lg:px-8 mt-8 mb-8">
                 <div className="bg-white w-full shadow rounded p-8 sm:p-12">
                     <p className="text-3xl font-bold leading-7 text-center text-black">
-                    Create a product
+                        Create a product
                     </p>
                     {message && <p className="success">{message}</p>}
                     {error && <p className="error">{error}</p>}
