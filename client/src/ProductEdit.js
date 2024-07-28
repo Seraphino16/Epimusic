@@ -31,8 +31,8 @@ const ProductEdit = () => {
                 setDescription(productData.description);
                 setCategory(productData.category_id);
                 if (productData.models.length > 0) {
-                    setColor(productData.models[0].color ? productData.models[0].color.id : '');
-                    setSize(productData.models[0].size ? productData.models[0].size.id : '');
+                    setColor(productData.models[0].color || '');
+                    setSize(productData.models[0].size || '');
                     setPrice(productData.models[0].price);
                     setPhotoPaths(productData.models[0].images.map(img => img.path));
                     setMainImageIndex(productData.models[0].images.findIndex(img => img.is_main));
@@ -44,6 +44,7 @@ const ProductEdit = () => {
             })
             .catch(error => {
                 console.error('There was an error fetching the product!', error);
+                setError('There was an error fetching the product data!');
             });
 
         axios.get('http://localhost:8000/api/categories')
@@ -52,6 +53,7 @@ const ProductEdit = () => {
             })
             .catch(error => {
                 console.error('There was an error fetching the categories!', error);
+                setError('There was an error fetching the categories!');
             });
 
         axios.get('http://localhost:8000/api/colors')
@@ -60,6 +62,7 @@ const ProductEdit = () => {
             })
             .catch(error => {
                 console.error('There was an error fetching the colors!', error);
+                setError('There was an error fetching the colors!');
             });
 
         axios.get('http://localhost:8000/api/sizes')
@@ -68,6 +71,7 @@ const ProductEdit = () => {
             })
             .catch(error => {
                 console.error('There was an error fetching the sizes!', error);
+                setError('There was an error fetching the sizes!');
             });
     }, [id]);
 
