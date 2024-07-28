@@ -1,5 +1,5 @@
 <?php
-// src/Controller/CategoryController.php
+// src/Controller/CategoryAdminController.php
 
 namespace App\Controller;
 
@@ -9,9 +9,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
-class CategoryController extends AbstractController
+class CategoryAdminController extends AbstractController
 {
-    #[Route('/api/categories', name: 'api_categories', methods: ['GET'])]
+    #[Route('/api/admin/categories', name: 'api_categories', methods: ['GET'])]
     public function index(EntityManagerInterface $entityManager): JsonResponse
     {
         $categories = $entityManager->getRepository(Category::class)->findAll();

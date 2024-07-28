@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import './ProductForm.css'; // Import the CSS file
 
-const ProductEdit = () => {
+const ProductAdminEdit = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [product, setProduct] = useState(null);
@@ -23,7 +23,7 @@ const ProductEdit = () => {
     const [error, setError] = useState('');  // State for the error
 
     useEffect(() => {
-        axios.get(`http://localhost:8000/api/products/${id}`)
+        axios.get(`http://localhost:8000/api/admin/products/${id}`)
             .then(response => {
                 const productData = response.data;
                 setProduct(productData);
@@ -48,7 +48,7 @@ const ProductEdit = () => {
                 setError('There was an error fetching the product data!');
             });
 
-        axios.get('http://localhost:8000/api/categories')
+        axios.get('http://localhost:8000/api/admin/categories')
             .then(response => {
                 setCategories(response.data);
             })
@@ -57,7 +57,7 @@ const ProductEdit = () => {
                 setError('There was an error fetching the categories!');
             });
 
-        axios.get('http://localhost:8000/api/colors')
+        axios.get('http://localhost:8000/api/admin/colors')
             .then(response => {
                 setColors(response.data);
             })
@@ -66,7 +66,7 @@ const ProductEdit = () => {
                 setError('There was an error fetching the colors!');
             });
 
-        axios.get('http://localhost:8000/api/sizes')
+        axios.get('http://localhost:8000/api/admin/sizes')
             .then(response => {
                 setSizes(response.data);
             })
@@ -110,7 +110,7 @@ const ProductEdit = () => {
             mainImageIndex: mainImageIndex // Send the main image index
         };
 
-        axios.put(`http://localhost:8000/api/products/${id}`, updatedProduct)
+        axios.put(`http://localhost:8000/api/admin/products/${id}`, updatedProduct)
             .then(response => {
                 setMessage('Product updated successfully!');
                 setError('');
@@ -241,4 +241,4 @@ const ProductEdit = () => {
     );
 };
 
-export default ProductEdit;
+export default ProductAdminEdit;

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./ProductForm.css";
 
-const ProductForm = () => {
+const ProductAdminForm = () => {
     const [categories, setCategories] = useState([]);
     const [colors, setColors] = useState([]);
     const [sizes, setSizes] = useState([]);
@@ -19,7 +19,7 @@ const ProductForm = () => {
 
     useEffect(() => {
         axios
-            .get("http://localhost:8000/api/categories")
+            .get("http://localhost:8000/api/admin/categories")
             .then((response) => {
                 setCategories(response.data);
             })
@@ -31,7 +31,7 @@ const ProductForm = () => {
             });
 
         axios
-            .get("http://localhost:8000/api/colors")
+            .get("http://localhost:8000/api/admin/colors")
             .then((response) => {
                 setColors(response.data);
             })
@@ -40,7 +40,7 @@ const ProductForm = () => {
             });
 
         axios
-            .get("http://localhost:8000/api/sizes")
+            .get("http://localhost:8000/api/admin/sizes")
             .then((response) => {
                 setSizes(response.data);
             })
@@ -74,7 +74,7 @@ const ProductForm = () => {
         };
 
         axios
-            .post("http://localhost:8000/api/products", newProduct)
+            .post("http://localhost:8000/api/admin/products", newProduct)
             .then((response) => {
                 setMessage("Product created successfully!");
                 setError("");
@@ -330,4 +330,4 @@ const ProductForm = () => {
     );
 };
 
-export default ProductForm;
+export default ProductAdminForm;

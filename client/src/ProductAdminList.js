@@ -3,14 +3,14 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import './ProductList.css'; // Import CSS file
 
-const ProductList = () => {
+const ProductAdminList = () => {
     const [products, setProducts] = useState([]);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get('http://localhost:8000/api/products')
+        axios.get('http://localhost:8000/api/admin/products')
             .then(response => {
                 setProducts(response.data);
             })
@@ -22,7 +22,7 @@ const ProductList = () => {
 
     const deleteProduct = (id) => {
         if (window.confirm('Are you sure you want to delete this product?')) {
-            axios.delete(`http://localhost:8000/api/products/${id}`)
+            axios.delete(`http://localhost:8000/api/admin/products/${id}`)
                 .then(response => {
                     setProducts(products.filter(product => product.id !== id));
                     setMessage('Product deleted successfully!');
@@ -37,7 +37,7 @@ const ProductList = () => {
     };
 
     const editProduct = (id) => {
-        navigate(`/edit-product/${id}`);
+        navigate(`/admin/edit-product/${id}`);
     };
 
     return (
@@ -45,7 +45,7 @@ const ProductList = () => {
             {message && <p className="success">{message}</p>}
             {error && <p className="error">{error}</p>}
             <h1>Product List</h1>
-            <Link to="/create-product">
+            <Link to="/admin/create-product">
                 <button className="create-button">Create a new product</button>
             </Link>
             <div className="product-list">
@@ -78,4 +78,4 @@ const ProductList = () => {
     );
 };
 
-export default ProductList;
+export default ProductAdminList;

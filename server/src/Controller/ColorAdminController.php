@@ -1,5 +1,5 @@
 <?php
-// src/Controller/ColorController.php
+// src/Controller/ColorAdminController.php
 
 namespace App\Controller;
 
@@ -9,9 +9,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
-class ColorController extends AbstractController
+class ColorAdminController extends AbstractController
 {
-    #[Route('/api/colors', name: 'api_colors', methods: ['GET'])]
+    #[Route('/api/admin/colors', name: 'api_colors', methods: ['GET'])]
     public function index(EntityManagerInterface $entityManager): JsonResponse
     {
         $colors = $entityManager->getRepository(Color::class)->findAll();

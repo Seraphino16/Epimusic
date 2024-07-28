@@ -1,5 +1,5 @@
 <?php
-// src/Controller/SizeController.php
+// src/Controller/SizeAdminController.php
 
 namespace App\Controller;
 
@@ -9,9 +9,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
-class SizeController extends AbstractController
+class SizeAdminController extends AbstractController
 {
-    #[Route('/api/sizes', name: 'api_sizes', methods: ['GET'])]
+    #[Route('/api/admin/sizes', name: 'api_sizes', methods: ['GET'])]
     public function index(EntityManagerInterface $entityManager): JsonResponse
     {
         $sizes = $entityManager->getRepository(Size::class)->findAll();

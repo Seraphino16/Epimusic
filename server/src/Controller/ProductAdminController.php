@@ -1,5 +1,5 @@
 <?php
-// src/Controller/ProductController.php
+// src/Controller/ProductAdminController.php
 
 namespace App\Controller;
 
@@ -15,9 +15,9 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-class ProductController extends AbstractController
+class ProductAdminController extends AbstractController
 {
-    #[Route('/api/products', name: 'api_products', methods: ['GET'])]
+    #[Route('/api/admin/products', name: 'api_products', methods: ['GET'])]
     public function getProducts(EntityManagerInterface $entityManager): JsonResponse
     {
         $products = $entityManager->getRepository(Product::class)->findAll();
@@ -53,7 +53,7 @@ class ProductController extends AbstractController
         return new JsonResponse($data);
     }
 
-    #[Route('/api/products', name: 'api_products_create', methods: ['POST'])]
+    #[Route('/api/admin/products', name: 'api_products_create', methods: ['POST'])]
     public function create(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -99,7 +99,7 @@ class ProductController extends AbstractController
         return new JsonResponse(['id' => $product->getId()], 201);
     }
 
-    #[Route('/api/products/{id}', name: 'api_product_delete', methods: ['DELETE'])]
+    #[Route('/api/admin/products/{id}', name: 'api_product_delete', methods: ['DELETE'])]
     public function delete(Product $product, EntityManagerInterface $entityManager): JsonResponse
     {
         $entityManager->remove($product);
@@ -108,7 +108,7 @@ class ProductController extends AbstractController
         return new JsonResponse(['status' => 'Product deleted'], 200);
     }
 
-    #[Route('/api/products/{id}', name: 'api_product_get', methods: ['GET'])]
+    #[Route('/api/admin/products/{id}', name: 'api_product_get', methods: ['GET'])]
     public function getProduct(Product $product): JsonResponse
     {
         $models = [];
@@ -140,7 +140,7 @@ class ProductController extends AbstractController
         return new JsonResponse($data);
     }
 
-    #[Route('/api/products/{id}', name: 'api_product_update', methods: ['PUT'])]
+    #[Route('/api/admin/products/{id}', name: 'api_product_update', methods: ['PUT'])]
     public function update(Request $request, Product $product, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
