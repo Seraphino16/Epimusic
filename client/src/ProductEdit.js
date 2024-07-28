@@ -31,11 +31,12 @@ const ProductEdit = () => {
                 setDescription(productData.description);
                 setCategory(productData.category_id);
                 if (productData.models.length > 0) {
-                    setColor(productData.models[0].color || '');
-                    setSize(productData.models[0].size || '');
-                    setPrice(productData.models[0].price);
-                    setPhotoPaths(productData.models[0].images.map(img => img.path));
-                    setMainImageIndex(productData.models[0].images.findIndex(img => img.is_main));
+                    const model = productData.models[0];
+                    setColor(model.color_id || '');
+                    setSize(model.size_id || '');
+                    setPrice(model.price);
+                    setPhotoPaths(model.images.map(img => img.path));
+                    setMainImageIndex(model.images.findIndex(img => img.is_main));
                 }
                 // Check if the product category is 'Vinyle' or 'Goodies'
                 if (productData.category_id === 2 || productData.category_id === 3) {
