@@ -121,8 +121,8 @@ class ProductController extends AbstractController
                 ];
             }
             $models[] = [
-                'color' => $model->getColor()?->getName(),
-                'size' => $model->getSize()?->getName(),
+                'color' => $model->getColor() ? $model->getColor()->getName() : null,
+                'size' => $model->getSize() ? $model->getSize()->getName() : null,
                 'price' => $model->getPrice(),
                 'images' => $images,
             ];
@@ -138,5 +138,54 @@ class ProductController extends AbstractController
         ];
 
         return new JsonResponse($data);
+    }
+
+    #[Route('/api/products/{id}', name: 'api_product_update', methods: ['PUT'])]
+    public function update(Request $request, Product $product, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data['category'], $data['name'], $data['description'], $data['price'], $data['photoPaths'], $data['mainImageIndex'])) {
+            return new JsonResponse(['error' => 'Invalid data'], 400);
+        }
+
+        $category = $entityManager->getRepository(Category::class)->find($data['category']);
+        $color = isset($data['color']) ? $entityManager->getRepository(Color::class)->find($data['color']) : null;
+        $size = isset($data['size']) ? $entityManager->getRepository(Size::class)->find($data['size']) : null;
+
+        if (!$category || ($data['color'] && !$color) || ($data['size'] && !$size)) {
+            return new JsonResponse(['error' => 'Invalid references'], 404);
+        }
+
+        $product->setName($data['name']);
+        $product->setDescription($data['description']);
+        $product->setCategory($category);
+
+        // Update the model
+        $model = $product->getModels()[0]; // Assuming there is only one model per product
+        if ($color) $model->setColor($color);
+        if ($size) $model->setSize($size);
+        $model->setPrice($data['price']);
+
+        // Clear existing images
+        foreach ($model->getImage() as $image) {
+            $model->removeImage($image);
+            $entityManager->remove($image);
+        }
+
+        // Handle photo paths
+        foreach ($data['photoPaths'] as $index => $path) {
+            $image = new Image();
+            $image->setPath($path);
+            $image->setMain($index === $data['mainImageIndex']);
+            $model->addImage($image);
+            $entityManager->persist($image);
+        }
+
+        $entityManager->persist($product);
+        $entityManager->persist($model);
+        $entityManager->flush();
+
+        return new JsonResponse(['status' => 'Product updated'], 200);
     }
 }
