@@ -51,6 +51,22 @@
     height: auto;
 }
 
+.edit-button {
+    padding: 10px 20px;
+    color: white;
+    background-color: #28a745;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+    margin-right: 10px; /* Add space between buttons */
+}
+
+.edit-button:hover {
+    background-color: #218838;
+}
+
 .delete-button {
     padding: 10px 20px;
     color: white;

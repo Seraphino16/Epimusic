@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './ProductList.css'; // Import CSS file
 
 const ProductList = () => {
     const [products, setProducts] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         axios.get('http://localhost:8000/api/products')
@@ -26,6 +27,10 @@ const ProductList = () => {
                     console.error('There was an error deleting the product!', error);
                 });
         }
+    };
+
+    const editProduct = (id) => {
+        navigate(`/edit-product/${id}`);
     };
 
     return (
@@ -55,6 +60,7 @@ const ProductList = () => {
                                 </div>
                             </div>
                         ))}
+                        <button className="edit-button" onClick={() => editProduct(product.id)}>Edit</button>
                         <button className="delete-button" onClick={() => deleteProduct(product.id)}>Delete</button>
                     </div>
                 ))}

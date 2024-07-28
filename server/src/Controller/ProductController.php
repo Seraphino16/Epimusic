@@ -107,4 +107,36 @@ class ProductController extends AbstractController
 
         return new JsonResponse(['status' => 'Product deleted'], 200);
     }
+
+    #[Route('/api/products/{id}', name: 'api_product_get', methods: ['GET'])]
+    public function getProduct(Product $product): JsonResponse
+    {
+        $models = [];
+        foreach ($product->getModels() as $model) {
+            $images = [];
+            foreach ($model->getImage() as $image) {
+                $images[] = [
+                    'path' => $image->getPath(),
+                    'is_main' => $image->isMain(),
+                ];
+            }
+            $models[] = [
+                'color' => $model->getColor()?->getName(),
+                'size' => $model->getSize()?->getName(),
+                'price' => $model->getPrice(),
+                'images' => $images,
+            ];
+        }
+
+        $data = [
+            'id' => $product->getId(),
+            'name' => $product->getName(),
+            'description' => $product->getDescription(),
+            'category' => $product->getCategory()->getName(),
+            'category_id' => $product->getCategory()->getId(), // Needed for the form
+            'models' => $models,
+        ];
+
+        return new JsonResponse($data);
+    }
 }
