@@ -48,7 +48,7 @@ function Register() {
       });
 
       const data = await response.json();
-      console.log(data);
+   
       if (response.ok) {
         setAlert({ message: 'Inscription réussie. Vous allez être redirigé vers la page de connexion', type: 'success' });
         setTimeout(() => {

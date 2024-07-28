@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Register from './components/AuthForms/Register';
-// import Login from './Login';
+import Login from './components/AuthForms/Login';
 
 function App() {
   return (
@@ -9,7 +9,7 @@ function App() {
       <div className="min-h-screen bg-gray-100 p-4">
         <Routes>
           <Route path="/register" element={<Register />} />
-          {/* <Route path="/login" element={<Login />} /> */}
+          <Route path="/login" element={<Login />} />
         </Routes>
       </div>
     </Router>
