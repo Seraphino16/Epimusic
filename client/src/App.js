@@ -1,8 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import ProductAdminList from './ProductAdminList';
-import ProductAdminForm from './ProductAdminForm';
-import ProductAdminEdit from './ProductAdminEdit';
+import ProductAdminList from './components/pages/ProductAdminList';
+import ProductAdminForm from './components/forms/ProductAdminForm';
+import ProductAdminEdit from './components/forms/ProductAdminEdit';
 import Navbar from './components/navbar/Navbar';
 
 const App = () => {
