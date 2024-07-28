@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import "../../ProductForm.css";
+import "../../styles/ProductForm.css";
 
 const ProductAdminEdit = () => {
     const { id } = useParams();

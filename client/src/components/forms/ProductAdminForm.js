@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import "../../ProductForm.css";
+import "../../styles/ProductForm.css";
 
 const ProductAdminForm = () => {
     const [categories, setCategories] = useState([]);
