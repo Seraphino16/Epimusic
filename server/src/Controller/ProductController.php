@@ -17,7 +17,43 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ProductController extends AbstractController
 {
-    #[Route('/api/products', name: 'api_products', methods: ['POST'])]
+    #[Route('/api/products', name: 'api_products', methods: ['GET'])]
+    public function getProducts(EntityManagerInterface $entityManager): JsonResponse
+    {
+        $products = $entityManager->getRepository(Product::class)->findAll();
+        $data = [];
+
+        foreach ($products as $product) {
+            $models = [];
+            foreach ($product->getModels() as $model) {
+                $images = [];
+                foreach ($model->getImage() as $image) {
+                    $images[] = [
+                        'path' => $image->getPath(),
+                        'is_main' => $image->isMain(),
+                    ];
+                }
+                $models[] = [
+                    'color' => $model->getColor() ? $model->getColor()->getName() : null,
+                    'size' => $model->getSize() ? $model->getSize()->getName() : null,
+                    'price' => $model->getPrice(),
+                    'images' => $images,
+                ];
+            }
+
+            $data[] = [
+                'id' => $product->getId(),
+                'name' => $product->getName(),
+                'description' => $product->getDescription(),
+                'category' => $product->getCategory()->getName(),
+                'models' => $models,
+            ];
+        }
+
+        return new JsonResponse($data);
+    }
+
+    #[Route('/api/products', name: 'api_products_create', methods: ['POST'])]
     public function create(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -61,5 +97,14 @@ class ProductController extends AbstractController
         $entityManager->flush();
 
         return new JsonResponse(['id' => $product->getId()], 201);
+    }
+
+    #[Route('/api/products/{id}', name: 'api_product_delete', methods: ['DELETE'])]
+    public function delete(Product $product, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $entityManager->remove($product);
+        $entityManager->flush();
+
+        return new JsonResponse(['status' => 'Product deleted'], 200);
     }
 }

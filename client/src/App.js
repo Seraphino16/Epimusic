@@ -1,16 +1,17 @@
 import React from 'react';
-import './App.css';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import ProductList from './ProductList';
 import ProductForm from './ProductForm';
 
-function App() {
-  return (
-      <div className="App">
-        <header className="App-header">
-          <h1>Create a New Product</h1>
-          <ProductForm />
-        </header>
-      </div>
-  );
-}
+const App = () => {
+    return (
+        <Router>
+            <Routes>
+                <Route path="/" element={<ProductList />} />
+                <Route path="/create-product" element={<ProductForm />} />
+            </Routes>
+        </Router>
+    );
+};
 
 export default App;

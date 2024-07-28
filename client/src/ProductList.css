@@ -1,0 +1,67 @@
+.create-button {
+    padding: 10px 20px;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.create-button:hover {
+    background-color: #0056b3;
+}
+
+.product-list {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping to the next line if needed */
+    gap: 20px;
+}
+
+.product-item {
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 5px;
+    flex: 1 1 calc(33.333% - 40px); /* 3 items per row, adjust the percentage as needed */
+    box-sizing: border-box;
+    max-width: calc(33.333% - 40px); /* Ensure the items do not exceed the container's width */
+}
+
+.model-item {
+    margin-top: 10px;
+}
+
+.images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.image-item {
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.image-item img {
+    max-width: 100px;
+    height: auto;
+}
+
+.delete-button {
+    padding: 10px 20px;
+    color: white;
+    background-color: #dc3545;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.delete-button:hover {
+    background-color: #c82333;
+}
