@@ -48,10 +48,12 @@ function Register() {
       });
 
       const data = await response.json();
-
+      console.log(data);
       if (response.ok) {
-        setAlert({ message: 'Inscription réussie', type: 'success' });
-        navigate('/login');
+        setAlert({ message: 'Inscription réussie. Vous allez être redirigé vers la page de connexion', type: 'success' });
+        setTimeout(() => {
+            navigate('/login');
+          }, 3000);
       } else {
         setAlert({ message: data.message || 'Une erreur s\'est produite lors de l\'inscription. Veuillez réessayer plus tard', type: 'error' });
       }
