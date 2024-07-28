@@ -35,7 +35,7 @@ const Navbar = () => {
                     <SearchBar />
                     <NavbarItem text="Products" href="/" />
                     <NavbarItem text="Clients" href="/" />
-                    <NavbarItem text="Admin profile" href="/" />
+                    <NavbarItem text="Admin" href="/admin/" />
                 </div>
             </div>
         </nav>
