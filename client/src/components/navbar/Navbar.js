@@ -9,7 +9,9 @@ const Navbar = () => {
     return (
         <nav className="relative z-50 w-full flex items-center justify-between flex-wrap bg-[#2bebf1] py-2 shadow px-4 lg:px-16 xl:px-48">
             <div className="flex items-center flex-shrink-0 text-black mr-6">
-                <img src={logo} alt="Logo" className="w-16 h-16 mr-2" />
+                <a href="/">
+                    <img src={logo} alt="Logo" className="w-16 h-16 mr-2" />
+                </a>
             </div>
             <div className="block lg:hidden">
                 <button
@@ -33,6 +35,7 @@ const Navbar = () => {
             >
                 <div className="flex flex-col lg:flex-row lg:items-center justify-center lg:space-x-8 lg:text-left lg:flex-grow lg:mt-0 space-y-4 lg:space-y-0">
                     <SearchBar />
+                    <NavbarItem text="Login" href="/login" />
                     <NavbarItem text="Products" href="/" />
                     <NavbarItem text="Clients" href="/" />
                     <NavbarItem text="Admin" href="/admin/" />
