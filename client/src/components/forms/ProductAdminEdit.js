@@ -133,7 +133,9 @@ const ProductAdminEdit = () => {
             .then((response) => {
                 setMessage("Product updated successfully!");
                 setError("");
-                navigate("/admin/"); // Redirection vers la liste des produits
+                setTimeout(() => {
+                    navigate("/admin/");
+                }, 2000);
             })
             .catch((error) => {
                 setError("There was an error updating the product!");
@@ -373,4 +375,4 @@ const ProductAdminEdit = () => {
     );
 };
 
-export default ProductAdminEdit
+export default ProductAdminEdit;

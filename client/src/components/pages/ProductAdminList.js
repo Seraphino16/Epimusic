@@ -5,6 +5,7 @@ import '../../styles/ProductList.css'; // Import CSS file
 
 const ProductAdminList = () => {
     const [products, setProducts] = useState([]);
+    const [selectedProducts, setSelectedProducts] = useState([]);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -19,6 +20,38 @@ const ProductAdminList = () => {
                 setError('There was an error fetching the products!');
             });
     }, []);
+
+    const handleSelectProduct = (id) => {
+        setSelectedProducts(prev =>
+            prev.includes(id) ? prev.filter(pid => pid !== id) : [...prev, id]
+        );
+    };
+
+    const deleteSelectedProducts = () => {
+        if (window.confirm('Are you sure you want to delete the selected products?')) {
+            axios.all(selectedProducts.map(id => axios.delete(`http://localhost:8000/api/admin/products/${id}`)))
+                .then(() => {
+                    setProducts(products.filter(product => !selectedProducts.includes(product.id)));
+                    setSelectedProducts([]);
+                    setMessage('Selected products deleted successfully!');
+                    setError('');
+                })
+                .catch(error => {
+                    console.error('There was an error deleting the selected products!', error);
+                    setError('There was an error deleting the selected products!');
+                    setMessage('');
+                });
+        }
+    };
+
+    const editSelectedProducts = () => {
+        if (selectedProducts.length === 1) {
+            navigate(`/admin/edit-product/${selectedProducts[0]}`);
+        } else {
+            setError('Please select only one product to edit!');
+            setMessage('');
+        }
+    };
 
     const deleteProduct = (id) => {
         if (window.confirm('Are you sure you want to delete this product?')) {
@@ -48,9 +81,16 @@ const ProductAdminList = () => {
             <Link to="/admin/create-product">
                 <button className="create-button">Create a new product</button>
             </Link>
+            <button onClick={deleteSelectedProducts} className="batch-delete-button">Delete Selected</button>
+            <button onClick={editSelectedProducts} className="batch-edit-button">Edit Selected</button>
             <div className="product-list">
                 {products.map(product => (
                     <div key={product.id} className="product-item">
+                        <input
+                            type="checkbox"
+                            checked={selectedProducts.includes(product.id)}
+                            onChange={() => handleSelectProduct(product.id)}
+                        />
                         <h2>{product.name}</h2>
                         <p>{product.description}</p>
                         <p>Category: {product.category}</p>
