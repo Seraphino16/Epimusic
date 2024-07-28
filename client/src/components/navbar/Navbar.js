@@ -1,17 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import NavbarItem from "./NavbarItem";
 import SearchBar from "./SearchBar";
 import logo from "../../assets/logo.png";
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const [userRole, setUserRole] = useState(null);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user) {
+            setIsLoggedIn(true);
+            if (Array.isArray(user.roles)) {
+                if (user.roles.includes('ROLE_ADMIN')) {
+                    setUserRole('ROLE_ADMIN');
+                } else if (user.roles.includes('ROLE_USER')) {
+                    setUserRole('ROLE_USER');
+                }
+            }
+        }
+    }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem('user');
+        setIsLoggedIn(false);
+        setUserRole(null);
+        navigate('/login');
+        window.location.reload(); // This will refresh the page
+    };
 
     return (
         <nav className="relative z-50 w-full flex items-center justify-between flex-wrap bg-[#2bebf1] py-2 shadow px-4 lg:px-16 xl:px-48">
             <div className="flex items-center flex-shrink-0 text-black mr-6">
-                <a href="/">
-                    <img src={logo} alt="Logo" className="w-16 h-16 mr-2" />
-                </a>
+                <img src={logo} alt="Logo" className="w-16 h-16 mr-2" />
             </div>
             <div className="block lg:hidden">
                 <button
@@ -35,10 +59,20 @@ const Navbar = () => {
             >
                 <div className="flex flex-col lg:flex-row lg:items-center justify-center lg:space-x-8 lg:text-left lg:flex-grow lg:mt-0 space-y-4 lg:space-y-0">
                     <SearchBar />
-                    <NavbarItem text="Login" href="/login" />
                     <NavbarItem text="Products" href="/" />
                     <NavbarItem text="Clients" href="/" />
-                    <NavbarItem text="Admin" href="/admin/" />
+                    {userRole === 'ROLE_ADMIN' && <NavbarItem text="Admin" href="/admin/" />}
+                    {userRole === 'ROLE_USER' && <NavbarItem text="Profile" href="/profile/" />}
+                    {isLoggedIn ? (
+                        <button
+                            onClick={handleLogout}
+                            className="block mt-4 lg:inline-block lg:mt-0 text-black hover:text-gray-800 mr-4"
+                        >
+                            Logout
+                        </button>
+                    ) : (
+                        <NavbarItem text="Login" href="/login" />
+                    )}
                 </div>
             </div>
         </nav>
