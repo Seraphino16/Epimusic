@@ -17,6 +17,7 @@ const ProductAdminForm = () => {
     const [mainImageIndex, setMainImageIndex] = useState(0); // State for main image index
     const [message, setMessage] = useState(""); // State for the message
     const [error, setError] = useState(""); // State for the error
+    const [isSubmitting, setIsSubmitting] = useState(false); // State for submit button
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -63,6 +64,7 @@ const ProductAdminForm = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
+        setIsSubmitting(true);
 
         const newProduct = {
             name: name,
@@ -87,6 +89,7 @@ const ProductAdminForm = () => {
             .catch((error) => {
                 setError("There was an error creating the product!");
                 setMessage("");
+                setIsSubmitting(false); // Re-enable the button in case of an error
                 console.error(
                     "There was an error creating the product!",
                     error
@@ -315,7 +318,10 @@ const ProductAdminForm = () => {
                         <div className="flex items-center justify-center w-full mt-8">
                             <button
                                 type="submit"
-                                className="font-semibold leading-none text-white py-4 px-10 bg-blue-700 rounded hover:bg-blue-600 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:outline-none"
+                                disabled={isSubmitting} // Disable the button when submitting
+                                className={`font-semibold leading-none text-white py-4 px-10 rounded focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:outline-none ${
+                                    isSubmitting ? 'bg-gray-400' : 'bg-blue-700 hover:bg-blue-600'
+                                }`}
                             >
                                 Create Product
                             </button>
