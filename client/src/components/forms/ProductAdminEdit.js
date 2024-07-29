@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import "../../styles/ProductForm.css";
 
 const ProductAdminEdit = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const [product, setProduct] = useState(null);
     const [categories, setCategories] = useState([]);
     const [colors, setColors] = useState([]);
@@ -21,6 +22,10 @@ const ProductAdminEdit = () => {
     const [showColorAndSize, setShowColorAndSize] = useState(false); // State to show/hide color and size fields
     const [message, setMessage] = useState(""); // State for the message
     const [error, setError] = useState(""); // State for the error
+
+    const searchParams = new URLSearchParams(location.search);
+    const selectedProductIds = searchParams.get('selectedProducts')?.split(',') || [];
+    const currentEditIndex = parseInt(searchParams.get('currentEditIndex')) || 0;
 
     useEffect(() => {
         axios
@@ -133,7 +138,15 @@ const ProductAdminEdit = () => {
             .then((response) => {
                 setMessage("Product updated successfully!");
                 setError("");
-                navigate("/");
+                if (currentEditIndex < selectedProductIds.length - 1) {
+                    setTimeout(() => {
+                        navigate(`/admin/edit-product/${selectedProductIds[currentEditIndex + 1]}?selectedProducts=${selectedProductIds.join(',')}&currentEditIndex=${currentEditIndex + 1}`);
+                    }, 2000);
+                } else {
+                    setTimeout(() => {
+                        navigate("/admin/");
+                    }, 2000);
+                }
             })
             .catch((error) => {
                 setError("There was an error updating the product!");
@@ -366,6 +379,26 @@ const ProductAdminEdit = () => {
                                 Update Product
                             </button>
                         </div>
+                        {selectedProductIds.length > 1 && (
+                            <div className="flex items-center justify-center w-full mt-8">
+                                <button
+                                    type="button"
+                                    onClick={() => navigate(`/admin/edit-product/${selectedProductIds[currentEditIndex - 1]}?selectedProducts=${selectedProductIds.join(',')}&currentEditIndex=${currentEditIndex - 1}`)}
+                                    disabled={currentEditIndex === 0}
+                                    className="font-semibold leading-none text-white py-4 px-10 bg-blue-700 rounded hover:bg-blue-600 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:outline-none"
+                                >
+                                    Previous
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => navigate(`/admin/edit-product/${selectedProductIds[currentEditIndex + 1]}?selectedProducts=${selectedProductIds.join(',')}&currentEditIndex=${currentEditIndex + 1}`)}
+                                    disabled={currentEditIndex === selectedProductIds.length - 1}
+                                    className="font-semibold leading-none text-white py-4 px-10 bg-blue-700 rounded hover:bg-blue-600 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:outline-none"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        )}
                     </form>
                 </div>
             </div>

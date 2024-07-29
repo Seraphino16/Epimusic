@@ -6,8 +6,14 @@ import ProductCard from "../products/ProductCard";
 
 const ProductAdminList = () => {
     const [products, setProducts] = useState([]);
+<<<<<<< HEAD
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
+=======
+    const [selectedProducts, setSelectedProducts] = useState([]);
+    const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
+>>>>>>> Article-management
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -51,6 +57,31 @@ const ProductAdminList = () => {
         navigate(`/admin/edit-product/${id}`);
     };
 
+    const handleSelectProduct = (id) => {
+        if (selectedProducts.includes(id)) {
+            setSelectedProducts(selectedProducts.filter(productId => productId !== id));
+        } else {
+            setSelectedProducts([...selectedProducts, id]);
+        }
+    };
+
+    const editSelectedProducts = () => {
+        if (selectedProducts.length > 0) {
+            navigate(`/admin/edit-product/${selectedProducts[0]}?selectedProducts=${selectedProducts.join(',')}&currentEditIndex=0`);
+        } else {
+            alert('Please select at least one product to edit.');
+        }
+    };
+
+    const deleteSelectedProducts = () => {
+        if (window.confirm('Are you sure you want to delete the selected products?')) {
+            selectedProducts.forEach(id => {
+                deleteProduct(id);
+            });
+            setSelectedProducts([]);
+        }
+    };
+
     return (
         <div>
             {message && <p className="success">{message}</p>}
@@ -59,14 +90,37 @@ const ProductAdminList = () => {
             <Link to="/admin/create-product">
                 <button className="create-button">Create a new product</button>
             </Link>
-            <div className="product-list grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {products.map((product) => (
-                    <ProductCard
-                        key={product.id}
-                        product={product}
-                        editProduct={editProduct}
-                        deleteProduct={deleteProduct}
-                    />
+            <button className="delete-button" onClick={deleteSelectedProducts}>Delete Selected</button>
+            <button className="edit-button" onClick={editSelectedProducts}>Edit Selected</button>
+            <div className="product-list">
+                {products.map(product => (
+                    <div key={product.id} className="product-item">
+                        <input
+                            type="checkbox"
+                            checked={selectedProducts.includes(product.id)}
+                            onChange={() => handleSelectProduct(product.id)}
+                        />
+                        <h2>{product.name}</h2>
+                        <p>{product.description}</p>
+                        <p>Category: {product.category}</p>
+                        {product.models.map((model, index) => (
+                            <div key={index} className="model-item">
+                                <p>Color: {model.color || 'N/A'}</p>
+                                <p>Size: {model.size || 'N/A'}</p>
+                                <p>Price: ${model.price}</p>
+                                <div className="images">
+                                    {model.images.map((image, idx) => (
+                                        <div key={idx} className="image-item">
+                                            <img src={image.path} alt={`Product ${product.name}`} />
+                                            <p>{image.is_main ? 'Main Image' : 'Additional Image'}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                        <button className="edit-button" onClick={() => editProduct(product.id)}>Edit</button>
+                        <button className="delete-button" onClick={() => deleteProduct(product.id)}>Delete</button>
+                    </div>
                 ))}
             </div>
         </div>
