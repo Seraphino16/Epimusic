@@ -15,69 +15,125 @@
 
 .product-list {
     display: flex;
-    flex-wrap: wrap; /* Allow wrapping to the next line if needed */
+    flex-wrap: wrap;
     gap: 20px;
+    justify-content: center;
 }
 
 .product-item {
     border: 1px solid #ddd;
     padding: 20px;
     border-radius: 5px;
-    flex: 1 1 calc(33.333% - 40px); /* 3 items per row, adjust the percentage as needed */
     box-sizing: border-box;
-    max-width: calc(33.333% - 40px); /* Ensure the items do not exceed the container's width */
+    width: 100%;
+    max-width: 600px;
+    max-height: 600px;
+    flex: 1 1 300px;
 }
 
 .model-item {
     margin-top: 10px;
 }
 
-.images {
+.image-container {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    margin-top: 10px;
+    justify-content: center;
+    padding: 10px 0;
 }
 
 .image-item {
+    flex: 1 1 45%;
     border: 1px solid #ddd;
-    padding: 10px;
+    padding: 5px;
     border-radius: 5px;
     text-align: center;
+    box-sizing: border-box;
 }
 
 .image-item img {
-    max-width: 100px;
+    max-width: 100%;
     height: auto;
+    display: block;
 }
 
-.edit-button {
-    padding: 10px 20px;
+.product-details {
+    margin-top: 10px;
+}
+
+.product-name {
+    font-size: 1.2em;
+    margin: 10px 0;
+    font-weight: bold;
+}
+
+.product-category,
+.product-color,
+.product-size {
+    font-size: 1em;
+    margin: 5px 0;
+}
+
+.button-group {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.edit-button,
+.delete-button {
     color: white;
-    background-color: #28a745;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 16px;
-    margin-top: 10px;
-    margin-right: 10px; /* Add space between buttons */
+    font-size: 14px;
+    margin: 2px;
+    flex: 1 1 25%;
+    box-sizing: border-box;
+    width: 10px;
+    height: 30px;
+    font-size: 0.8em;
+    text-align: center;
 }
 
-.edit-button:hover {
+.group-edit-button,
+.group-delete-button {
+    padding: 10px 20px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    margin: 5px;
+    flex: 1 1 45%;
+    box-sizing: border-box;
+}
+
+.edit-button,
+.group-edit-button {
+    background-color: #28a745;
+}
+
+.edit-button:hover,
+.group-edit-button:hover {
     background-color: #218838;
 }
 
-.delete-button {
-    padding: 10px 20px;
-    color: white;
+.delete-button,
+.group-delete-button {
     background-color: #dc3545;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    margin-top: 10px;
 }
 
-.delete-button:hover {
+.delete-button:hover,
+.group-delete-button:hover {
     background-color: #c82333;
+}
+
+.select-checkbox {
+    display: block;
+    width: 20px;
+    height: 20px;
+    margin-top: 10px;
 }
