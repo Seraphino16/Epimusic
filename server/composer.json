@@ -23,10 +23,10 @@
         "symfony/notifier": "7.1.*",
         "symfony/runtime": "7.1.*",
         "symfony/security-bundle": "7.1.*",
+        "symfony/twig-bundle": "7.1.*",
         "symfony/validator": "7.1.*",
         "symfony/yaml": "7.1.*",
-        "symfonycasts/verify-email-bundle": "^1.17",
-        "symfony/yaml": "7.1.*"
+        "symfonycasts/verify-email-bundle": "^1.17"
     },
     "require-dev": {
         "symfony/maker-bundle": "^1.60"
