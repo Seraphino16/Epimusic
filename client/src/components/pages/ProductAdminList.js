@@ -11,6 +11,10 @@ const ProductAdminList = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        fetchProducts();
+    }, []);
+
+    const fetchProducts = () => {
         axios.get('http://localhost:8000/api/admin/products')
             .then(response => {
                 setProducts(response.data);
@@ -19,22 +23,20 @@ const ProductAdminList = () => {
                 console.error('There was an error fetching the products!', error);
                 setError('There was an error fetching the products!');
             });
-    }, []);
+    };
 
     const deleteProduct = (id) => {
-        if (window.confirm('Are you sure you want to delete this product?')) {
-            axios.delete(`http://localhost:8000/api/admin/products/${id}`)
-                .then(response => {
-                    setProducts(products.filter(product => product.id !== id));
-                    setMessage('Product deleted successfully!');
-                    setError('');
-                })
-                .catch(error => {
-                    console.error('There was an error deleting the product!', error);
-                    setError('There was an error deleting the product!');
-                    setMessage('');
-                });
-        }
+        return axios.delete(`http://localhost:8000/api/admin/products/${id}`)
+            .then(response => {
+                setProducts(products.filter(product => product.id !== id));
+                setMessage('Product deleted successfully!');
+                setError('');
+            })
+            .catch(error => {
+                console.error('There was an error deleting the product!', error);
+                setError('There was an error deleting the product!');
+                setMessage('');
+            });
     };
 
     const editProduct = (id) => {
@@ -59,10 +61,15 @@ const ProductAdminList = () => {
 
     const deleteSelectedProducts = () => {
         if (window.confirm('Are you sure you want to delete the selected products?')) {
-            selectedProducts.forEach(id => {
-                deleteProduct(id);
-            });
-            setSelectedProducts([]);
+            Promise.all(selectedProducts.map(id => deleteProduct(id)))
+                .then(() => {
+                    setSelectedProducts([]);
+                    fetchProducts(); // Rafraîchir la liste des produits
+                })
+                .catch(() => {
+                    setError('There was an error deleting one or more products!');
+                    setMessage('');
+                });
         }
     };
 
