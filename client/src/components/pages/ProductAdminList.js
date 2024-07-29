@@ -6,14 +6,9 @@ import ProductCard from "../products/ProductCard";
 
 const ProductAdminList = () => {
     const [products, setProducts] = useState([]);
-<<<<<<< HEAD
-    const [message, setMessage] = useState("");
-    const [error, setError] = useState("");
-=======
     const [selectedProducts, setSelectedProducts] = useState([]);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
->>>>>>> Article-management
     const navigate = useNavigate();
 
     useEffect(() => {
