@@ -70,7 +70,7 @@ const ProductAdminForm = () => {
             name: name,
             description: description,
             category: category,
-            color: color,
+            color: category !== "2" ? color : null, // Only set color if category is not "Vinyle"
             size: size,
             price: parseFloat(price),
             photoPaths: photoPaths.filter((path) => path), // Filter out empty paths
@@ -97,13 +97,32 @@ const ProductAdminForm = () => {
             });
     };
 
-    const shouldDisplayColorAndSize = (category) => {
-        const goodiesId = 2;
-        const vinylsId = 3;
-        return (
-            category === goodiesId.toString() ||
-            category === vinylsId.toString()
-        );
+    const handleCategoryChange = (e) => {
+        const selectedCategory = e.target.value;
+        setCategory(selectedCategory);
+
+        if (selectedCategory === "2") {
+            // Fetch only sizes related to category "Vinyle"
+            axios
+                .get(`http://localhost:8000/api/admin/sizes/category/${selectedCategory}`)
+                .then((response) => {
+                    setSizes(response.data);
+                    setColor(""); // Reset color as it should not be displayed
+                })
+                .catch((error) => {
+                    console.error("There was an error fetching the sizes!", error);
+                });
+        } else {
+            // Fetch all sizes if not "Vinyle"
+            axios
+                .get("http://localhost:8000/api/admin/sizes")
+                .then((response) => {
+                    setSizes(response.data);
+                })
+                .catch((error) => {
+                    console.error("There was an error fetching the sizes!", error);
+                });
+        }
     };
 
     return (
@@ -144,9 +163,7 @@ const ProductAdminForm = () => {
                                 <select
                                     id="category"
                                     value={category}
-                                    onChange={(e) =>
-                                        setCategory(e.target.value)
-                                    }
+                                    onChange={handleCategoryChange}
                                     required
                                     className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
                                 >
@@ -182,70 +199,72 @@ const ProductAdminForm = () => {
                                 />
                             </div>
                         </div>
-                        {shouldDisplayColorAndSize(category) && (
-                            <>
-                                <div className="md:flex items-center mt-8">
-                                    <div className="w-full md:w-1/2 flex flex-col">
-                                        <label
-                                            className="font-semibold leading-none text-black"
-                                            htmlFor="color"
+                        {category !== "2" && (
+                            <div className="md:flex items-center mt-8">
+                                <div className="w-full flex flex-col">
+                                    <label
+                                        className="font-semibold leading-none text-black"
+                                        htmlFor="color"
+                                    >
+                                        Color
+                                    </label>
+                                    <select
+                                        id="color"
+                                        value={color}
+                                        onChange={(e) =>
+                                            setColor(e.target.value)
+                                        }
+                                        className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
+                                    >
+                                        <option
+                                            value=""
+                                            className="text-gray-500"
                                         >
-                                            Color
-                                        </label>
-                                        <select
-                                            id="color"
-                                            value={color}
-                                            onChange={(e) =>
-                                                setColor(e.target.value)
-                                            }
-                                            className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
-                                        >
+                                            Select a color
+                                        </option>
+                                        {colors.map((col) => (
                                             <option
-                                                value=""
-                                                className="text-gray-500"
+                                                key={col.id}
+                                                value={col.id}
                                             >
-                                                Select a color
+                                                {col.name}
                                             </option>
-                                            {colors.map((col) => (
-                                                <option
-                                                    key={col.id}
-                                                    value={col.id}
-                                                >
-                                                    {col.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="w-full md:w-1/2 flex flex-col md:ml-6 md:mt-0 mt-4">
-                                        <label
-                                            className="font-semibold leading-none text-black"
-                                            htmlFor="size"
-                                        >
-                                            Size
-                                        </label>
-                                        <select
-                                            id="size"
-                                            value={size}
-                                            onChange={(e) =>
-                                                setSize(e.target.value)
-                                            }
-                                            className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
-                                        >
-                                            <option
-                                                value=""
-                                                className="text-gray-500"
-                                            >
-                                                Select a size
-                                            </option>
-                                            {sizes.map((s) => (
-                                                <option key={s.id} value={s.id}>
-                                                    {s.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                        ))}
+                                    </select>
                                 </div>
-                            </>
+                            </div>
+                        )}
+                        {sizes.length > 0 && (
+                            <div className="md:flex items-center mt-8">
+                                <div className="w-full md:w-1/2 flex flex-col">
+                                    <label
+                                        className="font-semibold leading-none text-black"
+                                        htmlFor="size"
+                                    >
+                                        Size
+                                    </label>
+                                    <select
+                                        id="size"
+                                        value={size}
+                                        onChange={(e) =>
+                                            setSize(e.target.value)
+                                        }
+                                        className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
+                                    >
+                                        <option
+                                            value=""
+                                            className="text-gray-500"
+                                        >
+                                            Select a size
+                                        </option>
+                                        {sizes.map((s) => (
+                                            <option key={s.id} value={s.id}>
+                                                {s.value} {s.unit}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
                         )}
                         <div className="md:flex items-center mt-8">
                             <div className="w-full flex flex-col">
