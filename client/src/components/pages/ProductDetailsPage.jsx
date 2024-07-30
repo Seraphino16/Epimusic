@@ -19,8 +19,7 @@ const ProductDetailsPage = () => {
                 const data = await response.json();
         
             if (response.ok) {
-                setProduct(data[0]);
-            
+                setProduct(data);
             } else {
                
                 setAlert({ message: data.message || 'Une erreur s\'est produite lors de la récupération des articles', type: 'error' });
@@ -42,7 +41,7 @@ const ProductDetailsPage = () => {
             <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
                 <div className="space-y-4">
                     <ProductTitle name={product.name} category={product.category} />
-                    <ProductImage image={product.image_url} />
+                    <ProductImage images={product.images} />
                 </div>
                 <div className="space-y-4 mt-16 pt-12">
                     <ProductDescription 

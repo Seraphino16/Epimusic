@@ -67,11 +67,11 @@ class ProductRepository extends ServiceEntityRepository
 
     public function findProductWithCategory($productId)
     {
-        return $this->createQueryBuilder('p')
-        ->select('p.id', 'p.name', 'p.description', 'c.name as category', 
-                'm.id as model_id', 'm.price', 'm.stock', 
-                'col.name as color', 's.value as size_value', 's.unit as size_unit', 
-                'i.path as image_url')
+        $results = $this->createQueryBuilder('p')
+            ->select('p.id', 'p.name', 'p.description', 'c.name as category', 
+                    'm.id as model_id', 'm.price', 'm.stock', 
+                    'col.name as color', 's.value as size_value', 's.unit as size_unit', 
+                    'i.path as image_url', 'i.is_main as is_main')
             ->leftJoin('p.category', 'c')
             ->leftJoin('p.models', 'm')
             ->leftJoin('m.color', 'col')
@@ -81,5 +81,35 @@ class ProductRepository extends ServiceEntityRepository
             ->setParameter('id', $productId)
             ->getQuery()
             ->getArrayResult();
+
+        $productData = [];
+        foreach ($results as $result) {
+            $productData['id'] = $result['id'];
+            $productData['name'] = $result['name'];
+            $productData['description'] = $result['description'];
+            $productData['category'] = $result['category'];
+            $productData['model_id'] = $result['model_id'];
+            $productData['price'] = $result['price'];
+            $productData['stock'] = $result['stock'];
+            $productData['color'] = $result['color'];
+            $productData['size_value'] = $result['size_value'];
+            $productData['size_unit'] = $result['size_unit'];
+
+            if (!isset($productData['images'])) {
+                $productData['images'] = ['main' => [], 'secondary' => []];
+            }
+
+            if ($result['is_main']) {
+                $productData['images']['main'][] = $result['image_url'];
+            } else {
+                $productData['images']['secondary'][] = $result['image_url'];
+            }
+        }
+
+        return $productData;
     }
+
+
+
+
 }
