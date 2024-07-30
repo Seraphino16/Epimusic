@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import ProductTitle from '../ProductDetails/ProductTitle';
 import ProductDescription from '../ProductDetails/ProductDescription';
+import ProductImage from '../ProductDetails/ProductImage';
 import Alert from '../Alerts/Alert';
 import { useParams } from 'react-router-dom';
-
 
 const ProductDetailsPage = () => {
     const { id } = useParams();
@@ -18,7 +18,7 @@ const ProductDetailsPage = () => {
                 const response = await fetch(`http://localhost:8000/api/products/${id}`);
                 const data = await response.json();
                 
-   
+                console.log(data);
             if (response.ok) {
                 setProduct(data[0]);
             
@@ -37,20 +37,30 @@ const ProductDetailsPage = () => {
     }, [id]);
 
     return (
-        <div>
-              <Alert message={alert.message} type={alert.type} />
-            {product && (
+        <div className="p-6">
+        <Alert message={alert.message} type={alert.type} />
+        {product && (
+            <div className="max-w-6xl mx-auto">
                 <div>
                     <ProductTitle name={product.name} category={product.category} />
-                    <ProductDescription 
-                        description={product.description}
-                        stock={product.stock}
-                        color={product.color}
-                        size={`${product.size_value} ${product.size_unit}`}
-                    />
                 </div>
-            )}
-        </div>
+                <div className="flex gap-6">
+                    <div className="flex-shrink-0">
+                        <ProductImage image={product.image_url} />
+                    </div>
+                    <div className="flex-1">
+                        <ProductDescription 
+                            category={product.category}
+                            description={product.description}
+                            stock={product.stock}
+                            color={product.color}
+                            size={`${product.size_value} ${product.size_unit}`}
+                        />
+                    </div>
+                </div>
+            </div>
+        )}
+    </div>
     );
 }
 
