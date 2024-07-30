@@ -13,6 +13,7 @@ const ProductAdminForm = () => {
     const [color, setColor] = useState("");
     const [size, setSize] = useState("");
     const [price, setPrice] = useState("");
+    const [stock, setStock] = useState(""); // State for stock
     const [photoPaths, setPhotoPaths] = useState([""]); // State for photo paths
     const [mainImageIndex, setMainImageIndex] = useState(0); // State for main image index
     const [message, setMessage] = useState(""); // State for the message
@@ -61,6 +62,7 @@ const ProductAdminForm = () => {
             color: category !== "2" ? color : null, // Set color only if category is not "Vinyle"
             size: category === "2" || category === "3" ? size : null, // Set size only if category is "Vinyle" or "Goodies"
             price: parseFloat(price),
+            stock: parseInt(stock, 10), // Add stock information
             photoPaths: photoPaths.filter((path) => path), // Filter out empty paths
             mainImageIndex: mainImageIndex, // Send the main image index
         };
@@ -251,6 +253,25 @@ const ProductAdminForm = () => {
                                     placeholder="Enter product price"
                                     value={price}
                                     onChange={(e) => setPrice(e.target.value)}
+                                    required
+                                    className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
+                                />
+                            </div>
+                        </div>
+                        <div className="md:flex items-center mt-8">
+                            <div className="w-full flex flex-col">
+                                <label
+                                    className="font-semibold leading-none text-black"
+                                    htmlFor="stock"
+                                >
+                                    Stock
+                                </label>
+                                <input
+                                    type="number"
+                                    id="stock"
+                                    placeholder="Enter product stock"
+                                    value={stock}
+                                    onChange={(e) => setStock(e.target.value)}
                                     required
                                     className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
                                 />
