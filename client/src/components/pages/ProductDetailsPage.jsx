@@ -39,23 +39,19 @@ const ProductDetailsPage = () => {
         <div className="p-6">
         <Alert message={alert.message} type={alert.type} />
         {product && (
-            <div className="max-w-6xl mx-auto">
-                <div>
+            <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div className="space-y-4">
                     <ProductTitle name={product.name} category={product.category} />
+                    <ProductImage image={product.image_url} />
                 </div>
-                <div className="flex gap-6">
-                    <div className="flex-shrink-0">
-                        <ProductImage image={product.image_url} />
-                    </div>
-                    <div className="flex-1">
-                        <ProductDescription 
-                            category={product.category}
-                            description={product.description}
-                            stock={product.stock}
-                            color={product.color}
-                            size={`${product.size_value} ${product.size_unit}`}
-                        />
-                    </div>
+                <div className="space-y-4 mt-16 pt-12">
+                    <ProductDescription 
+                        category={product.category}
+                        description={product.description}
+                        stock={product.stock}
+                        color={product.color}
+                        size={`${product.size_value} ${product.size_unit}`}
+                    />
                 </div>
             </div>
         )}
