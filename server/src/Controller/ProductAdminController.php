@@ -35,7 +35,7 @@ class ProductAdminController extends AbstractController
                 }
                 $models[] = [
                     'color' => $model->getColor() ? $model->getColor()->getName() : null,
-                    'size' => $model->getSize() ? $model->getSize()->getName() : null,
+                    'size' => $model->getSize() ? $model->getSize()->getValue() : null,
                     'price' => $model->getPrice(),
                     'images' => $images,
                 ];
@@ -121,8 +121,8 @@ class ProductAdminController extends AbstractController
                 ];
             }
             $models[] = [
-                'color' => $model->getColor() ? $model->getColor()->getName() : null,
-                'size' => $model->getSize() ? $model->getSize()->getName() : null,
+                'color' => $model->getColor()?->getName(),
+                'size' => $model->getSize()?->getValue(),
                 'price' => $model->getPrice(),
                 'images' => $images,
             ];

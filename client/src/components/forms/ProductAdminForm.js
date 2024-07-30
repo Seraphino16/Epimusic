@@ -27,10 +27,7 @@ const ProductAdminForm = () => {
                 setCategories(response.data);
             })
             .catch((error) => {
-                console.error(
-                    "There was an error fetching the categories!",
-                    error
-                );
+                console.error("There was an error fetching the categories!", error);
             });
 
         axios
@@ -40,15 +37,6 @@ const ProductAdminForm = () => {
             })
             .catch((error) => {
                 console.error("There was an error fetching the colors!", error);
-            });
-
-        axios
-            .get("http://localhost:8000/api/admin/sizes")
-            .then((response) => {
-                setSizes(response.data);
-            })
-            .catch((error) => {
-                console.error("There was an error fetching the sizes!", error);
             });
     }, []);
 
@@ -70,8 +58,8 @@ const ProductAdminForm = () => {
             name: name,
             description: description,
             category: category,
-            color: category !== "2" ? color : null, // Only set color if category is not "Vinyle"
-            size: size,
+            color: category !== "2" ? color : null, // Set color only if category is not "Vinyle"
+            size: category === "2" || category === "3" ? size : null, // Set size only if category is "Vinyle" or "Goodies"
             price: parseFloat(price),
             photoPaths: photoPaths.filter((path) => path), // Filter out empty paths
             mainImageIndex: mainImageIndex, // Send the main image index
@@ -90,10 +78,7 @@ const ProductAdminForm = () => {
                 setError("There was an error creating the product!");
                 setMessage("");
                 setIsSubmitting(false); // Re-enable the button in case of an error
-                console.error(
-                    "There was an error creating the product!",
-                    error
-                );
+                console.error("There was an error creating the product!", error);
             });
     };
 
@@ -101,28 +86,29 @@ const ProductAdminForm = () => {
         const selectedCategory = e.target.value;
         setCategory(selectedCategory);
 
-        if (selectedCategory === "2") {
-            // Fetch only sizes related to category "Vinyle"
+        if (selectedCategory === "2" || selectedCategory === "3") {
+            // Fetch only sizes related to category "Vinyle" or "Goodies"
             axios
                 .get(`http://localhost:8000/api/admin/sizes/category/${selectedCategory}`)
                 .then((response) => {
                     setSizes(response.data);
-                    setColor(""); // Reset color as it should not be displayed
+                    setSize(""); // Reset size selection
                 })
                 .catch((error) => {
                     console.error("There was an error fetching the sizes!", error);
                 });
         } else {
-            // Fetch all sizes if not "Vinyle"
-            axios
-                .get("http://localhost:8000/api/admin/sizes")
-                .then((response) => {
-                    setSizes(response.data);
-                })
-                .catch((error) => {
-                    console.error("There was an error fetching the sizes!", error);
-                });
+            setSizes([]); // Reset sizes if category is not "Vinyle" or "Goodies"
+            setSize("");
         }
+    };
+
+    const shouldDisplayColor = (category) => {
+        return category === "1" || category === "3"; // Display color for categories "Instrument" and "Goodies"
+    };
+
+    const shouldDisplaySize = (category) => {
+        return category === "2" || category === "3"; // Display size for categories "Vinyle" and "Goodies"
     };
 
     return (
@@ -191,15 +177,13 @@ const ProductAdminForm = () => {
                                     id="description"
                                     placeholder="Enter product description"
                                     value={description}
-                                    onChange={(e) =>
-                                        setDescription(e.target.value)
-                                    }
+                                    onChange={(e) => setDescription(e.target.value)}
                                     required
                                     className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
                                 />
                             </div>
                         </div>
-                        {category !== "2" && (
+                        {shouldDisplayColor(category) && (
                             <div className="md:flex items-center mt-8">
                                 <div className="w-full flex flex-col">
                                     <label
@@ -211,22 +195,14 @@ const ProductAdminForm = () => {
                                     <select
                                         id="color"
                                         value={color}
-                                        onChange={(e) =>
-                                            setColor(e.target.value)
-                                        }
+                                        onChange={(e) => setColor(e.target.value)}
                                         className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
                                     >
-                                        <option
-                                            value=""
-                                            className="text-gray-500"
-                                        >
+                                        <option value="" className="text-gray-500">
                                             Select a color
                                         </option>
                                         {colors.map((col) => (
-                                            <option
-                                                key={col.id}
-                                                value={col.id}
-                                            >
+                                            <option key={col.id} value={col.id}>
                                                 {col.name}
                                             </option>
                                         ))}
@@ -234,9 +210,9 @@ const ProductAdminForm = () => {
                                 </div>
                             </div>
                         )}
-                        {sizes.length > 0 && (
+                        {shouldDisplaySize(category) && (
                             <div className="md:flex items-center mt-8">
-                                <div className="w-full md:w-1/2 flex flex-col">
+                                <div className="w-full flex flex-col">
                                     <label
                                         className="font-semibold leading-none text-black"
                                         htmlFor="size"
@@ -246,15 +222,10 @@ const ProductAdminForm = () => {
                                     <select
                                         id="size"
                                         value={size}
-                                        onChange={(e) =>
-                                            setSize(e.target.value)
-                                        }
+                                        onChange={(e) => setSize(e.target.value)}
                                         className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
                                     >
-                                        <option
-                                            value=""
-                                            className="text-gray-500"
-                                        >
+                                        <option value="" className="text-gray-500">
                                             Select a size
                                         </option>
                                         {sizes.map((s) => (
@@ -286,10 +257,7 @@ const ProductAdminForm = () => {
                             </div>
                         </div>
                         {photoPaths.map((path, index) => (
-                            <div
-                                key={index}
-                                className="md:flex items-center mt-8"
-                            >
+                            <div key={index} className="md:flex items-center mt-8">
                                 <div className="w-full flex flex-col">
                                     <label
                                         className="font-semibold leading-none text-black"
@@ -302,12 +270,7 @@ const ProductAdminForm = () => {
                                         id={`photoPath${index}`}
                                         placeholder="Enter image path"
                                         value={path}
-                                        onChange={(e) =>
-                                            handlePhotoPathChange(
-                                                index,
-                                                e.target.value
-                                            )
-                                        }
+                                        onChange={(e) => handlePhotoPathChange(index, e.target.value)}
                                         className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
                                     />
                                     <label className="font-semibold leading-none text-black mt-4">
@@ -315,9 +278,7 @@ const ProductAdminForm = () => {
                                             type="radio"
                                             name="mainImage"
                                             checked={mainImageIndex === index}
-                                            onChange={() =>
-                                                setMainImageIndex(index)
-                                            }
+                                            onChange={() => setMainImageIndex(index)}
                                             className="mr-2"
                                         />
                                         Set as main image

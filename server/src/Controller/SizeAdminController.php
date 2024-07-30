@@ -4,7 +4,6 @@
 namespace App\Controller;
 
 use App\Entity\Category;
-use App\Entity\Size;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -29,11 +28,10 @@ class SizeAdminController extends AbstractController
         return new JsonResponse($data);
     }
 
-    #[Route('/api/admin/sizes/category/{categoryId}', name: 'api_sizes_by_category', methods: ['GET'])]
-    public function getSizesByCategory(EntityManagerInterface $entityManager, int $categoryId): JsonResponse
+    #[Route('/api/admin/sizes/category/{id}', name: 'api_sizes_by_category', methods: ['GET'])]
+    public function getSizesByCategory(EntityManagerInterface $entityManager, $id): JsonResponse
     {
-        $category = $entityManager->getRepository(Category::class)->find($categoryId);
-
+        $category = $entityManager->getRepository(Category::class)->find($id);
         if (!$category) {
             return new JsonResponse(['error' => 'Category not found'], 404);
         }
