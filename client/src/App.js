@@ -7,6 +7,7 @@ import Register from './components/AuthForms/Register';
 import Login from './components/AuthForms/Login';
 import Navbar from './components/navbar/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
+import FilteredArticles from './components/pages/FilteredArticles';
 
 const App = () => {
   return (
@@ -37,6 +38,12 @@ const App = () => {
             <ProtectedRoute requiredRole="ROLE_ADMIN">
               <ProductAdminEdit />
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Test"
+          element={
+              <FilteredArticles />
           }
         />
       </Routes>
