@@ -17,17 +17,18 @@ const ProductDetailsPage = () => {
             try {
                 const response = await fetch(`http://localhost:8000/api/products/${id}`);
                 const data = await response.json();
-                console.log(data);
+                
    
             if (response.ok) {
                 setProduct(data[0]);
-                console.log(product);
+            
             } else {
                
                 setAlert({ message: data.message || 'Une erreur s\'est produite lors de la récupération des articles', type: 'error' });
             }
             
             } catch (error) {
+                console.log(error);
                 setAlert({ message: 'Internal server error', type: 'error' });
             }
         };
@@ -41,7 +42,12 @@ const ProductDetailsPage = () => {
             {product && (
                 <div>
                     <ProductTitle name={product.name} category={product.category} />
-                    <ProductDescription description={product.description} />
+                    <ProductDescription 
+                        description={product.description}
+                        stock={product.stock}
+                        color={product.color}
+                        size={`${product.size_value} ${product.size_unit}`}
+                    />
                 </div>
             )}
         </div>

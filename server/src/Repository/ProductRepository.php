@@ -68,8 +68,15 @@ class ProductRepository extends ServiceEntityRepository
     public function findProductWithCategory($productId)
     {
         return $this->createQueryBuilder('p')
-            ->select('p.id', 'p.name', 'p.description', 'c.name as category')
+        ->select('p.id', 'p.name', 'p.description', 'c.name as category', 
+                'm.id as model_id', 'm.price', 'm.stock', 
+                'col.name as color', 's.value as size_value', 's.unit as size_unit', 
+                'i.path as image_url')
             ->leftJoin('p.category', 'c')
+            ->leftJoin('p.models', 'm')
+            ->leftJoin('m.color', 'col')
+            ->leftJoin('m.size', 's')
+            ->leftJoin('m.image', 'i')
             ->where('p.id = :id')
             ->setParameter('id', $productId)
             ->getQuery()
