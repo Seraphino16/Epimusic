@@ -18,7 +18,7 @@ const App = () => {
         <Route
           path="/admin"
           element={
-            <ProtectedRoute requiredRole="admin">
+            <ProtectedRoute requiredRole="ROLE_ADMIN">
               <ProductAdminList />
             </ProtectedRoute>
           }
@@ -26,7 +26,7 @@ const App = () => {
         <Route
           path="/admin/create-product"
           element={
-            <ProtectedRoute requiredRole="admin">
+            <ProtectedRoute requiredRole="ROLE_ADMIN">
               <ProductAdminForm />
             </ProtectedRoute>
           }
@@ -34,7 +34,7 @@ const App = () => {
         <Route
           path="/admin/edit-product/:id"
           element={
-            <ProtectedRoute requiredRole="admin">
+            <ProtectedRoute requiredRole="ROLE_ADMIN">
               <ProductAdminEdit />
             </ProtectedRoute>
           }

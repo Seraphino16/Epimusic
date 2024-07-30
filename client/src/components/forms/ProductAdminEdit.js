@@ -29,7 +29,7 @@ const ProductAdminEdit = () => {
 
     useEffect(() => {
         axios
-            .get(`http://localhost:8000/api/admin/products/${id}`)
+            .get(`/api/admin/products/${id}`)
             .then((response) => {
                 const productData = response.data;
                 setProduct(productData);
@@ -63,7 +63,7 @@ const ProductAdminEdit = () => {
             });
 
         axios
-            .get("http://localhost:8000/api/admin/categories")
+            .get("/api/admin/categories")
             .then((response) => {
                 setCategories(response.data);
             })
@@ -76,7 +76,7 @@ const ProductAdminEdit = () => {
             });
 
         axios
-            .get("http://localhost:8000/api/admin/colors")
+            .get("/api/admin/colors")
             .then((response) => {
                 setColors(response.data);
             })
@@ -86,7 +86,7 @@ const ProductAdminEdit = () => {
             });
 
         axios
-            .get("http://localhost:8000/api/admin/sizes")
+            .get("/api/admin/sizes")
             .then((response) => {
                 setSizes(response.data);
             })
@@ -132,7 +132,7 @@ const ProductAdminEdit = () => {
 
         axios
             .put(
-                `http://localhost:8000/api/admin/products/${id}`,
+                `/api/admin/products/${id}`,
                 updatedProduct
             )
             .then((response) => {

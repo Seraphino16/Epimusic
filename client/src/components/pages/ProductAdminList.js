@@ -11,7 +11,7 @@ const ProductAdminList = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get('http://localhost:8000/api/admin/products')
+        axios.get('/api/admin/products')
             .then(response => {
                 setProducts(response.data);
             })
@@ -23,7 +23,7 @@ const ProductAdminList = () => {
 
     const deleteProduct = (id) => {
         if (window.confirm('Are you sure you want to delete this product?')) {
-            axios.delete(`http://localhost:8000/api/admin/products/${id}`)
+            axios.delete(`/api/admin/products/${id}`)
                 .then(response => {
                     setProducts(products.filter(product => product.id !== id));
                     setMessage('Product deleted successfully!');

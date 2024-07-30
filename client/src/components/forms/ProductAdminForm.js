@@ -21,7 +21,7 @@ const ProductAdminForm = () => {
 
     useEffect(() => {
         axios
-            .get("http://localhost:8000/api/admin/categories")
+            .get("/api/admin/categories")
             .then((response) => {
                 setCategories(response.data);
             })
@@ -33,7 +33,7 @@ const ProductAdminForm = () => {
             });
 
         axios
-            .get("http://localhost:8000/api/admin/colors")
+            .get("/api/admin/colors")
             .then((response) => {
                 setColors(response.data);
             })
@@ -42,7 +42,7 @@ const ProductAdminForm = () => {
             });
 
         axios
-            .get("http://localhost:8000/api/admin/sizes")
+            .get("/api/admin/sizes")
             .then((response) => {
                 setSizes(response.data);
             })
@@ -76,7 +76,7 @@ const ProductAdminForm = () => {
         };
 
         axios
-            .post("http://localhost:8000/api/admin/products", newProduct)
+            .post("/api/admin/products", newProduct)
             .then((response) => {
                 setMessage("Product created successfully!");
                 setError("");
