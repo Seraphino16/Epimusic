@@ -17,8 +17,7 @@ const ProductDetailsPage = () => {
             try {
                 const response = await fetch(`http://localhost:8000/api/products/${id}`);
                 const data = await response.json();
-                
-                console.log(data);
+        
             if (response.ok) {
                 setProduct(data[0]);
             
