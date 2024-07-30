@@ -7,6 +7,7 @@ import Register from './components/AuthForms/Register';
 import Login from './components/AuthForms/Login';
 import Navbar from './components/navbar/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
+import ProductDetailsPage from './components/pages/ProductDetailsPage';
 
 const App = () => {
   return (
@@ -39,6 +40,10 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+        <Route 
+        path="/product/:id"
+        element={<ProductDetailsPage />}
+      />
       </Routes>
     </Router>
   );

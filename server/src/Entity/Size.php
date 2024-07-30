@@ -15,8 +15,11 @@ class Size
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $name = null;
+    #[ORM\Column]
+    private $value;
+
+    #[ORM\Column]
+    private $unit;
 
     /**
      * @var Collection<int, Model>
@@ -34,15 +37,25 @@ class Size
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getValue(): ?float
     {
-        return $this->name;
+        return $this->value;
     }
 
-    public function setName(string $name): static
+    public function setValue(float $value): static
     {
-        $this->name = $name;
+        $this->value = $value;
+        return $this;
+    }
 
+    public function getUnit(): ?string
+    {
+        return $this->unit;
+    }
+
+    public function setUnit(string $unit): static
+    {
+        $this->unit = $unit;
         return $this;
     }
 
