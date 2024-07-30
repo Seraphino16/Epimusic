@@ -19,7 +19,6 @@ const ProductAdminEdit = () => {
     const [price, setPrice] = useState("");
     const [photoPaths, setPhotoPaths] = useState([""]); // State for photo paths
     const [mainImageIndex, setMainImageIndex] = useState(0); // State for main image index
-    const [showColorAndSize, setShowColorAndSize] = useState(false); // State to show/hide color and size fields
     const [message, setMessage] = useState(""); // State for the message
     const [error, setError] = useState(""); // State for the error
 
@@ -46,12 +45,16 @@ const ProductAdminEdit = () => {
                         model.images.findIndex((img) => img.is_main)
                     );
                 }
-                // Check if the product category is 'Vinyle' or 'Goodies'
-                if (
-                    productData.category_id === 2 ||
-                    productData.category_id === 3
-                ) {
-                    setShowColorAndSize(true);
+                // Charger les tailles spécifiques à la catégorie
+                if (productData.category_id === 2 || productData.category_id === 3) {
+                    axios
+                        .get(`http://localhost:8000/api/admin/sizes/category/${productData.category_id}`)
+                        .then((response) => {
+                            setSizes(response.data);
+                        })
+                        .catch((error) => {
+                            console.error("There was an error fetching the sizes!", error);
+                        });
                 }
             })
             .catch((error) => {
@@ -85,24 +88,24 @@ const ProductAdminEdit = () => {
                 setError("There was an error fetching the colors!");
             });
 
-        axios
-            .get("http://localhost:8000/api/admin/sizes")
-            .then((response) => {
-                setSizes(response.data);
-            })
-            .catch((error) => {
-                console.error("There was an error fetching the sizes!", error);
-                setError("There was an error fetching the sizes!");
-            });
     }, [id]);
 
     const handleCategoryChange = (value) => {
         setCategory(value);
-        // Update the showColorAndSize state based on the selected category
+
         if (value === "2" || value === "3") {
-            setShowColorAndSize(true);
+            axios
+                .get(`http://localhost:8000/api/admin/sizes/category/${value}`)
+                .then((response) => {
+                    setSizes(response.data);
+                    setSize(""); // Reset size selection
+                })
+                .catch((error) => {
+                    console.error("There was an error fetching the sizes!", error);
+                });
         } else {
-            setShowColorAndSize(false);
+            setSizes([]); // Reset sizes if category is not "Vinyle" or "Goodies"
+            setSize("");
         }
     };
 
@@ -123,8 +126,8 @@ const ProductAdminEdit = () => {
             name: name,
             description: description,
             category: category,
-            color: color,
-            size: size,
+            color: category !== "2" ? color : null, // Set color only if category is not "Vinyle"
+            size: category === "2" || category === "3" ? size : null, // Set size only if category is "Vinyle" or "Goodies"
             price: parseFloat(price),
             photoPaths: photoPaths.filter((path) => path), // Filter out empty paths
             mainImageIndex: mainImageIndex, // Send the main image index
@@ -156,6 +159,14 @@ const ProductAdminEdit = () => {
                     error
                 );
             });
+    };
+
+    const shouldDisplayColor = (category) => {
+        return category === "1" || category === "3"; // Display color for categories "Instrument" and "Goodies"
+    };
+
+    const shouldDisplaySize = (category) => {
+        return category === "2" || category === "3"; // Display size for categories "Vinyle" and "Goodies"
     };
 
     if (!product) return <div>Loading...</div>;
@@ -238,70 +249,72 @@ const ProductAdminEdit = () => {
                                 </select>
                             </div>
                         </div>
-                        {showColorAndSize && (
-                            <>
-                                <div className="md:flex items-center mt-8">
-                                    <div className="w-full md:w-1/2 flex flex-col">
-                                        <label
-                                            className="font-semibold leading-none text-black"
-                                            htmlFor="color"
+                        {shouldDisplayColor(category) && (
+                            <div className="md:flex items-center mt-8">
+                                <div className="w-full md:w-1/2 flex flex-col">
+                                    <label
+                                        className="font-semibold leading-none text-black"
+                                        htmlFor="color"
+                                    >
+                                        Color
+                                    </label>
+                                    <select
+                                        id="color"
+                                        value={color}
+                                        onChange={(e) =>
+                                            setColor(e.target.value)
+                                        }
+                                        className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
+                                    >
+                                        <option
+                                            value=""
+                                            className="text-gray-500"
                                         >
-                                            Color
-                                        </label>
-                                        <select
-                                            id="color"
-                                            value={color}
-                                            onChange={(e) =>
-                                                setColor(e.target.value)
-                                            }
-                                            className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
-                                        >
+                                            Select a color
+                                        </option>
+                                        {colors.map((col) => (
                                             <option
-                                                value=""
-                                                className="text-gray-500"
+                                                key={col.id}
+                                                value={col.id}
                                             >
-                                                Select a color
+                                                {col.name}
                                             </option>
-                                            {colors.map((col) => (
-                                                <option
-                                                    key={col.id}
-                                                    value={col.id}
-                                                >
-                                                    {col.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="w-full md:w-1/2 flex flex-col md:ml-6 md:mt-0 mt-4">
-                                        <label
-                                            className="font-semibold leading-none text-black"
-                                            htmlFor="size"
-                                        >
-                                            Size
-                                        </label>
-                                        <select
-                                            id="size"
-                                            value={size}
-                                            onChange={(e) =>
-                                                setSize(e.target.value)
-                                            }
-                                            className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
-                                        >
-                                            <option
-                                                value=""
-                                                className="text-gray-500"
-                                            >
-                                                Select a size
-                                            </option>
-                                            {sizes.map((s) => (
-                                                <option key={s.id} value={s.id}>
-                                                    {s.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                        ))}
+                                    </select>
                                 </div>
-                            </>
+                            </div>
+                        )}
+                        {shouldDisplaySize(category) && (
+                            <div className="md:flex items-center mt-8">
+                                <div className="w-full flex flex-col">
+                                    <label
+                                        className="font-semibold leading-none text-black"
+                                        htmlFor="size"
+                                    >
+                                        Size
+                                    </label>
+                                    <select
+                                        id="size"
+                                        value={size}
+                                        onChange={(e) =>
+                                            setSize(e.target.value)
+                                        }
+                                        className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
+                                    >
+                                        <option
+                                            value=""
+                                            className="text-gray-500"
+                                        >
+                                            Select a size
+                                        </option>
+                                        {sizes.map((s) => (
+                                            <option key={s.id} value={s.id}>
+                                                {s.value} {s.unit}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
                         )}
                         <div className="md:flex items-center mt-8">
                             <div className="w-full flex flex-col">
