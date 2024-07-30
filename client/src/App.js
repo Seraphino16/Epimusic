@@ -7,7 +7,7 @@ import Register from './components/AuthForms/Register';
 import Login from './components/AuthForms/Login';
 import Navbar from './components/navbar/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
-import FilteredArticles from './components/pages/FilteredArticles';
+import FilteredArticles from './components/Filtered/FilteredArticles';
 
 const App = () => {
   return (
