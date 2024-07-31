@@ -12,11 +12,17 @@ const ProductList = () => {
         fetchProducts();
     }, [categoryId]);
 
-    const fetchProducts = () => {
+    const fetchProducts = async () => {
         axios
             .get(`http://localhost:8000/api/products/category/${categoryId}`)
+            
             .then((response) => {
-                setProducts(response.data);
+                 const uniqueProducts = Array.from(new Set(response.data.map(product => product.id)))
+                .map(id => {
+                    return response.data.find(product => product.id === id);
+                });
+            
+            setProducts(uniqueProducts);
             })
             .catch((error) => {
                 console.error(
@@ -49,7 +55,7 @@ const ProductList = () => {
                                     {product.image_url ? (
                                         <div className="image-item">
                                             <img
-                                                src={product.image_url}
+                                                src={`http://localhost:8000${product.image_url}`}
                                                 alt={`Produit ${product.name}`}
                                                 style={{ maxWidth: '100%', height: 'auto' }}
                                             />
