@@ -302,7 +302,7 @@ const ProductAdminForm = () => {
                                             <p className="mr-4">{file.name}</p>
                                             <button
                                                 type="button"
-                                                className={`mr-4 ${mainImageIndex === index ? 'text-blue-500' : 'text-gray-500'}`}
+                                                className={`mr-4 px-3 py-1 rounded ${mainImageIndex === index ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
                                                 onClick={() => setMainImageIndex(index)}
                                             >
                                                 {mainImageIndex === index ? 'Image principale' : 'Définir comme principale'}
