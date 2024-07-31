@@ -23,7 +23,7 @@ const RangeSlider = ({ min, max, step, onChange }) => {
           type="number"
           min={min}
           max={max}
-          step={step}
+          // step={step}
           value={minValue}
           onChange={handleMinChange}
           className="w-20 p-1 border rounded"
@@ -60,7 +60,7 @@ const RangeSlider = ({ min, max, step, onChange }) => {
           className="absolute w-full pointer-events-none"
           style={{ zIndex: 4 }}
         />
-        <div className="relative w-full">
+        <div className="relative w-full mb-12">
           <div
             className="absolute bg-gray-300 h-2"
             style={{
