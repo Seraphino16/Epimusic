@@ -1,5 +1,4 @@
 <?php
-// src/Controller/ProductAdminController.php
 
 namespace App\Controller;
 
@@ -9,6 +8,7 @@ use App\Entity\Color;
 use App\Entity\Size;
 use App\Entity\Image;
 use App\Entity\Model;
+use App\Entity\Stock; // Import the Stock entity
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -35,9 +35,20 @@ class ProductAdminController extends AbstractController
                 }
                 $models[] = [
                     'color' => $model->getColor() ? $model->getColor()->getName() : null,
-                    'size' => $model->getSize() ? $model->getSize()->getName() : null,
+                    'size' => $model->getSize() ? $model->getSize()->getValue() : null,
                     'price' => $model->getPrice(),
                     'images' => $images,
+                ];
+            }
+
+            // Get stock details
+            $stocks = $product->getStocks();
+            $stockData = [];
+            foreach ($stocks as $stock) {
+                $stockData[] = [
+                    'color' => $stock->getColor()?->getName(),
+                    'size' => $stock->getSize()?->getValue(),
+                    'quantity' => $stock->getQuantity(),
                 ];
             }
 
@@ -47,6 +58,7 @@ class ProductAdminController extends AbstractController
                 'description' => $product->getDescription(),
                 'category' => $product->getCategory()->getName(),
                 'models' => $models,
+                'stocks' => $stockData,
             ];
         }
 
@@ -58,7 +70,7 @@ class ProductAdminController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        if (!isset($data['category'], $data['name'], $data['description'], $data['price'], $data['photoPaths'], $data['mainImageIndex'])) {
+        if (!isset($data['category'], $data['name'], $data['description'], $data['price'], $data['photoPaths'], $data['mainImageIndex'], $data['stock'])) {
             return new JsonResponse(['error' => 'Invalid data'], 400);
         }
 
@@ -94,6 +106,15 @@ class ProductAdminController extends AbstractController
             $entityManager->persist($image);
         }
 
+        // Handle stock
+        $stock = new Stock();
+        $stock->setProduct($product);
+        $stock->setQuantity($data['stock']);
+        if ($color) $stock->setColor($color);
+        if ($size) $stock->setSize($size);
+
+        $entityManager->persist($stock);
+
         $entityManager->flush();
 
         return new JsonResponse(['id' => $product->getId()], 201);
@@ -121,10 +142,21 @@ class ProductAdminController extends AbstractController
                 ];
             }
             $models[] = [
-                'color' => $model->getColor() ? $model->getColor()->getName() : null,
-                'size' => $model->getSize() ? $model->getSize()->getName() : null,
+                'color' => $model->getColor()?->getName(),
+                'size' => $model->getSize()?->getValue(),
                 'price' => $model->getPrice(),
                 'images' => $images,
+            ];
+        }
+
+        // Get stock details
+        $stocks = $product->getStocks();
+        $stockData = [];
+        foreach ($stocks as $stock) {
+            $stockData[] = [
+                'color' => $stock->getColor()?->getName(),
+                'size' => $stock->getSize()?->getValue(),
+                'quantity' => $stock->getQuantity(),
             ];
         }
 
@@ -135,6 +167,7 @@ class ProductAdminController extends AbstractController
             'category' => $product->getCategory()->getName(),
             'category_id' => $product->getCategory()->getId(), // Needed for the form
             'models' => $models,
+            'stocks' => $stockData,
         ];
 
         return new JsonResponse($data);
@@ -145,7 +178,7 @@ class ProductAdminController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        if (!isset($data['category'], $data['name'], $data['description'], $data['price'], $data['photoPaths'], $data['mainImageIndex'])) {
+        if (!isset($data['category'], $data['name'], $data['description'], $data['price'], $data['photoPaths'], $data['mainImageIndex'], $data['stock'])) {
             return new JsonResponse(['error' => 'Invalid data'], 400);
         }
 
@@ -181,6 +214,14 @@ class ProductAdminController extends AbstractController
             $model->addImage($image);
             $entityManager->persist($image);
         }
+
+        // Handle stock
+        $stock = $product->getStocks()[0];
+        $stock->setQuantity($data['stock']);
+        if ($color) $stock->setColor($color);
+        if ($size) $stock->setSize($size);
+
+        $entityManager->persist($stock);
 
         $entityManager->persist($product);
         $entityManager->persist($model);

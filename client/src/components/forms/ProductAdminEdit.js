@@ -17,11 +17,11 @@ const ProductAdminEdit = () => {
     const [color, setColor] = useState("");
     const [size, setSize] = useState("");
     const [price, setPrice] = useState("");
-    const [photoPaths, setPhotoPaths] = useState([""]); // State for photo paths
-    const [mainImageIndex, setMainImageIndex] = useState(0); // State for main image index
-    const [showColorAndSize, setShowColorAndSize] = useState(false); // State to show/hide color and size fields
-    const [message, setMessage] = useState(""); // State for the message
-    const [error, setError] = useState(""); // State for the error
+    const [photoPaths, setPhotoPaths] = useState([""]);
+    const [mainImageIndex, setMainImageIndex] = useState(0);
+    const [message, setMessage] = useState("");
+    const [error, setError] = useState("");
+    const [stock, setStock] = useState("");
 
     const searchParams = new URLSearchParams(location.search);
     const selectedProductIds = searchParams.get('selectedProducts')?.split(',') || [];
@@ -46,20 +46,23 @@ const ProductAdminEdit = () => {
                         model.images.findIndex((img) => img.is_main)
                     );
                 }
-                // Check if the product category is 'Vinyle' or 'Goodies'
-                if (
-                    productData.category_id === 2 ||
-                    productData.category_id === 3
-                ) {
-                    setShowColorAndSize(true);
+                if (productData.stocks.length > 0) {
+                    setStock(productData.stocks[0].quantity);
+                }
+                if (productData.category_id === 2 || productData.category_id === 3) {
+                    axios
+                        .get(`http://localhost:8000/api/admin/sizes/category/${productData.category_id}`)
+                        .then((response) => {
+                            setSizes(response.data);
+                        })
+                        .catch((error) => {
+                            console.error("Erreur lors de la récupération des tailles!", error);
+                        });
                 }
             })
             .catch((error) => {
-                console.error(
-                    "There was an error fetching the product!",
-                    error
-                );
-                setError("There was an error fetching the product data!");
+                console.error("Erreur lors de la récupération du produit!", error);
+                setError("Erreur lors de la récupération des données du produit!");
             });
 
         axios
@@ -68,11 +71,8 @@ const ProductAdminEdit = () => {
                 setCategories(response.data);
             })
             .catch((error) => {
-                console.error(
-                    "There was an error fetching the categories!",
-                    error
-                );
-                setError("There was an error fetching the categories!");
+                console.error("Erreur lors de la récupération des catégories!", error);
+                setError("Erreur lors de la récupération des catégories!");
             });
 
         axios
@@ -81,29 +81,37 @@ const ProductAdminEdit = () => {
                 setColors(response.data);
             })
             .catch((error) => {
-                console.error("There was an error fetching the colors!", error);
-                setError("There was an error fetching the colors!");
+                console.error("Erreur lors de la récupération des couleurs!", error);
+                setError("Erreur lors de la récupération des couleurs!");
             });
 
-        axios
-            .get("http://localhost:8000/api/admin/sizes")
-            .then((response) => {
-                setSizes(response.data);
-            })
-            .catch((error) => {
-                console.error("There was an error fetching the sizes!", error);
-                setError("There was an error fetching the sizes!");
-            });
     }, [id]);
 
     const handleCategoryChange = (value) => {
         setCategory(value);
-        // Update the showColorAndSize state based on the selected category
+
         if (value === "2" || value === "3") {
-            setShowColorAndSize(true);
+            axios
+                .get(`http://localhost:8000/api/admin/sizes/category/${value}`)
+                .then((response) => {
+                    setSizes(response.data);
+                    setSize("");
+                })
+                .catch((error) => {
+                    console.error("Erreur lors de la récupération des tailles!", error);
+                });
         } else {
-            setShowColorAndSize(false);
+            setSizes([]);
+            setSize("");
         }
+    };
+
+    const shouldDisplayColor = (category) => {
+        return category === "1" || category === "3";
+    };
+
+    const shouldDisplaySize = (category) => {
+        return category === "2" || category === "3";
     };
 
     const handlePhotoPathChange = (index, value) => {
@@ -123,11 +131,12 @@ const ProductAdminEdit = () => {
             name: name,
             description: description,
             category: category,
-            color: color,
-            size: size,
+            color: category !== "2" ? color : null,
+            size: category === "2" || category === "3" ? size : null,
             price: parseFloat(price),
-            photoPaths: photoPaths.filter((path) => path), // Filter out empty paths
-            mainImageIndex: mainImageIndex, // Send the main image index
+            stock: parseInt(stock, 10),
+            photoPaths: photoPaths.filter((path) => path),
+            mainImageIndex: mainImageIndex,
         };
 
         axios
@@ -136,7 +145,7 @@ const ProductAdminEdit = () => {
                 updatedProduct
             )
             .then((response) => {
-                setMessage("Product updated successfully!");
+                setMessage("Produit mis à jour avec succès!");
                 setError("");
                 if (currentEditIndex < selectedProductIds.length - 1) {
                     setTimeout(() => {
@@ -149,23 +158,20 @@ const ProductAdminEdit = () => {
                 }
             })
             .catch((error) => {
-                setError("There was an error updating the product!");
+                setError("Erreur lors de la mise à jour du produit!");
                 setMessage("");
-                console.error(
-                    "There was an error updating the product!",
-                    error
-                );
+                console.error("Erreur lors de la mise à jour du produit!", error);
             });
     };
 
-    if (!product) return <div>Loading...</div>;
+    if (!product) return <div>Chargement...</div>;
 
     return (
         <div className="w-full">
             <div className="max-w-5xl mx-auto px-6 sm:px-6 lg:px-8 mt-8 mb-8">
                 <div className="bg-white w-full shadow rounded p-8 sm:p-12">
                     <p className="text-3xl font-bold leading-7 text-center text-black">
-                        Update Product
+                        Mettre à jour le produit
                     </p>
                     {message && <p className="success">{message}</p>}
                     {error && <p className="error">{error}</p>}
@@ -176,12 +182,12 @@ const ProductAdminEdit = () => {
                                     className="font-semibold leading-none text-black"
                                     htmlFor="name"
                                 >
-                                    Name
+                                    Nom
                                 </label>
                                 <input
                                     type="text"
                                     id="name"
-                                    placeholder="Enter product name"
+                                    placeholder="Entrez le nom du produit"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     required
@@ -200,7 +206,7 @@ const ProductAdminEdit = () => {
                                 <input
                                     type="text"
                                     id="description"
-                                    placeholder="Enter product description"
+                                    placeholder="Entrez la description du produit"
                                     value={description}
                                     onChange={(e) =>
                                         setDescription(e.target.value)
@@ -216,7 +222,7 @@ const ProductAdminEdit = () => {
                                     className="font-semibold leading-none text-black"
                                     htmlFor="category"
                                 >
-                                    Category
+                                    Catégorie
                                 </label>
                                 <select
                                     id="category"
@@ -228,7 +234,7 @@ const ProductAdminEdit = () => {
                                     className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
                                 >
                                     <option value="" className="text-gray-500">
-                                        Select a category
+                                        Sélectionnez une catégorie
                                     </option>
                                     {categories.map((cat) => (
                                         <option key={cat.id} value={cat.id}>
@@ -238,70 +244,72 @@ const ProductAdminEdit = () => {
                                 </select>
                             </div>
                         </div>
-                        {showColorAndSize && (
-                            <>
-                                <div className="md:flex items-center mt-8">
-                                    <div className="w-full md:w-1/2 flex flex-col">
-                                        <label
-                                            className="font-semibold leading-none text-black"
-                                            htmlFor="color"
+                        {shouldDisplayColor(category) && (
+                            <div className="md:flex items-center mt-8">
+                                <div className="w-full md:w-1/2 flex flex-col">
+                                    <label
+                                        className="font-semibold leading-none text-black"
+                                        htmlFor="color"
+                                    >
+                                        Couleur
+                                    </label>
+                                    <select
+                                        id="color"
+                                        value={color}
+                                        onChange={(e) =>
+                                            setColor(e.target.value)
+                                        }
+                                        className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
+                                    >
+                                        <option
+                                            value=""
+                                            className="text-gray-500"
                                         >
-                                            Color
-                                        </label>
-                                        <select
-                                            id="color"
-                                            value={color}
-                                            onChange={(e) =>
-                                                setColor(e.target.value)
-                                            }
-                                            className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
-                                        >
+                                            Sélectionnez une couleur
+                                        </option>
+                                        {colors.map((col) => (
                                             <option
-                                                value=""
-                                                className="text-gray-500"
+                                                key={col.id}
+                                                value={col.id}
                                             >
-                                                Select a color
+                                                {col.name}
                                             </option>
-                                            {colors.map((col) => (
-                                                <option
-                                                    key={col.id}
-                                                    value={col.id}
-                                                >
-                                                    {col.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="w-full md:w-1/2 flex flex-col md:ml-6 md:mt-0 mt-4">
-                                        <label
-                                            className="font-semibold leading-none text-black"
-                                            htmlFor="size"
-                                        >
-                                            Size
-                                        </label>
-                                        <select
-                                            id="size"
-                                            value={size}
-                                            onChange={(e) =>
-                                                setSize(e.target.value)
-                                            }
-                                            className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
-                                        >
-                                            <option
-                                                value=""
-                                                className="text-gray-500"
-                                            >
-                                                Select a size
-                                            </option>
-                                            {sizes.map((s) => (
-                                                <option key={s.id} value={s.id}>
-                                                    {s.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                        ))}
+                                    </select>
                                 </div>
-                            </>
+                            </div>
+                        )}
+                        {shouldDisplaySize(category) && (
+                            <div className="md:flex items-center mt-8">
+                                <div className="w-full flex flex-col">
+                                    <label
+                                        className="font-semibold leading-none text-black"
+                                        htmlFor="size"
+                                    >
+                                        Taille
+                                    </label>
+                                    <select
+                                        id="size"
+                                        value={size}
+                                        onChange={(e) =>
+                                            setSize(e.target.value)
+                                        }
+                                        className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
+                                    >
+                                        <option
+                                            value=""
+                                            className="text-gray-500"
+                                        >
+                                            Sélectionnez une taille
+                                        </option>
+                                        {sizes.map((s) => (
+                                            <option key={s.id} value={s.id}>
+                                                {s.value} {s.unit}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
                         )}
                         <div className="md:flex items-center mt-8">
                             <div className="w-full flex flex-col">
@@ -309,14 +317,33 @@ const ProductAdminEdit = () => {
                                     className="font-semibold leading-none text-black"
                                     htmlFor="price"
                                 >
-                                    Price
+                                    Prix
                                 </label>
                                 <input
                                     type="number"
                                     id="price"
-                                    placeholder="Enter product price"
+                                    placeholder="Entrez le prix du produit"
                                     value={price}
                                     onChange={(e) => setPrice(e.target.value)}
+                                    required
+                                    className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
+                                />
+                            </div>
+                        </div>
+                        <div className="md:flex items-center mt-8">
+                            <div className="w-full flex flex-col">
+                                <label
+                                    className="font-semibold leading-none text-black"
+                                    htmlFor="stock"
+                                >
+                                    Stock
+                                </label>
+                                <input
+                                    type="number"
+                                    id="stock"
+                                    placeholder="Entrez le stock du produit"
+                                    value={stock}
+                                    onChange={(e) => setStock(e.target.value)}
                                     required
                                     className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
                                 />
@@ -332,12 +359,12 @@ const ProductAdminEdit = () => {
                                         className="font-semibold leading-none text-black"
                                         htmlFor={`photoPath${index}`}
                                     >
-                                        Photo Path {index + 1}
+                                        Chemin de la photo {index + 1}
                                     </label>
                                     <input
                                         type="text"
                                         id={`photoPath${index}`}
-                                        placeholder="Enter image path"
+                                        placeholder="Entrez le chemin de l'image"
                                         value={path}
                                         onChange={(e) =>
                                             handlePhotoPathChange(
@@ -357,7 +384,7 @@ const ProductAdminEdit = () => {
                                             }
                                             className="mr-2"
                                         />
-                                        Set as main image
+                                        Définir comme image principale
                                     </label>
                                 </div>
                             </div>
@@ -368,7 +395,7 @@ const ProductAdminEdit = () => {
                                 onClick={addPhotoPathField}
                                 className="font-semibold leading-none text-white py-4 px-10 bg-blue-700 rounded hover:bg-blue-600 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:outline-none"
                             >
-                                Add another photo path
+                                Ajouter un autre chemin de photo
                             </button>
                         </div>
                         <div className="flex items-center justify-center w-full mt-8">
@@ -376,7 +403,7 @@ const ProductAdminEdit = () => {
                                 type="submit"
                                 className="font-semibold leading-none text-white py-4 px-10 bg-blue-700 rounded hover:bg-blue-600 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:outline-none"
                             >
-                                Update Product
+                                Mettre à jour le produit
                             </button>
                         </div>
                         {selectedProductIds.length > 1 && (
@@ -387,7 +414,7 @@ const ProductAdminEdit = () => {
                                     disabled={currentEditIndex === 0}
                                     className="font-semibold leading-none text-white py-4 px-10 bg-blue-700 rounded hover:bg-blue-600 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:outline-none"
                                 >
-                                    Previous
+                                    Précédent
                                 </button>
                                 <button
                                     type="button"
@@ -395,7 +422,7 @@ const ProductAdminEdit = () => {
                                     disabled={currentEditIndex === selectedProductIds.length - 1}
                                     className="font-semibold leading-none text-white py-4 px-10 bg-blue-700 rounded hover:bg-blue-600 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:outline-none"
                                 >
-                                    Next
+                                    Suivant
                                 </button>
                             </div>
                         )}

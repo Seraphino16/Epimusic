@@ -16,7 +16,10 @@ class Size
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $name = null;
+    private ?string $value = null;
+
+    #[ORM\Column(length: 50)]
+    private ?string $unit = null;
 
     /**
      * @var Collection<int, Model>
@@ -24,9 +27,16 @@ class Size
     #[ORM\OneToMany(targetEntity: Model::class, mappedBy: 'size')]
     private Collection $models;
 
+    /**
+     * @var Collection<int, Category>
+     */
+    #[ORM\ManyToMany(targetEntity: Category::class, mappedBy: 'sizes')]
+    private Collection $categories;
+
     public function __construct()
     {
         $this->models = new ArrayCollection();
+        $this->categories = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -34,14 +44,26 @@ class Size
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getValue(): ?string
     {
-        return $this->name;
+        return $this->value;
     }
 
-    public function setName(string $name): static
+    public function setValue(string $value): static
     {
-        $this->name = $name;
+        $this->value = $value;
+
+        return $this;
+    }
+
+    public function getUnit(): ?string
+    {
+        return $this->unit;
+    }
+
+    public function setUnit(string $unit): static
+    {
+        $this->unit = $unit;
 
         return $this;
     }
@@ -71,6 +93,33 @@ class Size
             if ($model->getSize() === $this) {
                 $model->setSize(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Category>
+     */
+    public function getCategories(): Collection
+    {
+        return $this->categories;
+    }
+
+    public function addCategory(Category $category): static
+    {
+        if (!$this->categories->contains($category)) {
+            $this->categories->add($category);
+            $category->addSize($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCategory(Category $category): static
+    {
+        if ($this->categories->removeElement($category)) {
+            $category->removeSize($this);
         }
 
         return $this;
