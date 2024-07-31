@@ -216,7 +216,7 @@ class ProductAdminController extends AbstractController
         }
 
         // Handle stock
-        $stock = $product->getStocks()[0]; // Assuming there is only one stock entry per product
+        $stock = $product->getStocks()[0];
         $stock->setQuantity($data['stock']);
         if ($color) $stock->setColor($color);
         if ($size) $stock->setSize($size);
