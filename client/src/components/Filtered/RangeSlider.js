@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const RangeSlider = ({ min, max, step, onChange }) => {
+const RangeSlider = ({ min, max, step, onChange, onReset }) => {
   const [minValue, setMinValue] = useState(min);
   const [maxValue, setMaxValue] = useState(max);
 
@@ -16,14 +16,28 @@ const RangeSlider = ({ min, max, step, onChange }) => {
     onChange([minValue, value]);
   };
 
+  const handleReset = (event) => {
+    event.preventDefault();
+    setMinValue(min);
+    setMaxValue(max);
+    onReset();
+    onChange([min, max]);
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    // Implémentation de la logique de validation si nécessaire
+    alert(`Selected range: ${minValue} - ${maxValue}`);
+  };
+
   return (
-    <div className="range-slider">
-      <div className="flex justify-between items-center">
+    <div className="range-slider p-4 border rounded-lg">
+      <div className="flex justify-between items-center mb-4">
         <input
           type="number"
           min={min}
           max={max}
-          // step={step}
+          step={step}
           value={minValue}
           onChange={handleMinChange}
           className="w-20 p-1 border rounded"
@@ -39,7 +53,7 @@ const RangeSlider = ({ min, max, step, onChange }) => {
           className="w-20 p-1 border rounded"
         />
       </div>
-      <div className="relative pt-2">
+      <div className="relative pt-2 mb-4">
         <input
           type="range"
           min={min}
@@ -69,6 +83,20 @@ const RangeSlider = ({ min, max, step, onChange }) => {
             }}
           ></div>
         </div>
+      </div>
+      <div className="flex justify-between">
+        <button
+          onClick={handleReset}
+          className="bg-blue-600 text-white hover:underline"
+        >
+          Réinitialiser
+        </button>
+        <button
+          onClick={handleSubmit}
+          className="bg-blue-600 text-white px-4 py-2 rounded"
+        >
+          Valider
+        </button>
       </div>
     </div>
   );

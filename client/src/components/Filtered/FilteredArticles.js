@@ -23,49 +23,69 @@ const sortOptions = [
   { name: 'Price: High to Low', href: '#', current: false },
 ];
 
-const filters = [
-  {
-    id: 'Marque',
-    name: 'marque',
-    options: [
-      { value: 'white', label: 'White', checked: false },
-      { value: 'beige', label: 'Beige', checked: false },
-      { value: 'blue', label: 'Blue', checked: true },
-      { value: 'brown', label: 'Brown', checked: false },
-      { value: 'green', label: 'Green', checked: false },
-      { value: 'purple', label: 'Purple', checked: false },
-    ],
-  },
-  {
-    id: 'Prix',
-    name: 'Prix',
-    options: [
-      { value: 'white', label: 'White', checked: false },
-      { value: 'beige', label: 'Beige', checked: false },
-      { value: 'blue', label: 'Blue', checked: true },
-      { value: 'brown', label: 'Brown', checked: false },
-      { value: 'green', label: 'Green', checked: false },
-      { value: 'purple', label: 'Purple', checked: false },
-    ],
-  },
-  {
-    id: 'Taille',
-    name: 'Taille',
-    component: <RangeSlider min={0} max={100} step={1} onChange={(value) => console.log('Taille:', value)} />,
-  },
-  {
-    id: 'Poids',
-    name: 'Poids',
-    component: <RangeSlider min={0} max={50} step={1} onChange={(value) => console.log('Poids:', value)} />,
-  },
-];
-
-function classNames(...classes) {
-  return classes.filter(Boolean).join(' ');
-}
-
-export default function FilteredArticles() {
+const FilteredArticles = () => {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  
+  const handlePrixChange = (value) => {
+    console.log('Prix:', value);
+  };
+
+  const handleTailleChange = (value) => {
+    console.log('Taille:', value);
+  };
+
+
+  const handlePoidsChange = (value) => {
+    console.log('Poids:', value);
+  };
+
+  const handlePrixReset = () => {
+    console.log('Prix reset');
+  };
+
+  const handleTailleReset = () => {
+    console.log('Taille reset');
+  };
+
+  const handlePoidsReset = () => {
+    console.log('Poids reset');
+  };
+
+  const filters = [
+    {
+      id: 'Marque',
+      name: 'marque',
+      options: [
+        { value: 'white', label: 'White', checked: false },
+        { value: 'beige', label: 'Beige', checked: false },
+        { value: 'blue', label: 'Blue', checked: true },
+        { value: 'brown', label: 'Brown', checked: false },
+        { value: 'green', label: 'Green', checked: false },
+        { value: 'purple', label: 'Purple', checked: false },
+      ],
+    },
+    {
+      id: 'Prix',
+      name: 'Prix',
+      component: <RangeSlider min={0} max={100} step={1} onChange={handlePrixChange} onReset={handlePrixReset} />,
+
+    
+    },
+    {
+      id: 'Taille',
+      name: 'Taille',
+      component: <RangeSlider min={0} max={100} step={1} onChange={handleTailleChange} onReset={handleTailleReset} />,
+    },
+    {
+      id: 'Poids',
+      name: 'Poids',
+      component: <RangeSlider min={0} max={50} step={1} onChange={handlePoidsChange} onReset={handlePoidsReset} />,
+    },
+  ];
+
+  function classNames(...classes) {
+    return classes.filter(Boolean).join(' ');
+  }
 
   return (
     <div className="bg-white">
@@ -204,4 +224,6 @@ export default function FilteredArticles() {
       </div>
     </div>
   );
-}
+};
+
+export default FilteredArticles;
