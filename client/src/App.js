@@ -7,6 +7,9 @@ import Register from './components/AuthForms/Register';
 import Login from './components/AuthForms/Login';
 import Navbar from './components/navbar/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
+import ProductDetailsPage from './components/pages/ProductDetailsPage';
+import ProductCategoriesList from "./components/pages/ProductCategoriesList";
+import ProductList from "./components/pages/ProductList";
 
 const App = () => {
   return (
@@ -15,6 +18,8 @@ const App = () => {
       <Routes>
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/products" element={<ProductCategoriesList />} />
+        <Route path="/products/:category/:categoryId" element={<ProductList />} />
         <Route
           path="/admin"
           element={
@@ -39,6 +44,10 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+        <Route 
+        path="/product/:id"
+        element={<ProductDetailsPage />}
+      />
       </Routes>
     </Router>
   );
