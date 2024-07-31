@@ -11,7 +11,7 @@ const CategoryCard = ({ imageSrc, categoryName }) => {
             />
             <h2 className="my-2 text-xl text-center">{categoryName}</h2>
             <Link to={`/products/${categoryName.toLowerCase()}`}>
-                <button className="bg-[#2bebf1] w-[12vw] text-[#634832] border-none py-2 px-4 text-base rounded cursor-pointer hover:bg-[#24c3c9]">
+                <button className="bg-[#2bebf1] w-[12vw] text-[#000000] border-none mb-4 py-2 px-4 text-base rounded cursor-pointer hover:bg-[#24c3c9]">
                     Voir les produits
                 </button>
             </Link>
