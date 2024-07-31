@@ -31,7 +31,9 @@ const ProductList = () => {
     return (
         <div>
             {error && <p className="error">{error}</p>}
-            <h1>Liste des Produits</h1>
+            <h1 className="text-center text-4xl font-bold my-4">
+                Liste des produits de la catégorie sélectionnée
+            </h1>
             <div className="product-list">
                 {products.map((product) => (
                     <div key={product.id} className="product-item">
