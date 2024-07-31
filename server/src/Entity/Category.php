@@ -24,9 +24,17 @@ class Category
     #[ORM\OneToMany(targetEntity: Product::class, mappedBy: 'category')]
     private Collection $products;
 
+    /**
+     * @var Collection<int, Size>
+     */
+    #[ORM\ManyToMany(targetEntity: Size::class, inversedBy: 'categories')]
+    #[ORM\JoinTable(name: 'category_size')]
+    private Collection $sizes;
+
     public function __construct()
     {
         $this->products = new ArrayCollection();
+        $this->sizes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -71,6 +79,33 @@ class Category
             if ($product->getCategory() === $this) {
                 $product->setCategory(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Size>
+     */
+    public function getSizes(): Collection
+    {
+        return $this->sizes;
+    }
+
+    public function addSize(Size $size): static
+    {
+        if (!$this->sizes->contains($size)) {
+            $this->sizes->add($size);
+            $size->addCategory($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSize(Size $size): static
+    {
+        if ($this->sizes->removeElement($size)) {
+            $size->removeCategory($this);
         }
 
         return $this;
