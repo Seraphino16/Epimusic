@@ -35,7 +35,7 @@ const ProductCategoriesList = () => {
             case "Goodies":
                 return goodies;
             default:
-                return "https://placehold.co/500x300"; 
+                return "https://placehold.co/500x300";
         }
     };
 
@@ -44,7 +44,7 @@ const ProductCategoriesList = () => {
             {message && <p className="success">{message}</p>}
             {error && <p className="error">{error}</p>}
             <h1 className="text-center text-4xl font-bold my-4">
-                All product categories
+                Toutes les catégories de produits
             </h1>
             <div className="flex flex-wrap justify-center m-5">
                 {categories.map((category) => (
