@@ -36,7 +36,11 @@ const ProductList = () => {
             </h1>
             <div className="product-list">
                 {products.map((product) => (
-                    <div key={product.id} className="product-item">
+                    <Link 
+                    to={`/product/${product.id}`} 
+                    key={product.id} 
+                    className="product-item transition-transform duration-300 ease-in-out hover:scale-105"
+                >
                         {product.models.map((model, index) => (
                             <div key={index} className="model-item">
                                 <div className="image-container">
@@ -121,7 +125,7 @@ const ProductList = () => {
                                 </div>
                             </div>
                         ))}
-                    </div>
+                    </Link>
                 ))}
             </div>
         </div>
