@@ -7,7 +7,6 @@ import Register from './components/AuthForms/Register';
 import Login from './components/AuthForms/Login';
 import Navbar from './components/navbar/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
-import UploadForm from "./components/forms/UploadForm";
 
 const App = () => {
   return (
@@ -44,18 +43,4 @@ const App = () => {
     </Router>
   );
 };
-
-/*
-const App = () => {
-    return (
-        <Router>
-            <div className="App">
-                <Routes>
-                    <Route path="/upload" element={<UploadForm />} />
-                </Routes>
-            </div>
-        </Router>
-    );
-};
-*/
 export default App;
