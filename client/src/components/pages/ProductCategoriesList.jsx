@@ -52,6 +52,7 @@ const ProductCategoriesList = () => {
                         key={category.id}
                         imageSrc={getCategoryImage(category.name)}
                         categoryName={category.name}
+                        categoryId={category.id}
                     />
                 ))}
             </div>

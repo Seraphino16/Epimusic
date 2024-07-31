@@ -109,6 +109,23 @@ class ProductRepository extends ServiceEntityRepository
         return $productData;
     }
 
+    public function findProductsByCategory($categoryId)
+    {
+        return $this->createQueryBuilder('p')
+            ->select('p.id', 'p.name', 'p.description', 'c.name as category', 
+                     'm.id as model_id', 'm.price', 'm.stock', 
+                     'col.name as color', 's.value as size_value', 's.unit as size_unit', 
+                     'i.path as image_url', 'i.is_main as is_main')
+            ->leftJoin('p.category', 'c')
+            ->leftJoin('p.models', 'm')
+            ->leftJoin('m.color', 'col')
+            ->leftJoin('m.size', 's')
+            ->leftJoin('m.image', 'i')
+            ->where('c.id = :categoryId')
+            ->setParameter('categoryId', $categoryId)
+            ->getQuery()
+            ->getArrayResult();
+    }
 
 
 

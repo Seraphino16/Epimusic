@@ -54,4 +54,16 @@ class ProductController extends AbstractController
 
         return new JsonResponse($product);
     }
+
+    #[Route('/products/category/{categoryId}', name: 'products_by_category', methods: ['GET'])]
+    public function productsByCategory(ProductRepository $productRepository, $categoryId): JsonResponse
+    {
+        $products = $productRepository->findProductsByCategory($categoryId);
+
+        if (empty($products)) {
+            return $this->json(['error' => 'Aucun produit trouvé dans cette catégorie'], 404);
+        }
+
+        return new JsonResponse($products);
+    }
 }
