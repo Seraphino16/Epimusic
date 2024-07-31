@@ -136,3 +136,20 @@
     height: 20px;
     margin-top: 10px;
 }
+
+.stock-status {
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.in-stock {
+    color: green;
+}
+
+.restocking {
+    color: orange;
+}
+
+.out-of-stock {
+    color: red;
+}

@@ -153,12 +153,24 @@ const ProductAdminList = () => {
                                                     Size: {model.size}
                                                 </p>
                                             )}
-                                            {product.stocks && product.stocks.length > 0 && (
-                                                <p className="product-stock">
-                                                    Stock: {product.stocks[0].quantity}
-                                                </p>
-                                            )}
                                         </div>
+                                        {product.stocks && product.stocks.length > 0 && (
+                                            <div className="product-stock">
+                                                {product.stocks[0].quantity > 0 && product.stocks[0].quantity <= 5 ? (
+                                                    <>
+                                                        <p>Stock: {product.stocks[0].quantity}</p>
+                                                        <p className="stock-status restocking">Restocking</p>
+                                                    </>
+                                                ) : product.stocks[0].quantity > 5 ? (
+                                                    <>
+                                                        <p>Stock: {product.stocks[0].quantity}</p>
+                                                        <p className="stock-status in-stock">In Stock</p>
+                                                    </>
+                                                ) : (
+                                                    <p className="stock-status out-of-stock">Out of Stock</p>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                                 <div>
