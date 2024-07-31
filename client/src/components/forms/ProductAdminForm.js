@@ -13,12 +13,12 @@ const ProductAdminForm = () => {
     const [color, setColor] = useState("");
     const [size, setSize] = useState("");
     const [price, setPrice] = useState("");
-    const [stock, setStock] = useState(""); // State for stock
-    const [photoPaths, setPhotoPaths] = useState([""]); // State for photo paths
-    const [mainImageIndex, setMainImageIndex] = useState(0); // State for main image index
-    const [message, setMessage] = useState(""); // State for the message
-    const [error, setError] = useState(""); // State for the error
-    const [isSubmitting, setIsSubmitting] = useState(false); // State for submit button
+    const [stock, setStock] = useState("");
+    const [photoPaths, setPhotoPaths] = useState([""]);
+    const [mainImageIndex, setMainImageIndex] = useState(0);
+    const [message, setMessage] = useState("");
+    const [error, setError] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -28,7 +28,7 @@ const ProductAdminForm = () => {
                 setCategories(response.data);
             })
             .catch((error) => {
-                console.error("There was an error fetching the categories!", error);
+                console.error("Erreur lors de la récupération des catégories !", error);
             });
 
         axios
@@ -37,7 +37,7 @@ const ProductAdminForm = () => {
                 setColors(response.data);
             })
             .catch((error) => {
-                console.error("There was an error fetching the colors!", error);
+                console.error("Erreur lors de la récupération des couleurs !", error);
             });
     }, []);
 
@@ -59,28 +59,28 @@ const ProductAdminForm = () => {
             name: name,
             description: description,
             category: category,
-            color: shouldDisplayColor(category) ? color : null, // Set color only if it should be displayed
-            size: shouldDisplaySize(category) ? size : null, // Set size only if it should be displayed
+            color: shouldDisplayColor(category) ? color : null,
+            size: shouldDisplaySize(category) ? size : null,
             price: parseFloat(price),
-            stock: parseInt(stock, 10), // Add stock information
-            photoPaths: photoPaths.filter((path) => path), // Filter out empty paths
-            mainImageIndex: mainImageIndex, // Send the main image index
+            stock: parseInt(stock, 10),
+            photoPaths: photoPaths.filter((path) => path),
+            mainImageIndex: mainImageIndex,
         };
 
         axios
             .post("http://localhost:8000/api/admin/products", newProduct)
             .then((response) => {
-                setMessage("Product created successfully!");
+                setMessage("Produit créé avec succès !");
                 setError("");
                 setTimeout(() => {
                     navigate("/admin/");
-                }, 2000); // Wait for 2 seconds before redirecting
+                }, 2000);
             })
             .catch((error) => {
-                setError("There was an error creating the product!");
+                setError("Erreur lors de la création du produit !");
                 setMessage("");
-                setIsSubmitting(false); // Re-enable the button in case of an error
-                console.error("There was an error creating the product!", error);
+                setIsSubmitting(false);
+                console.error("Erreur lors de la création du produit !", error);
             });
     };
 
@@ -89,28 +89,27 @@ const ProductAdminForm = () => {
         setCategory(selectedCategory);
 
         if (selectedCategory === "2" || selectedCategory === "3") {
-            // Fetch only sizes related to category "Vinyle" or "Goodies"
             axios
                 .get(`http://localhost:8000/api/admin/sizes/category/${selectedCategory}`)
                 .then((response) => {
                     setSizes(response.data);
-                    setSize(""); // Reset size selection
+                    setSize("");
                 })
                 .catch((error) => {
-                    console.error("There was an error fetching the sizes!", error);
+                    console.error("Erreur lors de la récupération des tailles !", error);
                 });
         } else {
-            setSizes([]); // Reset sizes if category is not "Vinyle" or "Goodies"
+            setSizes([]);
             setSize("");
         }
     };
 
     const shouldDisplayColor = (category) => {
-        return category === "1" || category === "3"; // Display color for categories "Instrument" and "Goodies"
+        return category === "1" || category === "3";
     };
 
     const shouldDisplaySize = (category) => {
-        return category === "2" || category === "3"; // Display size for categories "Vinyle" and "Goodies"
+        return category === "2" || category === "3";
     };
 
     return (
@@ -118,7 +117,7 @@ const ProductAdminForm = () => {
             <div className="max-w-5xl mx-auto px-6 sm:px-6 lg:px-8 mt-8 mb-8">
                 <div className="bg-white w-full shadow rounded p-8 sm:p-12">
                     <p className="text-3xl font-bold leading-7 text-center text-black">
-                        Create a product
+                        Créer un produit
                     </p>
                     {message && <p className="success">{message}</p>}
                     {error && <p className="error">{error}</p>}
@@ -129,12 +128,12 @@ const ProductAdminForm = () => {
                                     className="font-semibold leading-none text-black"
                                     htmlFor="name"
                                 >
-                                    Name
+                                    Nom
                                 </label>
                                 <input
                                     type="text"
                                     id="name"
-                                    placeholder="Enter product name"
+                                    placeholder="Entrez le nom du produit"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     required
@@ -146,7 +145,7 @@ const ProductAdminForm = () => {
                                     className="font-semibold leading-none text-black"
                                     htmlFor="category"
                                 >
-                                    Category
+                                    Catégorie
                                 </label>
                                 <select
                                     id="category"
@@ -156,7 +155,7 @@ const ProductAdminForm = () => {
                                     className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
                                 >
                                     <option value="" className="text-gray-500">
-                                        Select a category
+                                        Sélectionnez une catégorie
                                     </option>
                                     {categories.map((cat) => (
                                         <option key={cat.id} value={cat.id}>
@@ -177,7 +176,7 @@ const ProductAdminForm = () => {
                                 <input
                                     type="text"
                                     id="description"
-                                    placeholder="Enter product description"
+                                    placeholder="Entrez la description du produit"
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
                                     required
@@ -192,7 +191,7 @@ const ProductAdminForm = () => {
                                         className="font-semibold leading-none text-black"
                                         htmlFor="color"
                                     >
-                                        Color
+                                        Couleur
                                     </label>
                                     <select
                                         id="color"
@@ -201,7 +200,7 @@ const ProductAdminForm = () => {
                                         className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
                                     >
                                         <option value="" className="text-gray-500">
-                                            Select a color
+                                            Sélectionnez une couleur
                                         </option>
                                         {colors.map((col) => (
                                             <option key={col.id} value={col.id}>
@@ -219,7 +218,7 @@ const ProductAdminForm = () => {
                                         className="font-semibold leading-none text-black"
                                         htmlFor="size"
                                     >
-                                        Size
+                                        Taille
                                     </label>
                                     <select
                                         id="size"
@@ -228,7 +227,7 @@ const ProductAdminForm = () => {
                                         className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
                                     >
                                         <option value="" className="text-gray-500">
-                                            Select a size
+                                            Sélectionnez une taille
                                         </option>
                                         {sizes.map((s) => (
                                             <option key={s.id} value={s.id}>
@@ -245,12 +244,12 @@ const ProductAdminForm = () => {
                                     className="font-semibold leading-none text-black"
                                     htmlFor="price"
                                 >
-                                    Price
+                                    Prix
                                 </label>
                                 <input
                                     type="number"
                                     id="price"
-                                    placeholder="Enter product price"
+                                    placeholder="Entrez le prix du produit"
                                     value={price}
                                     onChange={(e) => setPrice(e.target.value)}
                                     required
@@ -269,7 +268,7 @@ const ProductAdminForm = () => {
                                 <input
                                     type="number"
                                     id="stock"
-                                    placeholder="Enter product stock"
+                                    placeholder="Entrez le stock du produit"
                                     value={stock}
                                     onChange={(e) => setStock(e.target.value)}
                                     required
@@ -284,12 +283,12 @@ const ProductAdminForm = () => {
                                         className="font-semibold leading-none text-black"
                                         htmlFor={`photoPath${index}`}
                                     >
-                                        Photo Path {index + 1}
+                                        Chemin de la photo {index + 1}
                                     </label>
                                     <input
                                         type="text"
                                         id={`photoPath${index}`}
-                                        placeholder="Enter image path"
+                                        placeholder="Entrez le chemin de l'image"
                                         value={path}
                                         onChange={(e) => handlePhotoPathChange(index, e.target.value)}
                                         className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
@@ -302,7 +301,7 @@ const ProductAdminForm = () => {
                                             onChange={() => setMainImageIndex(index)}
                                             className="mr-2"
                                         />
-                                        Set as main image
+                                        Définir comme image principale
                                     </label>
                                 </div>
                             </div>
@@ -313,18 +312,18 @@ const ProductAdminForm = () => {
                                 onClick={addPhotoPathField}
                                 className="font-semibold leading-none text-white py-4 px-10 bg-blue-700 rounded hover:bg-blue-600 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:outline-none"
                             >
-                                Add another photo path
+                                Ajouter un autre chemin de photo
                             </button>
                         </div>
                         <div className="flex items-center justify-center w-full mt-8">
                             <button
                                 type="submit"
-                                disabled={isSubmitting} // Disable the button when submitting
+                                disabled={isSubmitting}
                                 className={`font-semibold leading-none text-white py-4 px-10 rounded focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:outline-none ${
                                     isSubmitting ? 'bg-gray-400' : 'bg-blue-700 hover:bg-blue-600'
                                 }`}
                             >
-                                Create Product
+                                Créer un produit
                             </button>
                         </div>
                     </form>

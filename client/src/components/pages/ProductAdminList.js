@@ -21,10 +21,10 @@ const ProductAdminList = () => {
             })
             .catch((error) => {
                 console.error(
-                    "There was an error fetching the products!",
+                    "Une erreur s'est produite lors de la récupération des produits !",
                     error
                 );
-                setError("There was an error fetching the products!");
+                setError("Une erreur s'est produite lors de la récupération des produits !");
             });
     };
 
@@ -32,12 +32,12 @@ const ProductAdminList = () => {
         return axios.delete(`http://localhost:8000/api/admin/products/${id}`)
             .then(response => {
                 setProducts(products.filter(product => product.id !== id));
-                setMessage('Product deleted successfully!');
+                setMessage('Produit supprimé avec succès !');
                 setError('');
             })
             .catch(error => {
-                console.error('There was an error deleting the product!', error);
-                setError('There was an error deleting the product!');
+                console.error('Une erreur s\'est produite lors de la suppression du produit !', error);
+                setError('Une erreur s\'est produite lors de la suppression du produit !');
                 setMessage('');
             });
     };
@@ -66,19 +66,19 @@ const ProductAdminList = () => {
                 )}&currentEditIndex=0`
             );
         } else {
-            alert("Please select at least one product to edit.");
+            alert("Veuillez sélectionner au moins un produit à modifier.");
         }
     };
 
     const deleteSelectedProducts = () => {
-        if (window.confirm('Are you sure you want to delete the selected products?')) {
+        if (window.confirm('Êtes-vous sûr de vouloir supprimer les produits sélectionnés ?')) {
             Promise.all(selectedProducts.map(id => deleteProduct(id)))
                 .then(() => {
                     setSelectedProducts([]);
-                    fetchProducts(); // Rafraîchir la liste des produits
+                    fetchProducts();
                 })
                 .catch(() => {
-                    setError('There was an error deleting one or more products!');
+                    setError('Une erreur s\'est produite lors de la suppression d\'un ou plusieurs produits !');
                     setMessage('');
                 });
         }
@@ -88,21 +88,21 @@ const ProductAdminList = () => {
         <div>
             {message && <p className="success">{message}</p>}
             {error && <p className="error">{error}</p>}
-            <h1>Product List</h1>
+            <h1>Liste des Produits</h1>
             <Link to="/admin/create-product">
-                <button className="create-button">Create a new product</button>
+                <button className="create-button">Créer un nouveau produit</button>
             </Link>
             <button
                 className="group-delete-button"
                 onClick={deleteSelectedProducts}
             >
-                Delete Selected
+                Supprimer les sélectionnés
             </button>
             <button
                 className="group-edit-button"
                 onClick={editSelectedProducts}
             >
-                Edit Selected
+                Modifier les sélectionnés
             </button>
             <div className="product-list">
                 {products.map((product) => (
@@ -126,7 +126,7 @@ const ProductAdminList = () => {
                                         <div key={idx} className="image-item">
                                             <img
                                                 src={image.path}
-                                                alt={`Product ${product.name}`}
+                                                alt={`Produit ${product.name}`}
                                             />
                                         </div>
                                     ))}
@@ -140,17 +140,17 @@ const ProductAdminList = () => {
                                     <div className="product-details">
                                         <p>{product.description}</p>
                                         <p className="product-category">
-                                            Category: {product.category}
+                                            Catégorie : {product.category}
                                         </p>
                                         <div className="flex flex-row space-x-12">
                                             {model.color && (
                                                 <p className="product-color">
-                                                    Color: {model.color}
+                                                    Couleur : {model.color}
                                                 </p>
                                             )}
                                             {model.size && (
                                                 <p className="product-size">
-                                                    Size: {model.size}
+                                                    Taille : {model.size}
                                                 </p>
                                             )}
                                         </div>
@@ -158,16 +158,16 @@ const ProductAdminList = () => {
                                             <div className="product-stock">
                                                 {product.stocks[0].quantity > 0 && product.stocks[0].quantity <= 5 ? (
                                                     <>
-                                                        <p>Stock: {product.stocks[0].quantity}</p>
-                                                        <p className="stock-status restocking">Restocking</p>
+                                                        <p>Stock : {product.stocks[0].quantity}</p>
+                                                        <p className="stock-status restocking">Réapprovisionnement</p>
                                                     </>
                                                 ) : product.stocks[0].quantity > 5 ? (
                                                     <>
-                                                        <p>Stock: {product.stocks[0].quantity}</p>
-                                                        <p className="stock-status in-stock">In Stock</p>
+                                                        <p>Stock : {product.stocks[0].quantity}</p>
+                                                        <p className="stock-status in-stock">En stock</p>
                                                     </>
                                                 ) : (
-                                                    <p className="stock-status out-of-stock">Out of Stock</p>
+                                                    <p className="stock-status out-of-stock">Rupture de stock</p>
                                                 )}
                                             </div>
                                         )}
@@ -181,7 +181,7 @@ const ProductAdminList = () => {
                                         className="edit-button"
                                         onClick={() => editProduct(product.id)}
                                     >
-                                        Edit
+                                        Modifier
                                     </button>
                                     <button
                                         className="delete-button"
@@ -189,7 +189,7 @@ const ProductAdminList = () => {
                                             deleteProduct(product.id)
                                         }
                                     >
-                                        Delete
+                                        Supprimer
                                     </button>
                                 </div>
                             </div>
