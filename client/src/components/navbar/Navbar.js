@@ -61,6 +61,7 @@ const Navbar = () => {
                     <SearchBar />
                     <NavbarItem text="Accueil" href="/" />
                     <NavbarItem text="Produits" href="/products" />
+                    <NavbarItem text="Test" href="/Test" />
                     {userRole === 'ROLE_ADMIN' && <NavbarItem text="Admin" href="/admin/" />}
                     {userRole === 'ROLE_USER' && <NavbarItem text="Profil" href="/profile/" />}
                     {isLoggedIn ? (
