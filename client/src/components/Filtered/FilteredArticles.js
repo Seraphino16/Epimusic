@@ -9,12 +9,11 @@ import {
   MenuButton,
   MenuItems,
   MenuItem,
-
 } from '@headlessui/react';
-
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon, FunnelIcon, Squares2X2Icon } from '@heroicons/react/20/solid';
 import FilterDisclosure from './FilterDisclosure';
+import RangeSlider from './RangeSlider';
 
 const sortOptions = [
   { name: 'Most Popular', href: '#', current: true },
@@ -52,25 +51,12 @@ const filters = [
   {
     id: 'Taille',
     name: 'Taille',
-    options: [
-      { value: 'new-arrivals', label: 'New Arrivals', checked: false },
-      { value: 'sale', label: 'Sale', checked: false },
-      { value: 'travel', label: 'Travel', checked: true },
-      { value: 'organization', label: 'Organization', checked: false },
-      { value: 'accessories', label: 'Accessories', checked: false },
-    ],
+    component: <RangeSlider min={0} max={100} step={1} onChange={(value) => console.log('Taille:', value)} />,
   },
   {
     id: 'Poids',
     name: 'Poids',
-    options: [
-      { value: '2l', label: '2L', checked: false },
-      { value: '6l', label: '6L', checked: false },
-      { value: '12l', label: '12L', checked: false },
-      { value: '18l', label: '18L', checked: false },
-      { value: '20l', label: '20L', checked: false },
-      { value: '40l', label: '40L', checked: true },
-    ],
+    component: <RangeSlider min={0} max={50} step={1} onChange={(value) => console.log('Poids:', value)} />,
   },
 ];
 

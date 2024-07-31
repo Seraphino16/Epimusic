@@ -15,7 +15,7 @@ const FilterDisclosure = ({ section }) => (
       </DisclosureButton>
     </h3>
     <DisclosurePanel className="pt-6">
-      <FilterOptions options={section.options} sectionId={section.id} />
+      {section.options ? <FilterOptions options={section.options} sectionId={section.id} /> : section.component}
     </DisclosurePanel>
   </Disclosure>
 );
