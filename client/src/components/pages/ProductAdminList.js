@@ -1,14 +1,7 @@
-<<<<<<< HEAD
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom';
-import '../../styles/ProductList.css'; 
-=======
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import "../../styles/ProductList.css";
->>>>>>> dev
 
 const ProductAdminList = () => {
     const [products, setProducts] = useState([]);

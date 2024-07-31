@@ -59,13 +59,8 @@ const Navbar = () => {
             >
                 <div className="flex flex-col lg:flex-row lg:items-center justify-center lg:space-x-8 lg:text-left lg:flex-grow lg:mt-0 space-y-4 lg:space-y-0">
                     <SearchBar />
-<<<<<<< HEAD
-                    <NavbarItem text="Products" href="/products" />
-                    <NavbarItem text="Clients" href="/clients" />
-=======
                     <NavbarItem text="Accueil" href="/" />
                     <NavbarItem text="Produits" href="/products" />
->>>>>>> dev
                     {userRole === 'ROLE_ADMIN' && <NavbarItem text="Admin" href="/admin/" />}
                     {userRole === 'ROLE_USER' && <NavbarItem text="Profil" href="/profile/" />}
                     {isLoggedIn ? (
