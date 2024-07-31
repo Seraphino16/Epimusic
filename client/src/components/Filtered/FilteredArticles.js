@@ -30,10 +30,6 @@ const FilteredArticles = () => {
     console.log('Prix:', value);
   };
 
-  const handleTailleChange = (value) => {
-    console.log('Taille:', value);
-  };
-
 
   const handlePoidsChange = (value) => {
     console.log('Poids:', value);
@@ -43,10 +39,6 @@ const FilteredArticles = () => {
     console.log('Prix reset');
   };
 
-  const handleTailleReset = () => {
-    console.log('Taille reset');
-  };
-
   const handlePoidsReset = () => {
     console.log('Poids reset');
   };
@@ -54,7 +46,7 @@ const FilteredArticles = () => {
   const filters = [
     {
       id: 'Marque',
-      name: 'marque',
+      name: 'Marque',
       options: [
         { value: 'white', label: 'White', checked: false },
         { value: 'beige', label: 'Beige', checked: false },
@@ -74,7 +66,14 @@ const FilteredArticles = () => {
     {
       id: 'Taille',
       name: 'Taille',
-      component: <RangeSlider min={0} max={100} step={1} onChange={handleTailleChange} onReset={handleTailleReset} />,
+      options: [
+        { value: 'white', label: 'White', checked: false },
+        { value: 'beige', label: 'Beige', checked: false },
+        { value: 'blue', label: 'Blue', checked: true },
+        { value: 'brown', label: 'Brown', checked: false },
+        { value: 'green', label: 'Green', checked: false },
+        { value: 'purple', label: 'Purple', checked: false },
+      ],
     },
     {
       id: 'Poids',

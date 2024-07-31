@@ -5,15 +5,19 @@ const RangeSlider = ({ min, max, step, onChange, onReset }) => {
   const [maxValue, setMaxValue] = useState(max);
 
   const handleMinChange = (event) => {
-    const value = Math.min(Number(event.target.value), maxValue - step);
-    setMinValue(value);
-    onChange([value, maxValue]);
+    const value = Number(event.target.value);
+    if (value <= maxValue - step) {
+      setMinValue(value);
+      onChange([value, maxValue]);
+    }
   };
 
   const handleMaxChange = (event) => {
-    const value = Math.max(Number(event.target.value), minValue + step);
-    setMaxValue(value);
-    onChange([minValue, value]);
+    const value = Number(event.target.value);
+    if (value >= minValue + step) {
+      setMaxValue(value);
+      onChange([minValue, value]);
+    }
   };
 
   const handleReset = (event) => {
@@ -26,7 +30,6 @@ const RangeSlider = ({ min, max, step, onChange, onReset }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    // Implémentation de la logique de validation si nécessaire
     alert(`Selected range: ${minValue} - ${maxValue}`);
   };
 
@@ -53,7 +56,16 @@ const RangeSlider = ({ min, max, step, onChange, onReset }) => {
           className="w-20 p-1 border rounded"
         />
       </div>
-      <div className="relative pt-2 mb-4">
+      <div className="relative pt-2 mb-8">
+        <div className="relative w-full h-2 bg-gray-300 rounded">
+          <div
+            className="absolute h-2 bg-blue-600 rounded "
+            style={{
+              left: `${((minValue - min) / (max - min)) * 100}%`,
+              width: `${((maxValue - minValue) / (max - min)) * 100}%`,
+            }}
+          ></div>
+        </div>
         <input
           type="range"
           min={min}
@@ -61,7 +73,7 @@ const RangeSlider = ({ min, max, step, onChange, onReset }) => {
           step={step}
           value={minValue}
           onChange={handleMinChange}
-          className="absolute w-full pointer-events-none"
+          className="absolute w-full appearance-none pointer-events-auto h-2 bg-transparent"
           style={{ zIndex: 3 }}
         />
         <input
@@ -71,23 +83,14 @@ const RangeSlider = ({ min, max, step, onChange, onReset }) => {
           step={step}
           value={maxValue}
           onChange={handleMaxChange}
-          className="absolute w-full pointer-events-none"
+          className="absolute w-full appearance-none pointer-events-auto h-2 bg-transparent"
           style={{ zIndex: 4 }}
         />
-        <div className="relative w-full mb-12">
-          <div
-            className="absolute bg-gray-300 h-2"
-            style={{
-              left: `${((minValue - min) / (max - min)) * 100}%`,
-              right: `${100 - ((maxValue - min) / (max - min)) * 100}%`,
-            }}
-          ></div>
-        </div>
       </div>
       <div className="flex justify-between">
         <button
           onClick={handleReset}
-          className="bg-blue-600 text-white hover:underline"
+          className="bg-blue-600 text-white hover:underline px-4 py-2 rounded"
         >
           Réinitialiser
         </button>
