@@ -143,12 +143,21 @@ const ProductAdminList = () => {
                                             Category: {product.category}
                                         </p>
                                         <div className="flex flex-row space-x-12">
-                                            <p className="product-color">
-                                                Color: {model.color || "N/A"}
-                                            </p>
-                                            <p className="product-size">
-                                                Size: {model.size || "N/A"}
-                                            </p>
+                                            {model.color && (
+                                                <p className="product-color">
+                                                    Color: {model.color}
+                                                </p>
+                                            )}
+                                            {model.size && (
+                                                <p className="product-size">
+                                                    Size: {model.size}
+                                                </p>
+                                            )}
+                                            {product.stocks && product.stocks.length > 0 && (
+                                                <p className="product-stock">
+                                                    Stock: {product.stocks[0].quantity}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
