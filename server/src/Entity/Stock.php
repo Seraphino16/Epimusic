@@ -21,11 +21,11 @@ class Stock
     private int $quantity = 0;
 
     #[ORM\ManyToOne(targetEntity: Color::class)]
-    #[ORM\JoinColumn(nullable: true)]
+    //#[ORM\JoinColumn(nullable: true)]
     private ?Color $color = null;
 
     #[ORM\ManyToOne(targetEntity: Size::class)]
-    #[ORM\JoinColumn(nullable: true)]
+    //#[ORM\JoinColumn(nullable: true)]
     private ?Size $size = null;
 
     public function getId(): ?int

@@ -59,8 +59,8 @@ const ProductAdminForm = () => {
             name: name,
             description: description,
             category: category,
-            color: category !== "2" ? color : null, // Set color only if category is not "Vinyle"
-            size: category === "2" || category === "3" ? size : null, // Set size only if category is "Vinyle" or "Goodies"
+            color: shouldDisplayColor(category) ? color : null, // Set color only if it should be displayed
+            size: shouldDisplaySize(category) ? size : null, // Set size only if it should be displayed
             price: parseFloat(price),
             stock: parseInt(stock, 10), // Add stock information
             photoPaths: photoPaths.filter((path) => path), // Filter out empty paths
