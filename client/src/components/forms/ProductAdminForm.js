@@ -14,7 +14,7 @@ const ProductAdminForm = () => {
     const [size, setSize] = useState("");
     const [price, setPrice] = useState("");
     const [stock, setStock] = useState("");
-    const [photoPaths, setPhotoPaths] = useState([""]);
+    const [photoFiles, setPhotoFiles] = useState([]); // State for photo files
     const [mainImageIndex, setMainImageIndex] = useState(0);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
@@ -41,47 +41,52 @@ const ProductAdminForm = () => {
             });
     }, []);
 
-    const handlePhotoPathChange = (index, value) => {
-        const paths = [...photoPaths];
-        paths[index] = value;
-        setPhotoPaths(paths);
+    const handlePhotoChange = (e) => {
+        setPhotoFiles(Array.from(e.target.files));
     };
 
-    const addPhotoPathField = () => {
-        setPhotoPaths([...photoPaths, ""]);
-    };
-
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
         setIsSubmitting(true);
 
-        const newProduct = {
-            name: name,
-            description: description,
-            category: category,
-            color: shouldDisplayColor(category) ? color : null,
-            size: shouldDisplaySize(category) ? size : null,
-            price: parseFloat(price),
-            stock: parseInt(stock, 10),
-            photoPaths: photoPaths.filter((path) => path),
-            mainImageIndex: mainImageIndex,
-        };
+        try {
+            const uploadedPhotos = [];
+            for (let i = 0; i < photoFiles.length; i++) {
+                const formData = new FormData();
+                formData.append("file", photoFiles[i]);
+                const response = await axios.post("http://localhost:8000/upload", formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                });
+                uploadedPhotos.push(response.data.filePath);
+            }
 
-        axios
-            .post("http://localhost:8000/api/admin/products", newProduct)
-            .then((response) => {
-                setMessage("Produit créé avec succès !");
-                setError("");
-                setTimeout(() => {
-                    navigate("/admin/");
-                }, 2000);
-            })
-            .catch((error) => {
-                setError("Erreur lors de la création du produit !");
-                setMessage("");
-                setIsSubmitting(false);
-                console.error("Erreur lors de la création du produit !", error);
-            });
+            const newProduct = {
+                name: name,
+                description: description,
+                category: category,
+                color: shouldDisplayColor(category) ? color : null,
+                size: shouldDisplaySize(category) ? size : null,
+                price: parseFloat(price),
+                stock: parseInt(stock, 10),
+                photoPaths: uploadedPhotos,
+                mainImageIndex: mainImageIndex,
+            };
+
+            await axios.post("http://localhost:8000/api/admin/products", newProduct);
+
+            setMessage("Produit créé avec succès !");
+            setError("");
+            setTimeout(() => {
+                navigate("/admin/");
+            }, 2000);
+        } catch (error) {
+            setError("Erreur lors de la création du produit !");
+            setMessage("");
+            setIsSubmitting(false);
+            console.error("Erreur lors de la création du produit !", error);
+        }
     };
 
     const handleCategoryChange = (e) => {
@@ -276,44 +281,36 @@ const ProductAdminForm = () => {
                                 />
                             </div>
                         </div>
-                        {photoPaths.map((path, index) => (
-                            <div key={index} className="md:flex items-center mt-8">
-                                <div className="w-full flex flex-col">
-                                    <label
-                                        className="font-semibold leading-none text-black"
-                                        htmlFor={`photoPath${index}`}
-                                    >
-                                        Chemin de la photo {index + 1}
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id={`photoPath${index}`}
-                                        placeholder="Entrez le chemin de l'image"
-                                        value={path}
-                                        onChange={(e) => handlePhotoPathChange(index, e.target.value)}
-                                        className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
-                                    />
-                                    <label className="font-semibold leading-none text-black mt-4">
-                                        <input
-                                            type="radio"
-                                            name="mainImage"
-                                            checked={mainImageIndex === index}
-                                            onChange={() => setMainImageIndex(index)}
-                                            className="mr-2"
-                                        />
-                                        Définir comme image principale
-                                    </label>
+                        <div className="md:flex items-center mt-8">
+                            <div className="w-full flex flex-col">
+                                <label
+                                    className="font-semibold leading-none text-black"
+                                    htmlFor="photos"
+                                >
+                                    Photos
+                                </label>
+                                <input
+                                    type="file"
+                                    id="photos"
+                                    multiple
+                                    onChange={handlePhotoChange}
+                                    className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
+                                />
+                                <div className="flex flex-col mt-4">
+                                    {Array.from(photoFiles).map((file, index) => (
+                                        <div key={index} className="flex items-center mt-2">
+                                            <p className="mr-4">{file.name}</p>
+                                            <button
+                                                type="button"
+                                                className={`mr-4 px-3 py-1 rounded ${mainImageIndex === index ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+                                                onClick={() => setMainImageIndex(index)}
+                                            >
+                                                {mainImageIndex === index ? 'Image principale' : 'Définir comme principale'}
+                                            </button>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
-                        ))}
-                        <div className="flex items-center justify-center w-full mt-8">
-                            <button
-                                type="button"
-                                onClick={addPhotoPathField}
-                                className="font-semibold leading-none text-white py-4 px-10 bg-blue-700 rounded hover:bg-blue-600 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:outline-none"
-                            >
-                                Ajouter un autre chemin de photo
-                            </button>
                         </div>
                         <div className="flex items-center justify-center w-full mt-8">
                             <button

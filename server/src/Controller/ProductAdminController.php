@@ -14,6 +14,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 class ProductAdminController extends AbstractController
 {
@@ -70,7 +71,7 @@ class ProductAdminController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        if (!isset($data['category'], $data['name'], $data['description'], $data['price'], $data['photoPaths'], $data['mainImageIndex'], $data['stock'])) {
+        if (!isset($data['category'], $data['name'], $data['description'], $data['price'], $data['stock'])) {
             return new JsonResponse(['error' => 'Invalid data'], 400);
         }
 
@@ -87,6 +88,10 @@ class ProductAdminController extends AbstractController
         $product->setDescription($data['description']);
         $product->setCategory($category);
 
+        // Persist the product to get its ID
+        $entityManager->persist($product);
+        $entityManager->flush(); // This will generate the ID for the product
+
         // Create a new model
         $model = new Model();
         $model->setProduct($product);
@@ -94,13 +99,23 @@ class ProductAdminController extends AbstractController
         if ($size) $model->setSize($size);
         $model->setPrice($data['price']);
 
-        $entityManager->persist($product);
         $entityManager->persist($model);
 
         // Handle photo paths
-        foreach ($data['photoPaths'] as $index => $path) {
+        $photoPaths = $data['photoPaths'];
+        foreach ($photoPaths as $index => $path) {
+            $originalFilePath = $this->getParameter('uploads_directory') . '/' . basename($path);
+            $newFileName = $product->getId() . '_' . $index . '.' . pathinfo($originalFilePath, PATHINFO_EXTENSION);
+            $newFilePath = $this->getParameter('uploads_directory') . '/' . $newFileName;
+
+            try {
+                rename($originalFilePath, $newFilePath);
+            } catch (FileException $e) {
+                return new JsonResponse(['error' => 'Failed to rename file'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+
             $image = new Image();
-            $image->setPath($path);
+            $image->setPath('/uploads/' . $newFileName);
             $image->setMain($index === $data['mainImageIndex']);
             $model->addImage($image);
             $entityManager->persist($image);
@@ -123,6 +138,17 @@ class ProductAdminController extends AbstractController
     #[Route('/api/admin/products/{id}', name: 'api_product_delete', methods: ['DELETE'])]
     public function delete(Product $product, EntityManagerInterface $entityManager): JsonResponse
     {
+        // Remove the product images from the file system and the database
+        foreach ($product->getModels() as $model) {
+            foreach ($model->getImage() as $image) {
+                $imagePath = $this->getParameter('uploads_directory') . '/' . basename($image->getPath());
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+                $entityManager->remove($image); // Remove image from the database
+            }
+        }
+
         $entityManager->remove($product);
         $entityManager->flush();
 
@@ -165,7 +191,7 @@ class ProductAdminController extends AbstractController
             'name' => $product->getName(),
             'description' => $product->getDescription(),
             'category' => $product->getCategory()->getName(),
-            'category_id' => $product->getCategory()->getId(), // Needed for the form
+            'category_id' => $product->getCategory()->getId(),
             'models' => $models,
             'stocks' => $stockData,
         ];
@@ -195,7 +221,7 @@ class ProductAdminController extends AbstractController
         $product->setCategory($category);
 
         // Update the model
-        $model = $product->getModels()[0]; // Assuming there is only one model per product
+        $model = $product->getModels()[0];
         if ($color) $model->setColor($color);
         if ($size) $model->setSize($size);
         $model->setPrice($data['price']);
@@ -207,9 +233,20 @@ class ProductAdminController extends AbstractController
         }
 
         // Handle photo paths
-        foreach ($data['photoPaths'] as $index => $path) {
+        $photoPaths = $data['photoPaths'];
+        foreach ($photoPaths as $index => $path) {
+            $originalFilePath = $this->getParameter('uploads_directory') . '/' . basename($path);
+            $newFileName = $product->getId() . '_' . $index . '.' . pathinfo($originalFilePath, PATHINFO_EXTENSION);
+            $newFilePath = $this->getParameter('uploads_directory') . '/' . $newFileName;
+
+            try {
+                rename($originalFilePath, $newFilePath);
+            } catch (FileException $e) {
+                return new JsonResponse(['error' => 'Failed to rename file'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+
             $image = new Image();
-            $image->setPath($path);
+            $image->setPath('/uploads/' . $newFileName);
             $image->setMain($index === $data['mainImageIndex']);
             $model->addImage($image);
             $entityManager->persist($image);

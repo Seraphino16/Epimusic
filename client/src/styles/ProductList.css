@@ -142,14 +142,14 @@
     margin-top: 5px;
 }
 
-.in-stock {
+.product-stock .stock-status.in-stock {
     color: green;
 }
 
-.restocking {
+.product-stock .stock-status.restocking {
     color: orange;
 }
 
-.out-of-stock {
+.product-stock .stock-status.out-of-stock {
     color: red;
 }

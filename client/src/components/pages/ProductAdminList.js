@@ -122,14 +122,16 @@ const ProductAdminList = () => {
                                     />
                                 </div>
                                 <div className="image-container">
-                                    {model.images.map((image, idx) => (
-                                        <div key={idx} className="image-item">
-                                            <img
-                                                src={image.path}
-                                                alt={`Produit ${product.name}`}
-                                            />
-                                        </div>
-                                    ))}
+                                    {model.images
+                                        .filter(image => image.is_main)
+                                        .map((image, idx) => (
+                                            <div key={idx} className="image-item">
+                                                <img
+                                                    src={`http://localhost:8000${image.path}`}
+                                                    alt={`Produit ${product.name}`}
+                                                />
+                                            </div>
+                                        ))}
                                 </div>
                                 <div>
                                     <h2 className="product-name">
