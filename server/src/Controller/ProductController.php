@@ -60,10 +60,6 @@ class ProductController extends AbstractController
     {
         $products = $productRepository->findProductsByCategory($categoryId);
 
-        if (empty($products)) {
-            return $this->json(['error' => 'Aucun produit trouvé dans cette catégorie'], 404);
-        }
-
         return new JsonResponse($products);
     }
 }
