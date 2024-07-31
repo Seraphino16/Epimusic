@@ -28,9 +28,6 @@ class Model
     #[ORM\Column]
     private ?float $price = null;
 
-    #[ORM\Column(type: 'integer')]
-    private ?int $stock = null;
-
     /**
      * @var Collection<int, Image>
      */
@@ -91,18 +88,6 @@ class Model
     public function setPrice(float $price): static
     {
         $this->price = $price;
-
-        return $this;
-    }
-
-    public function getStock(): ?int
-    {
-        return $this->stock;
-    }
-
-    public function setStock(int $stock): static
-    {
-        $this->stock = $stock;
 
         return $this;
     }
