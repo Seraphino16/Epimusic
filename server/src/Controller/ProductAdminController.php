@@ -138,6 +138,17 @@ class ProductAdminController extends AbstractController
     #[Route('/api/admin/products/{id}', name: 'api_product_delete', methods: ['DELETE'])]
     public function delete(Product $product, EntityManagerInterface $entityManager): JsonResponse
     {
+        // Remove the product images from the file system and the database
+        foreach ($product->getModels() as $model) {
+            foreach ($model->getImage() as $image) {
+                $imagePath = $this->getParameter('uploads_directory') . '/' . basename($image->getPath());
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+                $entityManager->remove($image); // Remove image from the database
+            }
+        }
+
         $entityManager->remove($product);
         $entityManager->flush();
 
