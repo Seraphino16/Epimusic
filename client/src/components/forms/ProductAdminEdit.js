@@ -17,7 +17,8 @@ const ProductAdminEdit = () => {
     const [color, setColor] = useState("");
     const [size, setSize] = useState("");
     const [price, setPrice] = useState("");
-    const [photoPaths, setPhotoPaths] = useState([""]);
+    const [photoPaths, setPhotoPaths] = useState([]);
+    const [photoFiles, setPhotoFiles] = useState([]); // New state for new photo files
     const [mainImageIndex, setMainImageIndex] = useState(0);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
@@ -120,48 +121,56 @@ const ProductAdminEdit = () => {
         setPhotoPaths(paths);
     };
 
-    const addPhotoPathField = () => {
-        setPhotoPaths([...photoPaths, ""]);
+    const handlePhotoChange = (e) => {
+        setPhotoFiles(e.target.files);
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
 
-        const updatedProduct = {
-            name: name,
-            description: description,
-            category: category,
-            color: category !== "2" ? color : null,
-            size: category === "2" || category === "3" ? size : null,
-            price: parseFloat(price),
-            stock: parseInt(stock, 10),
-            photoPaths: photoPaths.filter((path) => path),
-            mainImageIndex: mainImageIndex,
-        };
+        try {
+            const uploadedPhotos = [...photoPaths];
+            for (let i = 0; i < photoFiles.length; i++) {
+                const formData = new FormData();
+                formData.append("file", photoFiles[i]);
+                const response = await axios.post("http://localhost:8000/upload", formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                });
+                uploadedPhotos.push(response.data.filePath);
+            }
 
-        axios
-            .put(
-                `http://localhost:8000/api/admin/products/${id}`,
-                updatedProduct
-            )
-            .then((response) => {
-                setMessage("Produit mis à jour avec succès!");
-                setError("");
-                if (currentEditIndex < selectedProductIds.length - 1) {
-                    setTimeout(() => {
-                        navigate(`/admin/edit-product/${selectedProductIds[currentEditIndex + 1]}?selectedProducts=${selectedProductIds.join(',')}&currentEditIndex=${currentEditIndex + 1}`);
-                    }, 2000);
-                } else {
-                    setTimeout(() => {
-                        navigate("/admin/");
-                    }, 2000);
-                }
-            })
-            .catch((error) => {
-                setError("Erreur lors de la mise à jour du produit!");
-                setMessage("");
-                console.error("Erreur lors de la mise à jour du produit!", error);
-            });
+            const updatedProduct = {
+                name: name,
+                description: description,
+                category: category,
+                color: shouldDisplayColor(category) ? color : null,
+                size: shouldDisplaySize(category) ? size : null,
+                price: parseFloat(price),
+                stock: parseInt(stock, 10),
+                photoPaths: uploadedPhotos.filter((path) => path),
+                mainImageIndex: mainImageIndex,
+            };
+
+            await axios.put(`http://localhost:8000/api/admin/products/${id}`, updatedProduct);
+
+            setMessage("Produit mis à jour avec succès!");
+            setError("");
+            if (currentEditIndex < selectedProductIds.length - 1) {
+                setTimeout(() => {
+                    navigate(`/admin/edit-product/${selectedProductIds[currentEditIndex + 1]}?selectedProducts=${selectedProductIds.join(',')}&currentEditIndex=${currentEditIndex + 1}`);
+                }, 2000);
+            } else {
+                setTimeout(() => {
+                    navigate("/admin/");
+                }, 2000);
+            }
+        } catch (error) {
+            setError("Erreur lors de la mise à jour du produit!");
+            setMessage("");
+            console.error("Erreur lors de la mise à jour du produit!", error);
+        }
     };
 
     if (!product) return <div>Chargement...</div>;
@@ -349,11 +358,25 @@ const ProductAdminEdit = () => {
                                 />
                             </div>
                         </div>
+                        <div className="md:flex items-center mt-8">
+                            <div className="w-full flex flex-col">
+                                <label
+                                    className="font-semibold leading-none text-black"
+                                    htmlFor="photos"
+                                >
+                                    Photos
+                                </label>
+                                <input
+                                    type="file"
+                                    id="photos"
+                                    multiple
+                                    onChange={handlePhotoChange}
+                                    className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
+                                />
+                            </div>
+                        </div>
                         {photoPaths.map((path, index) => (
-                            <div
-                                key={index}
-                                className="md:flex items-center mt-8"
-                            >
+                            <div key={index} className="md:flex items-center mt-8">
                                 <div className="w-full flex flex-col">
                                     <label
                                         className="font-semibold leading-none text-black"
@@ -366,12 +389,7 @@ const ProductAdminEdit = () => {
                                         id={`photoPath${index}`}
                                         placeholder="Entrez le chemin de l'image"
                                         value={path}
-                                        onChange={(e) =>
-                                            handlePhotoPathChange(
-                                                index,
-                                                e.target.value
-                                            )
-                                        }
+                                        onChange={(e) => handlePhotoPathChange(index, e.target.value)}
                                         className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
                                     />
                                     <label className="font-semibold leading-none text-black mt-4">
@@ -379,9 +397,7 @@ const ProductAdminEdit = () => {
                                             type="radio"
                                             name="mainImage"
                                             checked={mainImageIndex === index}
-                                            onChange={() =>
-                                                setMainImageIndex(index)
-                                            }
+                                            onChange={() => setMainImageIndex(index)}
                                             className="mr-2"
                                         />
                                         Définir comme image principale
@@ -389,15 +405,6 @@ const ProductAdminEdit = () => {
                                 </div>
                             </div>
                         ))}
-                        <div className="flex items-center justify-center w-full mt-8">
-                            <button
-                                type="button"
-                                onClick={addPhotoPathField}
-                                className="font-semibold leading-none text-white py-4 px-10 bg-blue-700 rounded hover:bg-blue-600 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:outline-none"
-                            >
-                                Ajouter un autre chemin de photo
-                            </button>
-                        </div>
                         <div className="flex items-center justify-center w-full mt-8">
                             <button
                                 type="submit"
