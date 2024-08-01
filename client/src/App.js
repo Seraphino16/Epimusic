@@ -10,6 +10,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import ProductDetailsPage from './components/pages/ProductDetailsPage';
 import ProductCategoriesList from "./components/pages/ProductCategoriesList";
 import ProductList from "./components/pages/ProductList";
+import FilteredArticles from './components/Filtered/FilteredArticles';
 
 const App = () => {
   return (
@@ -48,6 +49,12 @@ const App = () => {
         path="/product/:id"
         element={<ProductDetailsPage />}
       />
+        <Route
+          path="/Test"
+          element={
+              <FilteredArticles />
+          }
+        />
       </Routes>
     </Router>
   );
