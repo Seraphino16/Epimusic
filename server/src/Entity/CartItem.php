@@ -80,7 +80,7 @@ class CartItem
 
     public function getQuantity(): int {
 
-        return $quantity;
+        return $this->quantity;
     }
 
     public function setQuantity(int $quantity): self {
@@ -92,7 +92,7 @@ class CartItem
 
     public function getPrice(): float {
 
-        return $price;
+        return $this->price;
     }
 
     public function setPrice(float $price): self

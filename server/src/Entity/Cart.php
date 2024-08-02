@@ -73,11 +73,30 @@ class Cart
 
     public function removeItem(CartItem $item): self
     {
-        if ($this->items->removeElement($item)) {
-            if ($item->getCart() === $this) {
-                $item->setCart(null);
+        $exitingItem = null;
+
+        foreach ($this->items as $i) {
+
+            if ($i->getProduct() === $item->getProduct() 
+                && $i->getModel() === $item->getModel()) {
+
+                $exitingItem = $i;
+                break;
             }
         }
+
+        if ($existingItem !== null) {
+
+            $currentQuantity = $existingItem->getQuantity();
+            $newQuantity = $currentQuantity + $item->getQuantity();
+            $existingItem->setQuantity($newQuantity);
+        } else {
+            if (!$this->items->contains($item)) {
+                $this->items[] = $item;
+                $item->setCart($this);
+            }
+        }
+
         $this->calculateTotal();
         return $this;
     }
@@ -113,7 +132,7 @@ class Cart
 
     public function calculateTotal(): void
     {
-        $total = 0;
+        $total = 0.0;
         foreach ($this->items as $item) {
             $total += $item->getPrice() * $item->getQuantity();
         }

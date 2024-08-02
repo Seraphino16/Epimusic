@@ -62,11 +62,6 @@ class CartController extends AbstractController
             return new JsonResponse(['error' => 'Modèle non trouvé pour ce produit'], Response::HTTP_NOT_FOUND);
         }
 
-        $price = $model->getPrice();
-        if ($price === null) {
-            return new JsonResponse(['error' => 'Prix non disponible pour ce modèle'], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-
         $user = $this->userRepository->find($userId);
         if (!$user) {
             return new JsonResponse(['error' => 'Utilisateur non trouvé'], Response::HTTP_NOT_FOUND);
@@ -80,23 +75,27 @@ class CartController extends AbstractController
             $this->entityManager->persist($cart);
         }
 
+
         $cartItem = $this->entityManager->getRepository(CartItem::class)
             ->findOneBy(['cart' => $cart, 'product' => $product, 'model' => $model]);
 
         if ($cartItem) {
+        
             $cartItem->setQuantity($cartItem->getQuantity() + $quantity);
         } else {
+    
             $cartItem = new CartItem();
             $cartItem->setCart($cart);
             $cartItem->setProduct($product);
             $cartItem->setModel($model);
             $cartItem->setQuantity($quantity);
-            $cartItem->setPrice($price);  // Correction ici pour définir le prix
+            $cartItem->setPrice($model->getPrice());
             $this->entityManager->persist($cartItem);
         }
 
+
         $this->entityManager->flush();
-        $cart->calculateTotal();  // Mettre à jour le total du panier
+        $cart->calculateTotal();
         $this->entityManager->flush();
 
         return new JsonResponse([
@@ -104,4 +103,6 @@ class CartController extends AbstractController
             'cart_total' => $cart->getTotal()
         ], Response::HTTP_OK);
     }
+
+
 }
