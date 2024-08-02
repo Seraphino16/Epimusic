@@ -2,26 +2,23 @@
 
 namespace App\Entity;
 
-use App\Repository\CartRepository;
+use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(repositoryClass: CartRepository::class)]
-#[ORM\HasLifecycleCallbacks]
-class Cart
+#[ORM\Entity]
+class AnonymousCart
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'carts')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?User $user = null;
+    #[ORM\Column(type: "string", unique: true)]
+    private string $token;
 
-    #[ORM\OneToMany(mappedBy: 'cart', targetEntity: CartItem::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToMany(mappedBy: 'anonymousCart', targetEntity: CartItem::class, orphanRemoval: true, cascade: ['persist', 'remove'])]
     private Collection $items;
 
     #[ORM\Column(type: 'datetime')]
@@ -33,7 +30,8 @@ class Cart
     #[ORM\Column(type: 'float')]
     private float $total = 0.0;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->items = new ArrayCollection();
         $this->createdAt = new \DateTime();
     }
@@ -43,14 +41,15 @@ class Cart
         return $this->id;
     }
 
-    public function getUser(): ?User
+    public function getToken(): string
     {
-        return $this->user;
+        return $this->token;
     }
 
-    public function setUser(?User $user): self
+    public function setToken(string $token): self
     {
-        $this->user = $user;
+        $this->token = $token;
+
         return $this;
     }
 
@@ -65,50 +64,24 @@ class Cart
     public function addItem(CartItem $item): self
     {
         if (!$this->items->contains($item)) {
-            $this->items[] = $item;
-            $item->setCart($this);
+            $this->items->add($item);
+            $item->setAnonymousCart($this);
         }
+
         return $this;
     }
 
     public function removeItem(CartItem $item): self
-    {   
+    {
         if ($this->items->removeElement($item)) {
 
-            if ($item->getCart() === $this) {
-                $item->setCart(null);
+            if ($item->getAnonymousCart() === $this) {
+                $item->setAnonymousCart(null);
             }
         }
 
         return $this;
     }
-        // $exitingItem = null;
-
-        // foreach ($this->items as $i) {
-
-        //     if ($i->getProduct() === $item->getProduct() 
-        //         && $i->getModel() === $item->getModel()) {
-
-        //         $exitingItem = $i;
-        //         break;
-        //     }
-        // }
-
-        // if ($existingItem !== null) {
-
-        //     $currentQuantity = $existingItem->getQuantity();
-        //     $newQuantity = $currentQuantity + $item->getQuantity();
-        //     $existingItem->setQuantity($newQuantity);
-        // } else {
-        //     if (!$this->items->contains($item)) {
-        //         $this->items[] = $item;
-        //         $item->setCart($this);
-        //     }
-        // }
-
-        // $this->calculateTotal();
-        // return $this;
-    // }
 
     public function getCreatedAt(): \DateTimeInterface
     {
