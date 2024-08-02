@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import NavbarItem from "./NavbarItem";
 import SearchBar from "./SearchBar";
 import logo from "../../assets/logo.png";
@@ -29,11 +29,13 @@ const Navbar = () => {
         setIsLoggedIn(false);
         setUserRole(null);
         navigate('/login');
-        window.location.reload(); // This will refresh the page
+        window.location.reload();
     };
 
+    const bgColor = userRole === 'ROLE_ADMIN' ? 'bg-[#2BEBF1]' : 'bg-[#eeb829]';
+
     return (
-        <nav className="relative z-50 w-full flex items-center justify-between flex-wrap bg-[#2bebf1] py-2 shadow px-4 lg:px-16 xl:px-48">
+        <nav className={`relative z-50 w-full flex items-center justify-between flex-wrap ${bgColor} py-2 shadow px-4 lg:px-16 xl:px-48`}>
             <div className="flex items-center flex-shrink-0 text-black mr-6">
                 <img src={logo} alt="Logo" className="w-16 h-16 mr-2" />
             </div>
