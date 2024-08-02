@@ -22,6 +22,10 @@ class CartItem
     #[ORM\JoinColumn(nullable: false)]
     private ?Product $product = null;
 
+    #[ORM\ManyToOne(targetEntity: Model::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Model $model = null;
+
     #[ORM\Column(type: 'integer')]
     #[Assert\NotNull]
     #[Assert\Possitive]
@@ -49,14 +53,27 @@ class CartItem
         return $this;
     }
 
-    public function getProduct(): ?Product {
-
-        return $product;
+    public function getProduct(): ?Product
+    {
+        return $this->product;
     }
 
-    public function setProduct(?Product $product): self {
+    public function setProduct(?Product $product): self
+    {
+        $this->product = $product;
 
-        $this->getProduct = $product;
+        return $this;
+    }
+
+
+    public function getModel(): ?Model
+    {
+        return $this->model;
+    }
+
+    public function setModel(?Model $model): self
+    {
+        $this->model = $model;
 
         return $this;
     }
@@ -78,12 +95,13 @@ class CartItem
         return $price;
     }
 
-    public function setPrice(int $quantity): self {
-
+    public function setPrice(float $price): self
+    {
         $this->price = $price;
 
         return $this;
     }
+
 
 
 }

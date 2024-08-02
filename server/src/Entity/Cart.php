@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CartRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Cart
 {
     #[ORM\Id]
@@ -29,9 +30,12 @@ class Cart
     #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $updatedAt = null;
 
+    #[ORM\Column(type: 'float')]
+    private float $total = 0.0;
+
     public function __construct() {
-        
         $this->items = new ArrayCollection();
+        $this->createdAt = new \DateTime();
     }
 
     public function getId(): ?int
@@ -41,13 +45,12 @@ class Cart
 
     public function getUser(): ?User
     {
-        return $user;
+        return $this->user;
     }
 
     public function setUser(?User $user): self
     {
         $this->user = $user;
-
         return $this;
     }
 
@@ -56,7 +59,7 @@ class Cart
      */
     public function getItems(): Collection
     {
-        return $items;
+        return $this->items;
     }
 
     public function addItem(CartItem $item): self
@@ -65,39 +68,36 @@ class Cart
             $this->items[] = $item;
             $item->setCart($this);
         }
-
         return $this;
     }
 
     public function removeItem(CartItem $item): self
     {
         if ($this->items->removeElement($item)) {
-        
             if ($item->getCart() === $this) {
                 $item->setCart(null);
             }
         }
-
-        $this->recalculateTotal();
-
+        $this->calculateTotal();
         return $this;
     }
 
-
     public function getCreatedAt(): \DateTimeInterface
     {
-        return $createdAt;
+        return $this->createdAt;
     }
 
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void
     {
-        $this->createdAt = new \DateTime();
+        if ($this->createdAt === null) {
+            $this->createdAt = new \DateTime();
+        }
     }
 
     public function getUpdatedAt(): ?\DateTimeInterface
     {
-        return $updatedAt;
+        return $this->updatedAt;
     }
 
     #[ORM\PreUpdate]
@@ -108,10 +108,10 @@ class Cart
 
     public function getTotal(): float
     {
-        return $total;
+        return $this->total;
     }
 
-    private function recalculateTotal(): void
+    public function calculateTotal(): void
     {
         $total = 0;
         foreach ($this->items as $item) {
@@ -119,6 +119,4 @@ class Cart
         }
         $this->total = $total;
     }
-
-
 }
