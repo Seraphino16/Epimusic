@@ -66,12 +66,7 @@ const Navbar = () => {
                     {userRole === 'ROLE_ADMIN' && <NavbarItem text="Admin" href="/admin/" />}
                     {userRole === 'ROLE_USER' && <NavbarItem text="Profil" href="/profile/" />}
                     {isLoggedIn ? (
-                        <button
-                            onClick={handleLogout}
-                            className="block mt-4 lg:inline-block lg:mt-0 text-black hover:text-gray-800 mr-4"
-                        >
-                            Déconnexion
-                        </button>
+                        <NavbarItem text="Déconnexion" onClick={handleLogout}/>
                     ) : (
                         <NavbarItem text="Se Connecter" href="/login" />
                     )}
