@@ -56,6 +56,61 @@ const ProductCategoriesList = () => {
                     />
                 ))}
             </div>
+            <div className="flex flex-wrap justify-center m-5">
+                {categories.map((category) => (
+                    <CategoryCard
+                        key={category.id}
+                        imageSrc={getCategoryImage(category.name)}
+                        categoryName={category.name}
+                        categoryId={category.id}
+                    />
+                ))}
+            </div><div className="flex flex-wrap justify-center m-5">
+                {categories.map((category) => (
+                    <CategoryCard
+                        key={category.id}
+                        imageSrc={getCategoryImage(category.name)}
+                        categoryName={category.name}
+                        categoryId={category.id}
+                    />
+                ))}
+            </div><div className="flex flex-wrap justify-center m-5">
+                {categories.map((category) => (
+                    <CategoryCard
+                        key={category.id}
+                        imageSrc={getCategoryImage(category.name)}
+                        categoryName={category.name}
+                        categoryId={category.id}
+                    />
+                ))}
+            </div><div className="flex flex-wrap justify-center m-5">
+                {categories.map((category) => (
+                    <CategoryCard
+                        key={category.id}
+                        imageSrc={getCategoryImage(category.name)}
+                        categoryName={category.name}
+                        categoryId={category.id}
+                    />
+                ))}
+            </div><div className="flex flex-wrap justify-center m-5">
+                {categories.map((category) => (
+                    <CategoryCard
+                        key={category.id}
+                        imageSrc={getCategoryImage(category.name)}
+                        categoryName={category.name}
+                        categoryId={category.id}
+                    />
+                ))}
+            </div><div className="flex flex-wrap justify-center m-5">
+                {categories.map((category) => (
+                    <CategoryCard
+                        key={category.id}
+                        imageSrc={getCategoryImage(category.name)}
+                        categoryName={category.name}
+                        categoryId={category.id}
+                    />
+                ))}
+            </div>
         </div>
     );
 };
