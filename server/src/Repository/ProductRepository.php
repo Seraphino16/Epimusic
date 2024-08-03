@@ -75,7 +75,7 @@ class ProductRepository extends ServiceEntityRepository
                     'st.quantity as stock_quantity',
                     'i.path as image_url', 'i.is_main as is_main',
                     'r.id as review_id', 'r.rating', 'r.comment', 'r.created_at as review_created_at',
-                    'u.firstName as user_firstname', 'u.lastName as user_lastname')
+                    'u.id as user_id', 'u.firstName as user_firstname', 'u.lastName as user_lastname')
             ->leftJoin('p.category', 'c')
             ->leftJoin('p.models', 'm')
             ->leftJoin('m.color', 'col')
@@ -128,6 +128,7 @@ class ProductRepository extends ServiceEntityRepository
                     'created_at' => $result['review_created_at']->format('Y-m-d H:i:s'),
                     'user_firstname' => $result['user_firstname'],
                     'user_lastname' => $result['user_lastname'],
+                    'user_id' => $result['user_id'],
                 ];
             }
         }

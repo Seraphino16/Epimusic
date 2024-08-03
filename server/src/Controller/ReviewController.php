@@ -9,6 +9,7 @@ use App\Entity\User;
 use App\Repository\ProductRepository;
 use App\Repository\ModelRepository;
 use App\Repository\UserRepository;
+use App\Repository\ReviewRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -25,19 +26,22 @@ class ReviewController extends AbstractController
     private ProductRepository $productRepository;
     private ModelRepository $modelRepository;
     private UserRepository $userRepository;
+    private ReviewRepository $reviewRepository;
 
     public function __construct(
         EntityManagerInterface $entityManager,
         ValidatorInterface $validator,
         ProductRepository $productRepository,
         ModelRepository $modelRepository,
-        UserRepository $userRepository
+        UserRepository $userRepository,
+        ReviewRepository $reviewRepository 
     ) {
         $this->entityManager = $entityManager;
         $this->validator = $validator;
         $this->productRepository = $productRepository;
         $this->modelRepository = $modelRepository;
         $this->userRepository = $userRepository;
+        $this->reviewRepository = $reviewRepository;
     }
 
     #[Route('/product/add/review', name: 'add_product_review', methods: ['POST'])]
@@ -107,4 +111,40 @@ class ReviewController extends AbstractController
             ],
         ], Response::HTTP_CREATED);
     }
+
+    #[Route('/review/delete/{id}', name: 'delete_review', methods: ['DELETE'])]
+    public function deleteReview(Request $request, int $id): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $userId = $data['user_id'] ?? null;
+
+        if (!$userId) {
+            return new JsonResponse(['error' => 'Utilisateur non spécifié'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $review = $this->reviewRepository->find($id);
+
+        if (!$review) {
+            return new JsonResponse(['error' => 'Avis non trouvé'], Response::HTTP_NOT_FOUND);
+        }
+
+        if (!$review->getUser()) {
+            return new JsonResponse(['error' => 'Impossible de supprimer un avis anonyme'], Response::HTTP_FORBIDDEN);
+        }
+
+        $user = $this->userRepository->find($userId);
+        if (!$user) {
+            return new JsonResponse(['error' => 'Utilisateur non trouvé'], Response::HTTP_NOT_FOUND);
+        }
+
+        if ($user->getId() !== $review->getUser()->getId()) {
+            return new JsonResponse(['error' => 'Vous n\'avez pas l\'autorisation de supprimer cet avis'], Response::HTTP_FORBIDDEN);
+        }
+
+        $this->entityManager->remove($review);
+        $this->entityManager->flush();
+
+        return new JsonResponse(['message' => 'Avis supprimé avec succès'], Response::HTTP_OK);
+    }
+
 }
