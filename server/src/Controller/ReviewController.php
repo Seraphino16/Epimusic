@@ -56,19 +56,25 @@ class ReviewController extends AbstractController
         $userId = $data['user_id'] ?? null;
 
         if (!$productId || !$comment) {
-            return new JsonResponse(['error' => 'Requete invalide'], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(
+                ['error' => 'Requete invalide'], 
+                Response::HTTP_BAD_REQUEST);
         }
 
         $product = $this->productRepository->find($productId);
         if (!$product) {
-            return new JsonResponse(['error' => 'Product non trouvé'], Response::HTTP_NOT_FOUND);
+            return new JsonResponse(
+                ['error' => 'Product non trouvé'], 
+                Response::HTTP_NOT_FOUND);
         }
 
         $model = null;
         if ($modelId) {
             $model = $this->modelRepository->find($modelId);
             if (!$model) {
-                return new JsonResponse(['error' => 'Model non trouvé'], Response::HTTP_NOT_FOUND);
+                return new JsonResponse(
+                    ['error' => 'Model non trouvé'], 
+                    Response::HTTP_NOT_FOUND);
             }
         }
 
@@ -76,7 +82,9 @@ class ReviewController extends AbstractController
         if ($userId) {
             $user = $this->userRepository->find($userId);
             if (!$user) {
-                return new JsonResponse(['error' => 'Utilisateur non trouvé'], Response::HTTP_NOT_FOUND);
+                return new JsonResponse(
+                    ['error' => 'Utilisateur non trouvé'], 
+                    Response::HTTP_NOT_FOUND);
             }
         }
 
@@ -92,7 +100,9 @@ class ReviewController extends AbstractController
 
         $errors = $this->validator->validate($review);
         if (count($errors) > 0) {
-            return new JsonResponse(['error' => (string) $errors], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(
+                ['error' => (string) $errors], 
+                Response::HTTP_BAD_REQUEST);
         }
 
         $this->entityManager->persist($review);
@@ -119,32 +129,110 @@ class ReviewController extends AbstractController
         $userId = $data['user_id'] ?? null;
 
         if (!$userId) {
-            return new JsonResponse(['error' => 'Utilisateur non spécifié'], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(
+                ['error' => 'Utilisateur non spécifié'], 
+                Response::HTTP_BAD_REQUEST);
         }
 
         $review = $this->reviewRepository->find($id);
 
         if (!$review) {
-            return new JsonResponse(['error' => 'Avis non trouvé'], Response::HTTP_NOT_FOUND);
+            return new JsonResponse(
+                ['error' => 'Avis non trouvé'], 
+                Response::HTTP_NOT_FOUND);
         }
 
         if (!$review->getUser()) {
-            return new JsonResponse(['error' => 'Impossible de supprimer un avis anonyme'], Response::HTTP_FORBIDDEN);
+            return new JsonResponse(
+                ['error' => 'Impossible de supprimer un avis anonyme'], 
+                Response::HTTP_FORBIDDEN);
         }
 
         $user = $this->userRepository->find($userId);
         if (!$user) {
-            return new JsonResponse(['error' => 'Utilisateur non trouvé'], Response::HTTP_NOT_FOUND);
+            return new JsonResponse(
+                ['error' => 'Utilisateur non trouvé'], 
+                Response::HTTP_NOT_FOUND);
         }
 
         if ($user->getId() !== $review->getUser()->getId()) {
-            return new JsonResponse(['error' => 'Vous n\'avez pas l\'autorisation de supprimer cet avis'], Response::HTTP_FORBIDDEN);
+            return new JsonResponse(
+                ['error' => 'Vous n\'avez pas l\'autorisation de supprimer cet avis'], 
+                Response::HTTP_FORBIDDEN);
         }
 
         $this->entityManager->remove($review);
         $this->entityManager->flush();
 
-        return new JsonResponse(['message' => 'Avis supprimé avec succès'], Response::HTTP_OK);
+        return new JsonResponse(
+            ['message' => 'Avis supprimé avec succès'], 
+            Response::HTTP_OK);
+    }
+
+    #[Route('/review/update/{id}', name: 'update_review', methods: ['PATCH'])]
+    public function updateReview(Request $request, int $id): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $userId = $data['user_id'] ?? null;
+        $rating = $data['rating'] ?? null;
+        $comment = $data['comment'] ?? null;
+
+        if (!$userId) {
+            return new JsonResponse(
+                ['error' => 'Utilisateur non spécifié'], 
+                Response::HTTP_BAD_REQUEST);
+        }
+
+        $review = $this->reviewRepository->find($id);
+
+        if (!$review) {
+            return new JsonResponse(
+                ['error' => 'Avis non trouvé'], 
+                Response::HTTP_NOT_FOUND);
+        }
+
+        if (!$review->getUser()) {
+            return new JsonResponse(
+                ['error' => 'Impossible de modifier un avis anonyme'], 
+                Response::HTTP_FORBIDDEN);
+        }
+
+        $user = $this->userRepository->find($userId);
+        if (!$user) {
+            return new JsonResponse(
+                ['error' => 'Utilisateur non trouvé'], 
+                Response::HTTP_NOT_FOUND);
+        }
+
+        if ($user->getId() !== $review->getUser()->getId()) {
+            return new JsonResponse(
+                ['error' => 'Vous n\'avez pas l\'autorisation de modifier cet avis'], 
+                Response::HTTP_FORBIDDEN);
+        }
+
+        if ($rating !== null) {
+            $review->setRating($rating);
+        }
+        if ($comment !== null) {
+            $review->setComment($comment);
+        }
+
+        $review->setUpdateAt(new \DateTime());
+
+        $this->entityManager->flush();
+
+        return new JsonResponse([
+            'message' => 'Avis mis à jour avec succès',
+            'review' => [
+                'id' => $review->getId(),
+                'product_id' => $review->getProduct()->getId(),
+                'model_id' => $review->getModel()?->getId(),
+                'rating' => $review->getRating(),
+                'comment' => $review->getComment(),
+                'created_at' => $review->getCreatedAt()->format('d-m-Y H:i:s'),
+                'update_at' => $review->getUpdateAt()->format('d-m-Y H:i:s'),
+            ],
+        ], Response::HTTP_OK);
     }
 
 }
