@@ -65,60 +65,75 @@ class ProductRepository extends ServiceEntityRepository
         // ];
     }
 
+    // Fiche détaillé 
     public function findProductWithCategory($productId)
     {
+        $results = $this->createQueryBuilder('p')
+            ->select('p.id', 'p.name', 'p.description', 'c.name as category', 
+                    'm.id as model_id', 'm.price',
+                    'col.name as color', 's.value as size_value', 's.unit as size_unit', 
+                    'st.quantity as stock_quantity',
+                    'i.path as image_url', 'i.is_main as is_main',
+                    'r.id as review_id', 'r.rating', 'r.comment', 'r.created_at as review_created_at')
+            ->leftJoin('p.category', 'c')
+            ->leftJoin('p.models', 'm')
+            ->leftJoin('m.color', 'col')
+            ->leftJoin('m.size', 's')
+            ->leftJoin('p.stocks', 'st')
+            ->leftJoin('m.image', 'i')
+            ->leftJoin('p.reviews', 'r')
+            ->where('p.id = :id')
+            ->setParameter('id', $productId)
+            ->getQuery()
+            ->getArrayResult();
 
-    $results = $this->createQueryBuilder('p')
-        ->select('p.id', 'p.name', 'p.description', 'c.name as category', 
-                'm.id as model_id', 'm.price',
-                'col.name as color', 's.value as size_value', 's.unit as size_unit', 
-                'st.quantity as stock_quantity',
-                'i.path as image_url', 'i.is_main as is_main')
-        ->leftJoin('p.category', 'c')
-        ->leftJoin('p.models', 'm')
-        ->leftJoin('m.color', 'col')
-        ->leftJoin('m.size', 's')
-        ->leftJoin('p.stocks', 'st')
-        ->leftJoin('m.image', 'i')
-        ->where('p.id = :id')
-        ->setParameter('id', $productId)
-        ->getQuery()
-        ->getArrayResult();
+        $productData = [];
+        $productData['images'] = ['main' => [], 'secondary' => []];
+        $productData['reviews'] = [];
 
-    $productData = [];
-    $productData['images'] = ['main' => [], 'secondary' => []];
-
-    foreach ($results as $result) {
-        if (!isset($productData['id'])) {
+        foreach ($results as $result) {
         
-            $productData['id'] = $result['id'];
-            $productData['name'] = $result['name'];
-            $productData['description'] = $result['description'];
-            $productData['category'] = $result['category'];
+            if (!isset($productData['id'])) {
+                $productData['id'] = $result['id'];
+                $productData['name'] = $result['name'];
+                $productData['description'] = $result['description'];
+                $productData['category'] = $result['category'];
+            }
+
+            if (isset($result['model_id'])) {
+                $productData['models'][] = [
+                    'model_id' => $result['model_id'],
+                    'price' => $result['price'],
+                    'color' => $result['color'],
+                    'size_value' => $result['size_value'],
+                    'size_unit' => $result['size_unit'],
+                    'stock_quantity' => $result['stock_quantity'] ?? 0,
+                ];
+            }
+
+            if ($result['is_main']) {
+                $productData['images']['main'][] = $result['image_url'];
+            } else {
+                $productData['images']['secondary'][] = $result['image_url'];
+            }
+
+            if (isset($result['review_id'])) {
+                $productData['reviews'][] = [
+                    'review_id' => $result['review_id'],
+                    'rating' => $result['rating'],
+                    'comment' => $result['comment'],
+                    'created_at' => $result['review_created_at']->format('Y-m-d H:i:s'),
+                ];
+            }
         }
 
-        if (isset($result['model_id'])) {
-            $productData['models'][] = [
-                'model_id' => $result['model_id'],
-                'price' => $result['price'],
-                'color' => $result['color'],
-                'size_value' => $result['size_value'],
-                'size_unit' => $result['size_unit'],
-                'stock_quantity' => $result['stock_quantity'] ?? 0, // Stock de l'entité Stock
-            ];
-        }
-
-        if ($result['is_main']) {
-            $productData['images']['main'][] = $result['image_url'];
-        } else {
-            $productData['images']['secondary'][] = $result['image_url'];
-        }
+        return $productData;
     }
 
-    return $productData;
-}
+    
 
 
+    // Cartes des produits
     public function findProductsByCategory($categoryId) {
         return $this->createQueryBuilder('p')
             ->select('p.id', 'p.name', 'p.description', 'c.name as category',
