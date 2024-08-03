@@ -23,7 +23,7 @@ class Review
     private ?Model $model = null;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'reviews')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?User $user = null;
 
     #[ORM\Column(nullable: true)]

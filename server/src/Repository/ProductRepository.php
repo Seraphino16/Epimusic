@@ -65,7 +65,7 @@ class ProductRepository extends ServiceEntityRepository
         // ];
     }
 
-    // Fiche détaillé 
+    // Fiche détaillée du produit
     public function findProductWithCategory($productId)
     {
         $results = $this->createQueryBuilder('p')
@@ -74,7 +74,8 @@ class ProductRepository extends ServiceEntityRepository
                     'col.name as color', 's.value as size_value', 's.unit as size_unit', 
                     'st.quantity as stock_quantity',
                     'i.path as image_url', 'i.is_main as is_main',
-                    'r.id as review_id', 'r.rating', 'r.comment', 'r.created_at as review_created_at')
+                    'r.id as review_id', 'r.rating', 'r.comment', 'r.created_at as review_created_at',
+                    'u.firstName as user_firstname', 'u.lastName as user_lastname')
             ->leftJoin('p.category', 'c')
             ->leftJoin('p.models', 'm')
             ->leftJoin('m.color', 'col')
@@ -82,6 +83,7 @@ class ProductRepository extends ServiceEntityRepository
             ->leftJoin('p.stocks', 'st')
             ->leftJoin('m.image', 'i')
             ->leftJoin('p.reviews', 'r')
+            ->leftJoin('r.user', 'u')
             ->where('p.id = :id')
             ->setParameter('id', $productId)
             ->getQuery()
@@ -92,7 +94,7 @@ class ProductRepository extends ServiceEntityRepository
         $productData['reviews'] = [];
 
         foreach ($results as $result) {
-        
+           
             if (!isset($productData['id'])) {
                 $productData['id'] = $result['id'];
                 $productData['name'] = $result['name'];
@@ -100,6 +102,7 @@ class ProductRepository extends ServiceEntityRepository
                 $productData['category'] = $result['category'];
             }
 
+          
             if (isset($result['model_id'])) {
                 $productData['models'][] = [
                     'model_id' => $result['model_id'],
@@ -123,15 +126,14 @@ class ProductRepository extends ServiceEntityRepository
                     'rating' => $result['rating'],
                     'comment' => $result['comment'],
                     'created_at' => $result['review_created_at']->format('Y-m-d H:i:s'),
+                    'user_firstname' => $result['user_firstname'],
+                    'user_lastname' => $result['user_lastname'],
                 ];
             }
         }
 
         return $productData;
     }
-
-    
-
 
     // Cartes des produits
     public function findProductsByCategory($categoryId) {
@@ -152,7 +154,6 @@ class ProductRepository extends ServiceEntityRepository
             ->getQuery()
             ->getArrayResult();
     }
-
 
 
 }

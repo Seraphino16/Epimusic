@@ -51,7 +51,7 @@ class ReviewController extends AbstractController
         $comment = $data['comment'] ?? null;
         $userId = $data['user_id'] ?? null;
 
-        if (!$productId || !$comment || !$userId) {
+        if (!$productId || !$comment) {
             return new JsonResponse(['error' => 'Requete invalide'], Response::HTTP_BAD_REQUEST);
         }
 
@@ -68,9 +68,12 @@ class ReviewController extends AbstractController
             }
         }
 
-        $user = $this->userRepository->find($userId);
-        if (!$user) {
-            return new JsonResponse(['error' => 'Utilisateur non trouvé'], Response::HTTP_NOT_FOUND);
+        $user = null;
+        if ($userId) {
+            $user = $this->userRepository->find($userId);
+            if (!$user) {
+                return new JsonResponse(['error' => 'Utilisateur non trouvé'], Response::HTTP_NOT_FOUND);
+            }
         }
 
         $review = new Review();
