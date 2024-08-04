@@ -57,7 +57,7 @@ function Login() {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen overflow-hidden">
+        <div className="flex items-center justify-center overflow-hidden">
             <div className="max-w-md w-full mx-auto p-8 rounded-lg mb-16">
                 <div className="flex items-center justify-center py-16">
                     <img src={logo} alt="Logo" className="w-64 h-64" />
@@ -65,7 +65,7 @@ function Login() {
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="flex items-center text-lg mb-6 md:mb-8">
                         <svg
-                            class="absolute ml-3"
+                            className="absolute ml-3"
                             width="24"
                             viewBox="0 0 24 24"
                         >
@@ -82,7 +82,7 @@ function Login() {
                     </div>
                     <div className="flex items-center text-lg mb-6 md:mb-8">
                         <svg
-                            class="absolute ml-3"
+                            className="absolute ml-3"
                             width="24"
                             viewBox="0 0 24 24"
                         >
