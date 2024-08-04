@@ -47,7 +47,7 @@ const ProductList = () => {
                         <Link 
                             to={`/product/${product.id}`} 
                             key={product.id} 
-                            className="product-item transition-transform duration-300 ease-in-out hover:scale-105"
+                            className="product-item transition-transform duration-300 ease-in-out hover:scale-105 bg-white"
                         >
                             <div className="model-item">
                                 <div className="image-container">
