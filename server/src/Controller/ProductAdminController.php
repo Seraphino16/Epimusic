@@ -203,7 +203,6 @@ class ProductAdminController extends AbstractController
         return new JsonResponse(['status' => 'Product deleted'], 200);
     }
 
-
     #[Route('/api/admin/products/{id}', name: 'api_product_get', methods: ['GET'])]
     public function getProduct(Product $product): JsonResponse
     {
