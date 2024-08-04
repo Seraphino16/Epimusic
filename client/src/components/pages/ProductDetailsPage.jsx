@@ -23,10 +23,15 @@ const ProductDetailsPage = () => {
                 const data = await response.json();
                 if (response.ok) {
                     setProduct(data);
+                    console.log(data)
+                   
                     setReviews(data.reviews || []);
+                   
+                    console.log('review', data.reviews)
                 } else {
                     setAlert({ message: data.message || 'Une erreur s\'est produite lors de la récupération des articles', type: 'error' });
                 }
+                
             } catch (error) {
                 console.log(error);
                 setAlert({ message: 'Internal server error', type: 'error' });
@@ -68,6 +73,7 @@ const ProductDetailsPage = () => {
         const user = JSON.parse(localStorage.getItem('user'));
         const data = {
             product_id: product.id,
+            model_id: product.models[0].model_id,
             comment: review,
             user_id: user ? user.id : null,
         };
@@ -142,8 +148,8 @@ const ProductDetailsPage = () => {
                             </div>
                             <div className="space-y-4">
                                 {reviews.map((review) => (
-                                    <div key={review.id} className="p-4 border border-gray-300 rounded">
-                                        <p className="font-bold">{review.user ? `${review.user.firstName} ${review.user.lastName}` : 'Anonyme'}</p>
+                                    <div key={review.review_id} className="p-4 border border-gray-300 rounded">
+                                        <p className="font-bold">{review.user_id ? `${review.user_firstname} ${review.user_lastname}` : 'Anonyme'}</p>
                                         <p className="text-gray-500 text-sm">{new Date(review.created_at).toLocaleDateString()}</p>
                                         <p>{review.comment}</p>
                                     </div>

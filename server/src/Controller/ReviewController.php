@@ -111,18 +111,16 @@ class ReviewController extends AbstractController
         return new JsonResponse([
             'message' => 'Votre avis à été ajouté',
             'review' => [
-                'id' => $review->getId(),
+                'review_id' => $review->getId(),
                 'product_id' => $review->getProduct()->getId(),
-                'model_id' => $review->getModel()?->getId(),
-                'user' => $review->getUser() ? [
-                    'id' => $review->getUser()->getId(),
-                    'firstName' => $review->getUser()->getFirstName(),
-                    'lastName' => $review->getUser()->getLastName()
-                ] : null,
+                'model_id' => $review->getModel() ? $review->getModel()->getId() : null,
+                'user_id' => $review->getUser() ? $review->getUser()->getId() : null,
+                'user_firstname' => $review->getUser() ? $review->getUser()->getFirstName() : null,
+                'user_lastname' => $review->getUser() ? $review->getUser()->getLastName() : null,
                 'rating' => $review->getRating(),
                 'comment' => $review->getComment(),
-                'created_at' => $review->getCreatedAt()->format('d-m-Y H:i:s'),
-                'update_at' => $review->getUpdateAt()->format('d-m-Y H:i:s'),
+                'created_at' => $review->getCreatedAt()->format('Y-m-d H:i:s'),
+                'update_at' => $review->getUpdateAt()->format('Y-m-d H:i:s')
             ],
         ], Response::HTTP_CREATED);
     }
@@ -229,13 +227,16 @@ class ReviewController extends AbstractController
         return new JsonResponse([
             'message' => 'Avis mis à jour avec succès',
             'review' => [
-                'id' => $review->getId(),
+                'review_id' => $review->getId(),
                 'product_id' => $review->getProduct()->getId(),
-                'model_id' => $review->getModel()?->getId(),
+                'model_id' => $review->getModel() ? $review->getModel()->getId() : null,
+                'user_id' => $review->getUser() ? $review->getUser()->getId() : null,
+                'user_firstname' => $review->getUser() ? $review->getUser()->getFirstName() : null,
+                'user_lastname' => $review->getUser() ? $review->getUser()->getLastName() : null,
                 'rating' => $review->getRating(),
                 'comment' => $review->getComment(),
-                'created_at' => $review->getCreatedAt()->format('d-m-Y H:i:s'),
-                'update_at' => $review->getUpdateAt()->format('d-m-Y H:i:s'),
+                'created_at' => $review->getCreatedAt()->format('Y-m-d H:i:s'),
+                'update_at' => $review->getUpdateAt()->format('Y-m-d H:i:s')
             ],
         ], Response::HTTP_OK);
     }
