@@ -1,39 +1,48 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import NavbarItem from "./NavbarItem";
 import SearchBar from "./SearchBar";
 import logo from "../../assets/logo.png";
 
 const Navbar = () => {
+    const location = useLocation();
+    const isAuthRoute =
+        location.pathname === "/register" || location.pathname === "/login";
     const [isOpen, setIsOpen] = useState(false);
     const [userRole, setUserRole] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
-        const user = JSON.parse(localStorage.getItem('user'));
+        const user = JSON.parse(localStorage.getItem("user"));
         if (user) {
             setIsLoggedIn(true);
             if (Array.isArray(user.roles)) {
-                if (user.roles.includes('ROLE_ADMIN')) {
-                    setUserRole('ROLE_ADMIN');
-                } else if (user.roles.includes('ROLE_USER')) {
-                    setUserRole('ROLE_USER');
+                if (user.roles.includes("ROLE_ADMIN")) {
+                    setUserRole("ROLE_ADMIN");
+                } else if (user.roles.includes("ROLE_USER")) {
+                    setUserRole("ROLE_USER");
                 }
             }
         }
     }, []);
 
     const handleLogout = () => {
-        localStorage.removeItem('user');
+        localStorage.removeItem("user");
         setIsLoggedIn(false);
         setUserRole(null);
-        navigate('/login');
-        window.location.reload(); // This will refresh the page
+        navigate("/login");
+        window.location.reload();
     };
 
     return (
-        <nav className="relative z-50 w-full flex items-center justify-between flex-wrap bg-[#2bebf1] py-2 shadow px-4 lg:px-16 xl:px-48">
+        <nav
+            className={`top-0 z-50 w-full flex items-center justify-between flex-wrap ${
+                isAuthRoute
+                    ? "bg-transparent"
+                    : "bg-transparent"
+            } py-2 px-4 lg:px-16 xl:px-48`}
+        >
             <div className="flex items-center flex-shrink-0 text-black mr-6">
                 <img src={logo} alt="Logo" className="w-16 h-16 mr-2" />
             </div>
@@ -61,15 +70,14 @@ const Navbar = () => {
                     <SearchBar />
                     <NavbarItem text="Accueil" href="/" />
                     <NavbarItem text="Produits" href="/products" />
-                    {userRole === 'ROLE_ADMIN' && <NavbarItem text="Admin" href="/admin/" />}
-                    {userRole === 'ROLE_USER' && <NavbarItem text="Profil" href="/profile/" />}
+                    {userRole === "ROLE_ADMIN" && (
+                        <NavbarItem text="Admin" href="/admin/" />
+                    )}
+                    {userRole === "ROLE_USER" && (
+                        <NavbarItem text="Profil" href="/profile/" />
+                    )}
                     {isLoggedIn ? (
-                        <button
-                            onClick={handleLogout}
-                            className="block mt-4 lg:inline-block lg:mt-0 text-black hover:text-gray-800 mr-4"
-                        >
-                            Déconnexion
-                        </button>
+                        <NavbarItem text="Déconnexion" onClick={handleLogout} />
                     ) : (
                         <NavbarItem text="Se Connecter" href="/login" />
                     )}

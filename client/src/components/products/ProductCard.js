@@ -26,7 +26,7 @@ const ProductCard = ({ product, editProduct, deleteProduct }) => {
                 <h2 className="text-xl font-bold text-gray-800">
                     {product.name}
                 </h2>
-                <p className="text-gray-600 mt-2">
+                <p className="text-gray-600 mt-2 line-clamp-4">
                     {showFullDescription
                         ? product.description
                         : truncatedDescription}

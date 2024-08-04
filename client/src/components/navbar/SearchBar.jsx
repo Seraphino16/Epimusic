@@ -8,7 +8,7 @@ function SearchBar() {
                     className="border-2 border-gray-300 bg-white h-10 pl-5 pr-10 rounded-full text-sm focus:outline-none w-full"
                     type="search"
                     name="search"
-                    placeholder="Search a product..."
+                    placeholder="Rechercher un article..."
                 />
                 <button
                     type="submit"
