@@ -36,4 +36,31 @@ class StockRepository extends ServiceEntityRepository
             $this->_em->flush();
         }
     }
+
+    public function findStockForProduct(int $productId, ?int $colorId, ?int $sizeId): ?int
+    {
+        $qb = $this->createQueryBuilder('s')
+            ->select('s.quantity')
+            ->where('s.product = :productId')
+            ->setParameter('productId', $productId);
+
+        if ($colorId !== null) {
+            $qb->andWhere('s.color = :colorId')
+                ->setParameter('colorId', $colorId);
+        } else {
+            $qb->andWhere('s.color IS NULL');
+        }
+
+        if ($sizeId !== null) {
+            $qb->andWhere('s.size = :sizeId')
+                ->setParameter('sizeId', $sizeId);
+        } else {
+            $qb->andWhere('s.size IS NULL');
+        }
+
+        $stock = $qb->getQuery()->getOneOrNullResult();
+
+        return $stock ? (int)$stock['quantity'] : null;
+    }
+
 }
