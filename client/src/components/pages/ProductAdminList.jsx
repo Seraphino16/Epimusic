@@ -144,6 +144,18 @@ const ProductAdminList = () => {
                                         <p className="product-category">
                                             Catégorie : {product.category}
                                         </p>
+                                        {product.category === 'Instrument' && (
+                                            <div>
+                                                <p className="product-brand">
+                                                    Marque : {product.brands.join(', ')}
+                                                </p>
+                                            </div>
+                                        )}
+                                        <div>
+                                            <p className="product-tags">
+                                                Tags : {product.tags.join(', ')}
+                                            </p>
+                                        </div>
                                         <div className="flex flex-row space-x-12">
                                             {model.color && (
                                                 <p className="product-color">
@@ -156,6 +168,9 @@ const ProductAdminList = () => {
                                                 </p>
                                             )}
                                         </div>
+                                        <p className="product-weight">
+                                            Poids : {product.weight} Kg
+                                        </p>
                                         {product.stocks && product.stocks.length > 0 && (
                                             <div className="product-stock">
                                                 {product.stocks[0].quantity > 0 && product.stocks[0].quantity <= 5 ? (

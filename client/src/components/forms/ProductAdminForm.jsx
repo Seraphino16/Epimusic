@@ -14,7 +14,11 @@ const ProductAdminForm = () => {
     const [size, setSize] = useState("");
     const [price, setPrice] = useState("");
     const [stock, setStock] = useState("");
-    const [photoFiles, setPhotoFiles] = useState([]); // State for photo files
+    const [brand, setBrand] = useState("");
+    const [tags, setTags] = useState([]);
+    const [weight, setWeight] = useState("");
+    const [tagInput, setTagInput] = useState("");
+    const [photoFiles, setPhotoFiles] = useState([]);
     const [mainImageIndex, setMainImageIndex] = useState(0);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
@@ -22,8 +26,7 @@ const ProductAdminForm = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios
-            .get("http://localhost:8000/api/admin/categories")
+        axios.get("http://localhost:8000/api/admin/categories")
             .then((response) => {
                 setCategories(response.data);
             })
@@ -31,8 +34,7 @@ const ProductAdminForm = () => {
                 console.error("Erreur lors de la récupération des catégories !", error);
             });
 
-        axios
-            .get("http://localhost:8000/api/admin/colors")
+        axios.get("http://localhost:8000/api/admin/colors")
             .then((response) => {
                 setColors(response.data);
             })
@@ -45,9 +47,30 @@ const ProductAdminForm = () => {
         setPhotoFiles(Array.from(e.target.files));
     };
 
+    const handleTagInputChange = (e) => {
+        setTagInput(e.target.value);
+    };
+
+    const handleAddTag = () => {
+        if (tagInput.trim() !== "") {
+            setTags([...tags, tagInput.trim()]);
+            setTagInput("");
+        }
+    };
+
+    const handleRemoveTag = (index) => {
+        setTags(tags.filter((_, i) => i !== index));
+    };
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         setIsSubmitting(true);
+
+        if (price <= 0 || stock < 0 || weight < 0) {
+            setError("Le prix doit être supérieur à zéro, le stock et le poids ne peuvent pas être négatifs !");
+            setIsSubmitting(false);
+            return;
+        }
 
         try {
             const uploadedPhotos = [];
@@ -70,8 +93,11 @@ const ProductAdminForm = () => {
                 size: shouldDisplaySize(category) ? size : null,
                 price: parseFloat(price),
                 stock: parseInt(stock, 10),
+                weight: parseFloat(weight),
                 photoPaths: uploadedPhotos,
                 mainImageIndex: mainImageIndex,
+                brand: category === "1" ? brand : null,  // Ensure brand is only sent for category 1
+                tags: tags  // Ensure tags are included in the request
             };
 
             await axios.post("http://localhost:8000/api/admin/products", newProduct);
@@ -94,8 +120,7 @@ const ProductAdminForm = () => {
         setCategory(selectedCategory);
 
         if (selectedCategory === "2" || selectedCategory === "3") {
-            axios
-                .get(`http://localhost:8000/api/admin/sizes/category/${selectedCategory}`)
+            axios.get(`http://localhost:8000/api/admin/sizes/category/${selectedCategory}`)
                 .then((response) => {
                     setSizes(response.data);
                     setSize("");
@@ -129,10 +154,7 @@ const ProductAdminForm = () => {
                     <form onSubmit={handleSubmit}>
                         <div className="md:flex items-center mt-12">
                             <div className="w-full md:w-1/2 flex flex-col">
-                                <label
-                                    className="font-semibold leading-none text-black"
-                                    htmlFor="name"
-                                >
+                                <label className="font-semibold leading-none text-black" htmlFor="name">
                                     Nom
                                 </label>
                                 <input
@@ -146,10 +168,7 @@ const ProductAdminForm = () => {
                                 />
                             </div>
                             <div className="w-full md:w-1/2 flex flex-col md:ml-6 md:mt-0 mt-4">
-                                <label
-                                    className="font-semibold leading-none text-black"
-                                    htmlFor="category"
-                                >
+                                <label className="font-semibold leading-none text-black" htmlFor="category">
                                     Catégorie
                                 </label>
                                 <select
@@ -172,30 +191,80 @@ const ProductAdminForm = () => {
                         </div>
                         <div className="md:flex items-center mt-8">
                             <div className="w-full flex flex-col">
-                                <label
-                                    className="font-semibold leading-none text-black"
-                                    htmlFor="description"
-                                >
+                                <label className="font-semibold leading-none text-black" htmlFor="description">
                                     Description
                                 </label>
-                                <input
-                                    type="text"
+                                <textarea
                                     id="description"
                                     placeholder="Entrez la description du produit"
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
                                     required
                                     className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
+                                    rows="5"
                                 />
+                            </div>
+                        </div>
+                        {category === "1" && (
+                            <div className="md:flex items-center mt-8">
+                                <div className="w-full flex flex-col">
+                                    <label className="font-semibold leading-none text-black" htmlFor="brand">
+                                        Marque
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="brand"
+                                        placeholder="Entrez le nom de la marque"
+                                        value={brand}
+                                        onChange={(e) => setBrand(e.target.value)}
+                                        className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
+                                    />
+                                </div>
+                            </div>
+                        )}
+                        <div className="md:flex items-center mt-8">
+                            <div className="w-full flex flex-col">
+                                <label className="font-semibold leading-none text-black" htmlFor="tags">
+                                    Tags
+                                </label>
+                                <div className="flex">
+                                    <input
+                                        type="text"
+                                        id="tags"
+                                        placeholder="Entrez un tag"
+                                        value={tagInput}
+                                        onChange={handleTagInputChange}
+                                        className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200 flex-grow"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={handleAddTag}
+                                        className="bg-blue-700 text-white px-4 py-2 rounded ml-2"
+                                    >
+                                        Ajouter
+                                    </button>
+                                </div>
+                                <div className="flex flex-wrap mt-2">
+                                    {tags.map((tag, index) => (
+                                        <div key={index}
+                                             className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full mr-2 mt-2">
+                                            {tag}
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveTag(index)}
+                                                className="ml-2 text-red-600"
+                                            >
+                                                &times;
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                         {shouldDisplayColor(category) && (
                             <div className="md:flex items-center mt-8">
                                 <div className="w-full flex flex-col">
-                                    <label
-                                        className="font-semibold leading-none text-black"
-                                        htmlFor="color"
-                                    >
+                                    <label className="font-semibold leading-none text-black" htmlFor="color">
                                         Couleur
                                     </label>
                                     <select
@@ -219,10 +288,7 @@ const ProductAdminForm = () => {
                         {shouldDisplaySize(category) && (
                             <div className="md:flex items-center mt-8">
                                 <div className="w-full flex flex-col">
-                                    <label
-                                        className="font-semibold leading-none text-black"
-                                        htmlFor="size"
-                                    >
+                                    <label className="font-semibold leading-none text-black" htmlFor="size">
                                         Taille
                                     </label>
                                     <select
@@ -245,6 +311,24 @@ const ProductAdminForm = () => {
                         )}
                         <div className="md:flex items-center mt-8">
                             <div className="w-full flex flex-col">
+                                <label className="font-semibold leading-none text-black" htmlFor="weight">
+                                    Poids (Kg)
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    id="weight"
+                                    placeholder="Entrez le poids du produit en Kg"
+                                    value={weight}
+                                    onChange={(e) => setWeight(e.target.value)}
+                                    min="0"
+                                    required
+                                    className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
+                                />
+                            </div>
+                        </div>
+                        <div className="md:flex items-center mt-8">
+                            <div className="w-full flex flex-col">
                                 <label
                                     className="font-semibold leading-none text-black"
                                     htmlFor="price"
@@ -252,7 +336,7 @@ const ProductAdminForm = () => {
                                     Prix
                                 </label>
                                 <input
-                                    type="number"
+                                    type="text"
                                     id="price"
                                     placeholder="Entrez le prix du produit"
                                     value={price}
@@ -264,10 +348,7 @@ const ProductAdminForm = () => {
                         </div>
                         <div className="md:flex items-center mt-8">
                             <div className="w-full flex flex-col">
-                                <label
-                                    className="font-semibold leading-none text-black"
-                                    htmlFor="stock"
-                                >
+                                <label className="font-semibold leading-none text-black" htmlFor="stock">
                                     Stock
                                 </label>
                                 <input
@@ -276,6 +357,7 @@ const ProductAdminForm = () => {
                                     placeholder="Entrez le stock du produit"
                                     value={stock}
                                     onChange={(e) => setStock(e.target.value)}
+                                    min="0"
                                     required
                                     className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
                                 />
@@ -283,10 +365,7 @@ const ProductAdminForm = () => {
                         </div>
                         <div className="md:flex items-center mt-8">
                             <div className="w-full flex flex-col">
-                                <label
-                                    className="font-semibold leading-none text-black"
-                                    htmlFor="photos"
-                                >
+                                <label className="font-semibold leading-none text-black" htmlFor="photos">
                                     Photos
                                 </label>
                                 <input
@@ -297,7 +376,7 @@ const ProductAdminForm = () => {
                                     className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
                                 />
                                 <div className="flex flex-col mt-4">
-                                    {Array.from(photoFiles).map((file, index) => (
+                                    {photoFiles.map((file, index) => (
                                         <div key={index} className="flex items-center mt-2">
                                             <p className="mr-4">{file.name}</p>
                                             <button
