@@ -34,6 +34,9 @@ class Model
     #[ORM\ManyToMany(targetEntity: Image::class, inversedBy: 'models')]
     private Collection $image;
 
+    #[ORM\Column(nullable: true)]
+    private ?float $weight = null;
+
     public function __construct()
     {
         $this->image = new ArrayCollection();
@@ -112,6 +115,18 @@ class Model
     public function removeImage(Image $image): static
     {
         $this->image->removeElement($image);
+
+        return $this;
+    }
+
+    public function getWeight(): ?float
+    {
+        return $this->weight;
+    }
+
+    public function setWeight(?float $weight): static
+    {
+        $this->weight = $weight;
 
         return $this;
     }

@@ -31,6 +31,9 @@ class Category
     #[ORM\JoinTable(name: 'category_size')]
     private Collection $sizes;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $weight_unit = null;
+
     public function __construct()
     {
         $this->products = new ArrayCollection();
@@ -80,6 +83,18 @@ class Category
                 $product->setCategory(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getWeightUnit(): ?string
+    {
+        return $this->weight_unit;
+    }
+
+    public function setWeightUnit(?string $weight_unit): static
+    {
+        $this->weight_unit = $weight_unit;
 
         return $this;
     }

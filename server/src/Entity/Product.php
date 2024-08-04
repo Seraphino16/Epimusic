@@ -18,7 +18,7 @@ class Product
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\Column(length: 1005)]
+    #[ORM\Column(type: 'text')]
     private ?string $description = null;
 
     #[ORM\ManyToOne(inversedBy: 'products')]
@@ -34,10 +34,22 @@ class Product
     #[ORM\OneToMany(targetEntity: Stock::class, mappedBy: 'product', orphanRemoval: true)]
     private Collection $stocks;
 
+    #[ORM\OneToMany(targetEntity: Brand::class, mappedBy: 'product', orphanRemoval: true)]
+    private Collection $brands;
+
+    #[ORM\OneToMany(targetEntity: Tag::class, mappedBy: 'product', orphanRemoval: true)]
+    private Collection $tags;
+
+    #[ORM\OneToMany(targetEntity: Weight::class, mappedBy: 'product', orphanRemoval: true)]
+    private Collection $weights;
+
     public function __construct()
     {
         $this->models = new ArrayCollection();
         $this->stocks = new ArrayCollection();
+        $this->brands = new ArrayCollection();
+        $this->tags = new ArrayCollection();
+        $this->weights = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -135,6 +147,90 @@ class Product
             // set the owning side to null (unless already changed)
             if ($stock->getProduct() === $this) {
                 $stock->setProduct(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Brand>
+     */
+    public function getBrands(): Collection
+    {
+        return $this->brands;
+    }
+
+    public function addBrand(Brand $brand): self
+    {
+        if (!$this->brands->contains($brand)) {
+            $this->brands->add($brand);
+            $brand->setProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBrand(Brand $brand): self
+    {
+        if ($this->brands->removeElement($brand)) {
+            if ($brand->getProduct() === $this) {
+                $brand->setProduct(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getTags(): Collection
+    {
+        return $this->tags;
+    }
+
+    public function addTag(Tag $tag): static
+    {
+        if (!$this->tags->contains($tag)) {
+            $this->tags->add($tag);
+            $tag->setProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTag(Tag $tag): static
+    {
+        if ($this->tags->removeElement($tag)) {
+            if ($tag->getProduct() === $this) {
+                $tag->setProduct(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Weight>
+     */
+    public function getWeights(): Collection
+    {
+        return $this->weights;
+    }
+
+    public function addWeight(Weight $weight): self
+    {
+        if (!$this->weights->contains($weight)) {
+            $this->weights->add($weight);
+            $weight->setProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removeWeight(Weight $weight): self
+    {
+        if ($this->weights->removeElement($weight)) {
+            if ($weight->getProduct() === $this) {
+                $weight->setProduct(null);
             }
         }
 
