@@ -29,7 +29,7 @@ class CartController extends AbstractController
     private StockRepository $stockRepository;
     private EntityManagerInterface $entityManager;
     private AnonymousCartRepository $anonymousCartRepository;
-    private UserRepository $userRepository; 
+    private UserRepository $userRepository;
 
     public function __construct(
         CartRepository $cartRepository,
@@ -38,7 +38,7 @@ class CartController extends AbstractController
         StockRepository $stockRepository,
         EntityManagerInterface $entityManager,
         AnonymousCartRepository $anonymousCartRepository,
-        UserRepository $userRepository 
+        UserRepository $userRepository
     ) {
         $this->cartRepository = $cartRepository;
         $this->productRepository = $productRepository;
@@ -46,7 +46,7 @@ class CartController extends AbstractController
         $this->stockRepository = $stockRepository;
         $this->entityManager = $entityManager;
         $this->anonymousCartRepository = $anonymousCartRepository;
-        $this->userRepository = $userRepository; 
+        $this->userRepository = $userRepository;
     }
 
     #[Route('/cart/add/{productId}', name: 'cart_add_item', methods: ['POST'])]
@@ -59,7 +59,7 @@ class CartController extends AbstractController
         $modelId = isset($data['model_id']) ? (int)$data['model_id'] : null;
         $token = isset($data['token']) ? $data['token'] : null;
 
-    
+
         $product = $this->productRepository->find($productId);
         $model = $this->modelRepository->find($modelId);
 
@@ -79,7 +79,7 @@ class CartController extends AbstractController
         }
 
         if ($userId) {
-            
+
             $user = $this->userRepository->find($userId);
             if (!$user) {
                 return new JsonResponse(['error' => 'Utilisateur non trouvé'], Response::HTTP_NOT_FOUND);
@@ -93,15 +93,15 @@ class CartController extends AbstractController
                 $this->entityManager->persist($cart);
             }
         } elseif ($token) {
-          
+
             $anonymousCart = $this->anonymousCartRepository->findOneBy(['token' => $token]);
             if (!$anonymousCart) {
-                return new JsonResponse(['error' => 'Panier anonyme non trouvé'], 
+                return new JsonResponse(['error' => 'Panier anonyme non trouvé'],
                                             Response::HTTP_NOT_FOUND);
             }
             $cart = $anonymousCart;
         } else {
-            
+
             $token = bin2hex(random_bytes(16));
             $anonymousCart = new AnonymousCart();
             $anonymousCart->setToken($token);
@@ -128,7 +128,7 @@ class CartController extends AbstractController
             ], Response::HTTP_OK);
         }
 
-     
+
         $cartItem = $this->entityManager->getRepository(CartItem::class)
             ->findOneBy([
                 'cart' => $cart instanceof Cart ? $cart : null,

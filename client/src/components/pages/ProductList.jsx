@@ -39,22 +39,25 @@ const ProductList = () => {
 
     const handleAddToCart = (product) => {
         const user = JSON.parse(localStorage.getItem('user'));
-
-        if (!user) {
-            setAlert("Veuillez vous connecter pour ajouter des articles au panier.");
-            return;
-        }
-
+        const token = localStorage.getItem('cart_token');
         const data = {
             model_id: product.model_id,
-            user_id: user.id,
-            quantity: 1
+            quantity: 1,
         };
+
+        if (user) {
+            data.user_id = user.id;
+        } else if (token) {
+            data.token = token;
+        }
 
         axios.post(`http://localhost:8000/api/cart/add/${product.id}`, data)
             .then(response => {
                 console.log("Produit ajouté au panier : ", response.data);
                 setAlert("Produit ajouté au panier !");
+                if (response.data.token) {
+                    localStorage.setItem('cart_token', response.data.token);
+                }
             })
             .catch(error => {
                 console.error("Erreur lors de l'ajout du produit au panier : ", error);
