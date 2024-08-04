@@ -199,3 +199,11 @@
 .add-to-cart-button-details:hover {
     background-color: #218838;
 }
+
+.quantity-select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 100%;
+    box-sizing: border-box;
+}

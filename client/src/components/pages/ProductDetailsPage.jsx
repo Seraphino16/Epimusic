@@ -12,13 +12,13 @@ const ProductDetailsPage = () => {
     const { id } = useParams();
     const [product, setProduct] = useState(null);
     const [alert, setAlert] = useState({ message: '', type: 'error' });
+    const [quantity, setQuantity] = useState(1);
 
     useEffect(() => {
         const fetchProduct = async () => {
             try {
                 const response = await fetch(`http://localhost:8000/api/products/${id}`);
                 const data = await response.json();
-              
 
                 if (response.ok) {
                     setProduct(data);
@@ -39,6 +39,7 @@ const ProductDetailsPage = () => {
         const token = localStorage.getItem('cart_token');
         const data = {
             model_id: product.models[0].model_id,
+            quantity: quantity,
         };
 
         if (user) {
@@ -79,12 +80,27 @@ const ProductDetailsPage = () => {
                             size={`${product.models[0]?.size_value || ''} ${product.models[0]?.size_unit || ''}`}
                             price={product.models[0].price}
                         />
-                        <button
-                            className="add-to-cart-button-details"
-                            onClick={handleAddToCart}
-                        >
-                            <FontAwesomeIcon icon={faShoppingCart} />
-                        </button>
+                        <div className="flex flex-col space-y-4">
+                            <label htmlFor="quantity">Quantité :</label>
+                            <select
+                                id="quantity"
+                                value={quantity}
+                                onChange={(e) => setQuantity(Number(e.target.value))}
+                                className="quantity-select"
+                            >
+                                {[...Array(product.models[0].stock_quantity).keys()].map((x) => (
+                                    <option key={x + 1} value={x + 1}>
+                                        {x + 1}
+                                    </option>
+                                ))}
+                            </select>
+                            <button
+                                className="add-to-cart-button-details"
+                                onClick={handleAddToCart}
+                            >
+                                <FontAwesomeIcon icon={faShoppingCart} />
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
