@@ -81,6 +81,10 @@ const Content = () => {
           path="/product/:id"
           element={<ProductDetailsPage />}
         />
+        <Route 
+          path="/filters"
+          element={<FilteredArticles />}
+        />
       </Routes>
     </div>
   );
