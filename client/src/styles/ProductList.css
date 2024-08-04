@@ -184,3 +184,18 @@
     text-align: center;
     margin: 10px 0;
 }
+
+.add-to-cart-button-details {
+    padding: 10px 20px;
+    color: white;
+    background-color: #28a745;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.add-to-cart-button-details:hover {
+    background-color: #218838;
+}
