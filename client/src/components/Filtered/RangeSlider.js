@@ -34,7 +34,7 @@ const RangeSlider = ({ min, max, step, onChange, onReset }) => {
   };
 
   return (
-    <div className="range-slider p-4 border rounded-lg">
+    <div className="range-slider p-4 rounded-lg">
       <div className="flex justify-between items-center mb-4">
         <input
           type="number"
@@ -90,13 +90,13 @@ const RangeSlider = ({ min, max, step, onChange, onReset }) => {
       <div className="flex justify-between">
         <button
           onClick={handleReset}
-          className="bg-blue-600 text-white hover:underline px-4 py-2 rounded"
+          className="bg-blue-600 text-white hover:underline px-2 py-2 rounded"
         >
           Réinitialiser
         </button>
         <button
           onClick={handleSubmit}
-          className="bg-blue-600 text-white px-4 py-2 rounded"
+          className="bg-blue-600 text-white px-2 py-2 rounded"
         >
           Valider
         </button>

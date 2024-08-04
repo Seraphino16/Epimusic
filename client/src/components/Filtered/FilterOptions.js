@@ -1,7 +1,7 @@
 import React from "react";
 
 const FilterOptions = ({ options, sectionId }) => (
-  <div className="space-y-6">
+  <div className="space-y-6 pl-4 py-4">
     {options.map((option, optionIdx) => (
       <div key={option.value} className="flex items-center">
         <input

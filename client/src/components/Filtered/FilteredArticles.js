@@ -3,15 +3,15 @@ import React from "react";
 import {
   Dialog,
   Transition,
-  TransitionChild,
-  DialogPanel,
   Menu,
   MenuButton,
   MenuItems,
   MenuItem,
 } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { ChevronDownIcon, FunnelIcon, Squares2X2Icon } from '@heroicons/react/20/solid';
+import { FunnelIcon, Squares2X2Icon } from '@heroicons/react/20/solid';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import FilterDisclosure from './FilterDisclosure';
 import RangeSlider from './RangeSlider';
 
@@ -30,7 +30,6 @@ const FilteredArticles = () => {
     console.log('Prix:', value);
   };
 
-
   const handlePoidsChange = (value) => {
     console.log('Poids:', value);
   };
@@ -45,34 +44,44 @@ const FilteredArticles = () => {
 
   const filters = [
     {
+      name: 'Filtres',
+    },
+    {
+      id: 'Type de produits',
+      name: 'Type de produits',
+      options: [
+        { value: 'Instruments', label: 'Instruments', checked: false },
+        { value: 'Vinyles', label: 'Vinyles', checked: false },
+        { value: 'Goddies', label: 'Goddies', checked: true },
+      ],
+    },
+    {
       id: 'Marque',
       name: 'Marque',
       options: [
-        { value: 'white', label: 'White', checked: false },
-        { value: 'beige', label: 'Beige', checked: false },
-        { value: 'blue', label: 'Blue', checked: true },
-        { value: 'brown', label: 'Brown', checked: false },
-        { value: 'green', label: 'Green', checked: false },
-        { value: 'purple', label: 'Purple', checked: false },
+        { value: 'Shiver', label: 'Shiver', checked: false },
+        { value: 'Takamine', label: 'Takamine', checked: false },
+        { value: 'Gibson', label: 'Gibson', checked: true },
+        { value: 'Yamaha', label: 'Yamaha', checked: false },
       ],
     },
     {
       id: 'Prix',
       name: 'Prix',
       component: <RangeSlider min={0} max={100} step={1} onChange={handlePrixChange} onReset={handlePrixReset} />,
-
-    
     },
     {
       id: 'Taille',
       name: 'Taille',
       options: [
-        { value: 'white', label: 'White', checked: false },
-        { value: 'beige', label: 'Beige', checked: false },
-        { value: 'blue', label: 'Blue', checked: true },
-        { value: 'brown', label: 'Brown', checked: false },
-        { value: 'green', label: 'Green', checked: false },
-        { value: 'purple', label: 'Purple', checked: false },
+        { value: '33', label: '33', checked: false },
+        { value: '45', label: '45', checked: false },
+        { value: 'XXL', label: 'XXL', checked: true },
+        { value: 'XL', label: 'XL', checked: false },
+        { value: 'L', label: 'L', checked: false },
+        { value: 'M', label: 'M', checked: false },
+        { value: 'S', label: 'S', checked: false },
+        { value: 'XS', label: 'XS', checked: false },
       ],
     },
     {
@@ -92,7 +101,7 @@ const FilteredArticles = () => {
         {/* Mobile filter dialog */}
         <Transition.Root show={mobileFiltersOpen} as={Fragment}>
           <Dialog as="div" className="relative z-40 lg:hidden" onClose={setMobileFiltersOpen}>
-            <TransitionChild
+            <Transition.Child
               as={Fragment}
               enter="transition-opacity ease-linear duration-300"
               enterFrom="opacity-0"
@@ -102,10 +111,10 @@ const FilteredArticles = () => {
               leaveTo="opacity-0"
             >
               <div className="fixed inset-0 bg-black bg-opacity-25" />
-            </TransitionChild>
+            </Transition.Child>
 
             <div className="fixed inset-0 z-40 flex">
-              <TransitionChild
+              <Transition.Child
                 as={Fragment}
                 enter="transition ease-in-out duration-300 transform"
                 enterFrom="translate-x-full"
@@ -114,7 +123,7 @@ const FilteredArticles = () => {
                 leaveFrom="translate-x-0"
                 leaveTo="translate-x-full"
               >
-                <DialogPanel className="relative ml-auto flex h-full w-full max-w-xs flex-col overflow-y-auto bg-white py-4 pb-12 shadow-xl">
+                <Dialog.Panel className="relative ml-auto flex h-full w-full max-w-xs flex-col overflow-y-auto bg-white py-4 pb-12 shadow-xl">
                   <div className="flex items-center justify-between px-4">
                     <h2 className="text-lg font-medium text-gray-900">Filters</h2>
                     <button
@@ -133,25 +142,20 @@ const FilteredArticles = () => {
                       <FilterDisclosure key={section.id} section={section} />
                     ))}
                   </form>
-                </DialogPanel>
-              </TransitionChild>
+                </Dialog.Panel>
+              </Transition.Child>
             </div>
           </Dialog>
         </Transition.Root>
 
         <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-baseline justify-between border-b border-gray-200 pb-6 pt-24">
-            <h1 className="text-4xl font-bold tracking-tight text-gray-900">New Arrivals</h1>
-
             <div className="flex items-center">
               <Menu as="div" className="relative inline-block text-left">
                 <div>
                   <MenuButton className="group inline-flex justify-center text-sm font-medium text-gray-700 hover:text-gray-900">
                     Sort
-                    <ChevronDownIcon
-                      className="-mr-1 ml-1 h-5 w-5 flex-shrink-0 text-gray-400 group-hover:text-gray-500"
-                      aria-hidden="true"
-                    />
+                    <FontAwesomeIcon icon={faChevronDown} className="-mr-1 ml-1 h-5 w-5 flex-shrink-0 text-gray-400 group-hover:text-gray-500" />
                   </MenuButton>
                 </div>
 
