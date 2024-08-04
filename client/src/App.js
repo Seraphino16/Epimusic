@@ -25,7 +25,7 @@ const App = () => (
 const BackgroundWrapper = ({ children }) => {
   const location = useLocation();
   const isAuthRoute = location.pathname === '/login' || location.pathname === '/register';
-  const backgroundImage = isAuthRoute ? bgAuth : bgHome;
+  const backgroundImage = isAuthRoute ? bgAuth : bgAuth;
 
   return (
     <div
@@ -45,7 +45,7 @@ const BackgroundWrapper = ({ children }) => {
 
 const Content = () => {
   return (
-    <div style={{ paddingTop: '100px' }}>
+    <div style={{ paddingTop: '50px' }}>
       <Routes>
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />

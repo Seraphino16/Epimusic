@@ -106,7 +106,7 @@ const ProductAdminList = () => {
             </button>
             <div className="product-list">
                 {products.map((product) => (
-                    <div key={product.id} className="product-item">
+                    <div key={product.id} className="bg-white product-item">
                         {product.models.map((model, index) => (
                             <div key={index} className="model-item">
                                 <div>
@@ -140,7 +140,7 @@ const ProductAdminList = () => {
                                 </div>
                                 <div className="flex flex-column">
                                     <div className="product-details">
-                                        <p>{product.description}</p>
+                                        <p className="line-clamp-3">{product.description}</p>
                                         <p className="product-category">
                                             Catégorie : {product.category}
                                         </p>

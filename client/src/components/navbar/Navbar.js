@@ -37,10 +37,10 @@ const Navbar = () => {
 
     return (
         <nav
-            className={`fixed top-0 z-50 w-full flex items-center justify-between flex-wrap ${
+            className={`top-0 z-50 w-full flex items-center justify-between flex-wrap ${
                 isAuthRoute
                     ? "bg-transparent"
-                    : "bg-gradient-to-b from-pink-500 to-orange-400"
+                    : "bg-transparent"
             } py-2 px-4 lg:px-16 xl:px-48`}
         >
             <div className="flex items-center flex-shrink-0 text-black mr-6">

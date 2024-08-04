@@ -73,7 +73,7 @@ const ProductList = () => {
                                 </div>
                                 <div className="flex flex-column">
                                     <div className="product-details">
-                                        <p className="line-clamp-4">{product.description}</p>
+                                        <p className="line-clamp-3">{product.description}</p>
                                         <p className="product-category">
                                             Catégorie : {product.category}
                                         </p>
