@@ -18,7 +18,7 @@ const ProductDetailsPage = () => {
             try {
                 const response = await fetch(`http://localhost:8000/api/products/${id}`);
                 const data = await response.json();
-                console.log(data);
+              
 
                 if (response.ok) {
                     setProduct(data);
@@ -38,8 +38,7 @@ const ProductDetailsPage = () => {
         const user = JSON.parse(localStorage.getItem('user'));
         const token = localStorage.getItem('cart_token');
         const data = {
-            model_id: product.models[0].id, // Assurez-vous que `product.models[0].id` correspond à l'ID du modèle
-            quantity: 1,
+            model_id: product.models[0].model_id,
         };
 
         if (user) {
