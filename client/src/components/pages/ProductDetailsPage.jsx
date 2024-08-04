@@ -18,15 +18,15 @@ const ProductDetailsPage = () => {
                 const response = await fetch(`http://localhost:8000/api/products/${id}`);
                 const data = await response.json();
                 console.log(data);
-        
+
             if (response.ok) {
                 setProduct(data);
-              
+
             } else {
-               
+
                 setAlert({ message: data.message || 'Une erreur s\'est produite lors de la récupération des articles', type: 'error' });
             }
-            
+
             } catch (error) {
                 console.log(error);
                 setAlert({ message: 'Internal server error', type: 'error' });
@@ -42,22 +42,22 @@ const ProductDetailsPage = () => {
         {product && (
             <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
                 <div className="space-y-4">
-                    <ProductTitle name={product.name} category={product.category} />
-                    <ProductImage images={product.images} />
+                    <ProductTitle name={product.name} category={product.category}/>
+                    <ProductImage images={product.images}/>
                 </div>
                 <div className="space-y-4 mt-16 pt-12">
-                        <ProductDescription
-                            category={product.category}
-                            description={product.description}
-                            stock={product.models[0].stock_quantity} 
-                            color={product.models[0]?.color || 'Non spécifié'}
-                            size={`${product.models[0]?.size_value || ''} ${product.models[0]?.size_unit || ''}`}
-                            price={product.models[0].price}
-                        />
-                    </div>
+                    <ProductDescription
+                        category={product.category}
+                        description={product.description}
+                        stock={product.models[0].stock_quantity}
+                        color={product.models[0]?.color || 'Non spécifié'}
+                        size={`${product.models[0]?.size_value || ''} ${product.models[0]?.size_unit || ''}`}
+                        price={product.models[0].price}
+                    />
+                </div>
             </div>
         )}
-    </div>
+        </div>
     );
 }
 
