@@ -86,21 +86,25 @@ class ProductRepository extends ServiceEntityRepository
         }
     }
 
+    // Fiche détaillée du produit
     public function findProductWithCategory($productId)
     {
-
         $results = $this->createQueryBuilder('p')
             ->select('p.id', 'p.name', 'p.description', 'c.name as category', 
                     'm.id as model_id', 'm.price',
                     'col.name as color', 's.value as size_value', 's.unit as size_unit', 
                     'st.quantity as stock_quantity',
-                    'i.path as image_url', 'i.is_main as is_main')
+                    'i.path as image_url', 'i.is_main as is_main',
+                    'r.id as review_id', 'r.rating', 'r.comment', 'r.created_at as review_created_at',
+                    'u.id as user_id', 'u.firstName as user_firstname', 'u.lastName as user_lastname')
             ->leftJoin('p.category', 'c')
             ->leftJoin('p.models', 'm')
             ->leftJoin('m.color', 'col')
             ->leftJoin('m.size', 's')
             ->leftJoin('p.stocks', 'st')
             ->leftJoin('m.image', 'i')
+            ->leftJoin('p.reviews', 'r')
+            ->leftJoin('r.user', 'u')
             ->where('p.id = :id')
             ->setParameter('id', $productId)
             ->getQuery()
@@ -108,16 +112,18 @@ class ProductRepository extends ServiceEntityRepository
 
         $productData = [];
         $productData['images'] = ['main' => [], 'secondary' => []];
+        $productData['reviews'] = [];
 
         foreach ($results as $result) {
+           
             if (!isset($productData['id'])) {
-            
                 $productData['id'] = $result['id'];
                 $productData['name'] = $result['name'];
                 $productData['description'] = $result['description'];
                 $productData['category'] = $result['category'];
             }
 
+          
             if (isset($result['model_id'])) {
                 $productData['models'][] = [
                     'model_id' => $result['model_id'],
@@ -125,7 +131,7 @@ class ProductRepository extends ServiceEntityRepository
                     'color' => $result['color'],
                     'size_value' => $result['size_value'],
                     'size_unit' => $result['size_unit'],
-                    'stock_quantity' => $result['stock_quantity'] ?? 0, // Stock de l'entité Stock
+                    'stock_quantity' => $result['stock_quantity'] ?? 0,
                 ];
             }
 
@@ -133,6 +139,18 @@ class ProductRepository extends ServiceEntityRepository
                 $productData['images']['main'][] = $result['image_url'];
             } else {
                 $productData['images']['secondary'][] = $result['image_url'];
+            }
+
+            if (isset($result['review_id'])) {
+                $productData['reviews'][] = [
+                    'review_id' => $result['review_id'],
+                    'rating' => $result['rating'],
+                    'comment' => $result['comment'],
+                    'created_at' => $result['review_created_at']->format('Y-m-d H:i:s'),
+                    'user_firstname' => $result['user_firstname'],
+                    'user_lastname' => $result['user_lastname'],
+                    'user_id' => $result['user_id'],
+                ];
             }
         }
 

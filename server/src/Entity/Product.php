@@ -34,6 +34,12 @@ class Product
     #[ORM\OneToMany(targetEntity: Stock::class, mappedBy: 'product', orphanRemoval: true)]
     private Collection $stocks;
 
+    /**
+     * @var Collection<int, Review>
+     */
+    #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'product')]
+    private Collection $reviews;
+
     #[ORM\OneToMany(targetEntity: Brand::class, mappedBy: 'product', orphanRemoval: true)]
     private Collection $brands;
 
@@ -47,6 +53,7 @@ class Product
     {
         $this->models = new ArrayCollection();
         $this->stocks = new ArrayCollection();
+        $this->reviews = new ArrayCollection();
         $this->brands = new ArrayCollection();
         $this->tags = new ArrayCollection();
         $this->weights = new ArrayCollection();
@@ -154,6 +161,22 @@ class Product
     }
 
     /**
+     * @return Collection<int, Review>
+     */
+    public function getReviews(): Collection
+    {
+        return $this->reviews;
+    }
+
+    public function addReview(Review $review): static
+    {
+        if (!$this->reviews->contains($review)) {
+            $this->reviews->add($review);
+            $review->setRelation($this);
+        }
+    }
+    
+    /*
      * @return Collection<int, Brand>
      */
     public function getBrands(): Collection
@@ -166,6 +189,18 @@ class Product
         if (!$this->brands->contains($brand)) {
             $this->brands->add($brand);
             $brand->setProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReview(Review $review): static
+    {
+        if ($this->reviews->removeElement($review)) {
+            // set the owning side to null (unless already changed)
+            if ($review->getRelation() === $this) {
+                $review->setRelation(null);
+            }
         }
 
         return $this;
@@ -231,6 +266,7 @@ class Product
         if ($this->weights->removeElement($weight)) {
             if ($weight->getProduct() === $this) {
                 $weight->setProduct(null);
+
             }
         }
 

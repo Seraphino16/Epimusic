@@ -6,22 +6,27 @@ import Alert from '../Alerts/Alert';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faShoppingCart } from '@fortawesome/free-solid-svg-icons';
+import { faShoppingCart, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 
 const ProductDetailsPage = () => {
     const { id } = useParams();
     const [product, setProduct] = useState(null);
     const [alert, setAlert] = useState({ message: '', type: 'error' });
     const [quantity, setQuantity] = useState(1);
+    const [review, setReview] = useState('');
+    const [reviews, setReviews] = useState([]);
+    const [editingReview, setEditingReview] = useState(null);
+    const [editReviewContent, setEditReviewContent] = useState('');
 
     useEffect(() => {
         const fetchProduct = async () => {
             try {
                 const response = await fetch(`http://localhost:8000/api/products/${id}`);
                 const data = await response.json();
-
                 if (response.ok) {
                     setProduct(data);
+                    const sortedReviews = data.reviews.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                    setReviews(sortedReviews);
                 } else {
                     setAlert({ message: data.message || 'Une erreur s\'est produite lors de la récupération des articles', type: 'error' });
                 }
@@ -59,6 +64,72 @@ const ProductDetailsPage = () => {
             .catch(error => {
                 console.error("Erreur lors de l'ajout du produit au panier : ", error);
                 setAlert({ message: "Erreur lors de l'ajout du produit au panier.", type: 'error' });
+            });
+    };
+
+    const handleAddReview = () => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const data = {
+            product_id: product.id,
+            model_id: product.models[0].model_id,
+            comment: review,
+            user_id: user ? user.id : null,
+        };
+
+        axios.post('http://localhost:8000/api/product/add/review', data)
+            .then(response => {
+                console.log("Avis ajouté : ", response.data);
+                setAlert({ message: "Avis ajouté avec succès !", type: 'success' });
+                setReviews([response.data.review, ...reviews]);
+                setReview('');
+            })
+            .catch(error => {
+                console.error("Erreur lors de l'ajout de l'avis : ", error);
+                setAlert({ message: "Erreur lors de l'ajout de l'avis.", type: 'error' });
+            });
+    };
+
+    const handleEditReview = (review) => {
+        setEditingReview(review.review_id);
+        setEditReviewContent(review.comment);
+    };
+
+    const handleUpdateReview = () => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const data = {
+            user_id: user.id,
+            comment: editReviewContent,
+        };
+
+        axios.patch(`http://localhost:8000/api/review/update/${editingReview}`, data)
+            .then(response => {
+                console.log("Avis mis à jour : ", response.data);
+                setAlert({ message: "Avis mis à jour avec succès !", type: 'success' });
+                setReviews(reviews.map(r => (r.review_id === editingReview ? response.data.review : r)));
+                setEditingReview(null);
+                setEditReviewContent('');
+            })
+            .catch(error => {
+                console.error("Erreur lors de la mise à jour de l'avis : ", error);
+                setAlert({ message: "Erreur lors de la mise à jour de l'avis.", type: 'error' });
+            });
+    };
+
+    const handleDeleteReview = (reviewId) => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const data = {
+            user_id: user.id,
+        };
+
+        axios.delete(`http://localhost:8000/api/review/delete/${reviewId}`, { data })
+            .then(response => {
+                console.log("Avis supprimé : ", response.data);
+                setAlert({ message: "Avis supprimé avec succès !", type: 'success' });
+                setReviews(reviews.filter(r => r.review_id !== reviewId));
+            })
+            .catch(error => {
+                console.error("Erreur lors de la suppression de l'avis : ", error);
+                setAlert({ message: "Erreur lors de la suppression de l'avis.", type: 'error' });
             });
     };
 
@@ -100,6 +171,61 @@ const ProductDetailsPage = () => {
                             >
                                 <FontAwesomeIcon icon={faShoppingCart} />
                             </button>
+                        </div>
+                        <div className="space-y-4 mt-16 pt-12">
+                            <h3 className="text-xl font-bold">Avis</h3>
+                            <div>
+                                <textarea
+                                    value={review}
+                                    onChange={(e) => setReview(e.target.value)}
+                                    className="w-full p-2 border border-gray-300 rounded"
+                                    placeholder="Écrire un avis"
+                                />
+                                <button
+                                    className="mt-2 p-2 bg-blue-500 text-white rounded"
+                                    onClick={handleAddReview}
+                                >
+                                    Écrire un avis
+                                </button>
+                            </div>
+                            <div className="space-y-4">
+                                {reviews.map((review) => (
+                                    <div key={review.review_id} className="p-4 border border-gray-300 rounded">
+                                        <p className="font-bold">{review.user_id ? `${review.user_firstname} ${review.user_lastname}` : 'Anonyme'}</p>
+                                        <p className="text-gray-500 text-sm">{new Date(review.created_at).toLocaleDateString()}</p>
+                                        <p>{editingReview === review.review_id ? (
+                                            <textarea
+                                                value={editReviewContent}
+                                                onChange={(e) => setEditReviewContent(e.target.value)}
+                                                className="w-full p-2 border border-gray-300 rounded"
+                                            />
+                                        ) : review.comment}</p>
+                                        {editingReview === review.review_id ? (
+                                            <button
+                                                className="mt-2 p-2 bg-blue-500 text-white rounded"
+                                                onClick={handleUpdateReview}
+                                            >
+                                                Mettre à jour
+                                            </button>
+                                        ) : review.user_id === JSON.parse(localStorage.getItem('user')).id && (
+                                            <div className="flex space-x-2">
+                                                <button
+                                                    className="mt-2 p-2 bg-yellow-500 text-white rounded"
+                                                    onClick={() => handleEditReview(review)}
+                                                >
+                                                    <FontAwesomeIcon icon={faEdit} />
+                                                </button>
+                                                <button
+                                                    className="mt-2 p-2 bg-red-500 text-white rounded"
+                                                    onClick={() => handleDeleteReview(review.review_id)}
+                                                >
+                                                    <FontAwesomeIcon icon={faTrash} />
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
