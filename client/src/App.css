@@ -36,3 +36,50 @@
     transform: rotate(360deg);
   }
 }
+
+@font-face {
+  font-family: 'LTSoul';
+  src: url('./assets/fonts/LTSoul-Bold.otf') format('opentype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'LTSoul';
+  src: url('./assets/fonts/LTSoul-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'LTSoul';
+  src: url('./assets/fonts/LTSoul-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'LTSoul';
+  src: url('./assets/fonts/LTSoul-SemiBold.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+}
+
+body {
+  font-family: 'LTSoul', sans-serif;
+}
+
+h1 {
+  font-family: 'LTSoul';
+  font-weight: bold;
+}
+
+h2 {
+  font-family: 'LTSoul';
+  font-weight: 600;
+}
+
+p {
+  font-family: 'LTSoul';
+  font-weight: normal;
+}
