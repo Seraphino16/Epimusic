@@ -13,6 +13,7 @@ import ProductList from "./components/pages/ProductList";
 import bgAuth from "./assets/bg-auth.png";
 import bgHome from "./assets/bg-home.png";
 import './App.css';
+import FilteredArticles from './components/Filtered/FilteredArticles';
 
 const App = () => (
   <Router>
