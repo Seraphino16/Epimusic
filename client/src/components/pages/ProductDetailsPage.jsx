@@ -13,15 +13,17 @@ const ProductDetailsPage = () => {
     const [product, setProduct] = useState(null);
     const [alert, setAlert] = useState({ message: '', type: 'error' });
     const [quantity, setQuantity] = useState(1);
+    const [review, setReview] = useState('');
+    const [reviews, setReviews] = useState([]);
 
     useEffect(() => {
         const fetchProduct = async () => {
             try {
                 const response = await fetch(`http://localhost:8000/api/products/${id}`);
                 const data = await response.json();
-
                 if (response.ok) {
                     setProduct(data);
+                    setReviews(data.reviews || []);
                 } else {
                     setAlert({ message: data.message || 'Une erreur s\'est produite lors de la récupération des articles', type: 'error' });
                 }
@@ -59,6 +61,27 @@ const ProductDetailsPage = () => {
             .catch(error => {
                 console.error("Erreur lors de l'ajout du produit au panier : ", error);
                 setAlert({ message: "Erreur lors de l'ajout du produit au panier.", type: 'error' });
+            });
+    };
+
+    const handleAddReview = () => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const data = {
+            product_id: product.id,
+            comment: review,
+            user_id: user ? user.id : null,
+        };
+
+        axios.post('http://localhost:8000/api/product/add/review', data)
+            .then(response => {
+                console.log("Avis ajouté : ", response.data);
+                setAlert({ message: "Avis ajouté avec succès !", type: 'success' });
+                setReviews([...reviews, response.data.review]);
+                setReview('');
+            })
+            .catch(error => {
+                console.error("Erreur lors de l'ajout de l'avis : ", error);
+                setAlert({ message: "Erreur lors de l'ajout de l'avis.", type: 'error' });
             });
     };
 
@@ -100,6 +123,32 @@ const ProductDetailsPage = () => {
                             >
                                 <FontAwesomeIcon icon={faShoppingCart} />
                             </button>
+                        </div>
+                        <div className="space-y-4 mt-16 pt-12">
+                            <h3 className="text-xl font-bold">Avis</h3>
+                            <div>
+                                <textarea
+                                    value={review}
+                                    onChange={(e) => setReview(e.target.value)}
+                                    className="w-full p-2 border border-gray-300 rounded"
+                                    placeholder="Écrire un avis"
+                                />
+                                <button
+                                    className="mt-2 p-2 bg-blue-500 text-white rounded"
+                                    onClick={handleAddReview}
+                                >
+                                    Écrire un avis
+                                </button>
+                            </div>
+                            <div className="space-y-4">
+                                {reviews.map((review) => (
+                                    <div key={review.id} className="p-4 border border-gray-300 rounded">
+                                        <p className="font-bold">{review.user ? `${review.user.firstName} ${review.user.lastName}` : 'Anonyme'}</p>
+                                        <p className="text-gray-500 text-sm">{new Date(review.created_at).toLocaleDateString()}</p>
+                                        <p>{review.comment}</p>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>

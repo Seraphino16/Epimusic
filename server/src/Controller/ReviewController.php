@@ -57,14 +57,14 @@ class ReviewController extends AbstractController
 
         if (!$productId || !$comment) {
             return new JsonResponse(
-                ['error' => 'Requete invalide'], 
+                ['error' => 'Requete invalide'],
                 Response::HTTP_BAD_REQUEST);
         }
 
         $product = $this->productRepository->find($productId);
         if (!$product) {
             return new JsonResponse(
-                ['error' => 'Product non trouvé'], 
+                ['error' => 'Product non trouvé'],
                 Response::HTTP_NOT_FOUND);
         }
 
@@ -73,7 +73,7 @@ class ReviewController extends AbstractController
             $model = $this->modelRepository->find($modelId);
             if (!$model) {
                 return new JsonResponse(
-                    ['error' => 'Model non trouvé'], 
+                    ['error' => 'Model non trouvé'],
                     Response::HTTP_NOT_FOUND);
             }
         }
@@ -83,7 +83,7 @@ class ReviewController extends AbstractController
             $user = $this->userRepository->find($userId);
             if (!$user) {
                 return new JsonResponse(
-                    ['error' => 'Utilisateur non trouvé'], 
+                    ['error' => 'Utilisateur non trouvé'],
                     Response::HTTP_NOT_FOUND);
             }
         }
@@ -101,7 +101,7 @@ class ReviewController extends AbstractController
         $errors = $this->validator->validate($review);
         if (count($errors) > 0) {
             return new JsonResponse(
-                ['error' => (string) $errors], 
+                ['error' => (string) $errors],
                 Response::HTTP_BAD_REQUEST);
         }
 
@@ -114,6 +114,11 @@ class ReviewController extends AbstractController
                 'id' => $review->getId(),
                 'product_id' => $review->getProduct()->getId(),
                 'model_id' => $review->getModel()?->getId(),
+                'user' => $review->getUser() ? [
+                    'id' => $review->getUser()->getId(),
+                    'firstName' => $review->getUser()->getFirstName(),
+                    'lastName' => $review->getUser()->getLastName()
+                ] : null,
                 'rating' => $review->getRating(),
                 'comment' => $review->getComment(),
                 'created_at' => $review->getCreatedAt()->format('d-m-Y H:i:s'),
