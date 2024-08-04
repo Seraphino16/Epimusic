@@ -101,7 +101,7 @@ const ProductDetailsPage = () => {
             comment: editReviewContent,
         };
 
-        axios.patch(`/review/update/${editingReview}`, data)
+        axios.patch(`http://localhost:8000/api/review/update/${editingReview}`, data)
             .then(response => {
                 console.log("Avis mis à jour : ", response.data);
                 setAlert({ message: "Avis mis à jour avec succès !", type: 'success' });
