@@ -16,53 +16,74 @@ class ProductRepository extends ServiceEntityRepository
         parent::__construct($registry, Product::class);
     }
 
-    public function findAllProductsWithCategoryAndImage()
-    {
-        return $this->createQueryBuilder('p')
-            ->select('p.id', 'p.name', 'p.description', 'c.name as category', 'm.price', 'i.path as image_url')
-            ->leftJoin('p.category', 'c')
-            ->leftJoin('p.models', 'm')
-            ->leftJoin('m.image', 'i')
-            ->where('i.is_main = :isMain')
-            ->setParameter('isMain', true)
-            ->getQuery()
-            ->getArrayResult();
-    }
-
-    public function findAllProductsPaginated(?string $search, ?string $category)
+    public function findAllProductsPaginated(array $filters)
     {
         $qb = $this->createQueryBuilder('p')
-            ->select('p.id', 'p.name', 'p.description', 'c.name as category', 'm.price', 'i.path as image_url')
+            ->select(
+                'p.id',
+                'p.name',
+                'p.description',
+                'c.name as category',
+                'm.price', 'm.weight',
+                's.value as size',
+                'c.weight_unit',
+                'i.path as image_url'
+            )
             ->leftJoin('p.category', 'c')
             ->leftJoin('p.models', 'm')
+            ->leftJoin('m.size', 's')
+            ->leftJoin('m.color', 'col')
+            ->leftJoin('p.stocks', 'st')
             ->leftJoin('m.image', 'i')
             ->where('i.is_main = :isMain')
             ->setParameter('isMain', true);
 
-        if ($search) {
-            $qb->andWhere('p.name LIKE :search OR p.description LIKE :search')
-                ->setParameter(':search', '%' . $search . '%');
-        }
-        
-        if ($category) {
-            $qb->andWhere('c.name = :category')
-                ->setParameter(':category', $category);
-        }
-        
+        $this->addFilters($qb, $filters);
+
         return $qb;
+    }
+
+    public function addFilters(&$qb, $filters)
+    {
+        if ($filters['search']) {
+            $qb->andWhere('p.name LIKE :search OR p.description LIKE :search')
+                ->setParameter(':search', '%' . $filters['search'] . '%');
+        }
         
+        if ($filters['category']) {
+            $qb->andWhere('c.name = :category')
+                ->setParameter(':category', $filters['category']);
+        }
 
-        // $totalProducts = $this->createQueryBuilder('p')
-        //     ->select('COUNT(p.id)')
-        //     ->getQuery()
-        //     ->getSingleScalarResult();
+        if ($filters['color']) {
+            $qb->andWhere('col.name = :color')
+                ->setParameter(':color', $filters['color']);
+        }
 
-        // return [
-        //     "totalArticles" => (int)$totalProducts,
-        //     "page" => $page,
-        //     "limit" => $limit,
-        //     "products" => $query->getArrayResult()
-        // ];
+        if ($filters['size']) {
+            $qb->andWhere('s.value = :size')
+                ->setParameter(':size', $filters['size']);
+        }
+
+        if ($filters['minPrice']) {
+            $qb->andWhere('m.price >= :minPrice')
+                ->setParameter(':minPrice', $filters['minPrice']);
+        }
+
+        if ($filters['maxPrice']) {
+            $qb->andWhere('m.price <= :maxPrice')
+                ->setParameter(':maxPrice', $filters['maxPrice']);
+        }
+
+        if ($filters['minWeight']) {
+            $qb->andWhere('m.weight >= :minWeight')
+                ->setParameter(':minWeight', $filters['minWeight']);
+        }
+
+        if ($filters['maxWeight']) {
+            $qb->andWhere('m.weight <= :maxWeight')
+                ->setParameter(':maxWeight', $filters['maxWeight']);
+        }
     }
 
     // Fiche détaillée du produit
@@ -136,11 +157,10 @@ class ProductRepository extends ServiceEntityRepository
         return $productData;
     }
 
-    // Cartes des produits
-    public function findProductsByCategory($categoryId) {
-        return $this->createQueryBuilder('p')
+    public function findProductsByCategory($categoryId, $filters) {
+        $queryBuilder = $this->createQueryBuilder('p')
             ->select('p.id', 'p.name', 'p.description', 'c.name as category',
-                     'm.id as model_id', 'm.price', 
+                     'm.id as model_id', 'm.price', 'm.weight',
                      'col.name as color', 's.value as size_value', 
                      'st.quantity as stock_quantity',
                      'i.path as image_url', 'i.is_main as is_main')
@@ -151,10 +171,13 @@ class ProductRepository extends ServiceEntityRepository
             ->leftJoin('m.image', 'i')
             ->leftJoin('p.stocks', 'st')
             ->where('c.id = :categoryId')
-            ->setParameter('categoryId', $categoryId)
-            ->getQuery()
-            ->getArrayResult();
+            ->andWhere('i.is_main = :isMain')
+            ->setParameter('isMain', true)
+            ->setParameter('categoryId', $categoryId);
+
+        $this->addFilters($queryBuilder, $filters);
+
+        return $queryBuilder->getQuery()
+                            ->getArrayResult();
     }
-
-
 }

@@ -18,41 +18,46 @@ const ProductAdminEdit = () => {
     const [size, setSize] = useState("");
     const [price, setPrice] = useState("");
     const [photoPaths, setPhotoPaths] = useState([]);
-    const [photoFiles, setPhotoFiles] = useState([]); // New state for new photo files
+    const [photoFiles, setPhotoFiles] = useState([]);
     const [mainImageIndex, setMainImageIndex] = useState(0);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
     const [stock, setStock] = useState("");
+    const [brand, setBrand] = useState("");
+    const [tags, setTags] = useState([]);
+    const [weight, setWeight] = useState("");
+    const [tagInput, setTagInput] = useState("");
+    const [deletedPhotos, setDeletedPhotos] = useState([]);
 
     const searchParams = new URLSearchParams(location.search);
     const selectedProductIds = searchParams.get('selectedProducts')?.split(',') || [];
     const currentEditIndex = parseInt(searchParams.get('currentEditIndex')) || 0;
 
     useEffect(() => {
-        axios
-            .get(`http://localhost:8000/api/admin/products/${id}`)
+        axios.get(`http://localhost:8000/api/admin/products/${id}`)
             .then((response) => {
                 const productData = response.data;
                 setProduct(productData);
                 setName(productData.name);
                 setDescription(productData.description);
                 setCategory(productData.category_id);
+                setBrand(productData.brands.length > 0 ? productData.brands[0] : "");
+                setTags(productData.tags);
+                setWeight(productData.weight);
+
                 if (productData.models.length > 0) {
                     const model = productData.models[0];
                     setColor(model.color_id || "");
                     setSize(model.size_id || "");
                     setPrice(model.price);
                     setPhotoPaths(model.images.map((img) => img.path));
-                    setMainImageIndex(
-                        model.images.findIndex((img) => img.is_main)
-                    );
+                    setMainImageIndex(model.images.findIndex((img) => img.is_main));
                 }
                 if (productData.stocks.length > 0) {
                     setStock(productData.stocks[0].quantity);
                 }
                 if (productData.category_id === 2 || productData.category_id === 3) {
-                    axios
-                        .get(`http://localhost:8000/api/admin/sizes/category/${productData.category_id}`)
+                    axios.get(`http://localhost:8000/api/admin/sizes/category/${productData.category_id}`)
                         .then((response) => {
                             setSizes(response.data);
                         })
@@ -66,8 +71,7 @@ const ProductAdminEdit = () => {
                 setError("Erreur lors de la récupération des données du produit!");
             });
 
-        axios
-            .get("http://localhost:8000/api/admin/categories")
+        axios.get("http://localhost:8000/api/admin/categories")
             .then((response) => {
                 setCategories(response.data);
             })
@@ -76,8 +80,7 @@ const ProductAdminEdit = () => {
                 setError("Erreur lors de la récupération des catégories!");
             });
 
-        axios
-            .get("http://localhost:8000/api/admin/colors")
+        axios.get("http://localhost:8000/api/admin/colors")
             .then((response) => {
                 setColors(response.data);
             })
@@ -92,8 +95,7 @@ const ProductAdminEdit = () => {
         setCategory(value);
 
         if (value === "2" || value === "3") {
-            axios
-                .get(`http://localhost:8000/api/admin/sizes/category/${value}`)
+            axios.get(`http://localhost:8000/api/admin/sizes/category/${value}`)
                 .then((response) => {
                     setSizes(response.data);
                     setSize("");
@@ -115,21 +117,52 @@ const ProductAdminEdit = () => {
         return category === "2" || category === "3";
     };
 
-    const handlePhotoPathChange = (index, value) => {
-        const paths = [...photoPaths];
-        paths[index] = value;
-        setPhotoPaths(paths);
+    const handleTagInputChange = (e) => {
+        setTagInput(e.target.value);
+    };
+
+    const handleAddTag = () => {
+        if (tagInput.trim() !== "") {
+            setTags([...tags, tagInput.trim()]);
+            setTagInput("");
+        }
+    };
+
+    const handleRemoveTag = (index) => {
+        setTags(tags.filter((_, i) => i !== index));
     };
 
     const handlePhotoChange = (e) => {
-        setPhotoFiles(e.target.files);
+        const newPhotoFiles = Array.from(e.target.files);
+        setPhotoFiles(newPhotoFiles);
+
+        if (photoPaths.length === 0 && newPhotoFiles.length > 0) {
+            setMainImageIndex(0); // Set the first new image as main if no images exist
+        }
+    };
+
+    const handleRemovePhoto = (index) => {
+        setDeletedPhotos([...deletedPhotos, photoPaths[index]]);
+        setPhotoPaths(photoPaths.filter((_, i) => i !== index));
+        if (mainImageIndex === index) setMainImageIndex(0);
     };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
 
+        if (price <= 0 || stock < 0 || weight < 0) {
+            setError("Le prix doit être supérieur à zéro, le stock et le poids ne peuvent pas être négatifs !");
+            return;
+        }
+
         try {
             const uploadedPhotos = [...photoPaths];
+            let maxIndex = uploadedPhotos.reduce((max, path) => {
+                const parts = path.split('_');
+                const index = parseInt(parts[parts.length - 1].split('.')[0], 10);
+                return Math.max(max, index);
+            }, 0);
+
             for (let i = 0; i < photoFiles.length; i++) {
                 const formData = new FormData();
                 formData.append("file", photoFiles[i]);
@@ -138,7 +171,9 @@ const ProductAdminEdit = () => {
                         "Content-Type": "multipart/form-data",
                     },
                 });
-                uploadedPhotos.push(response.data.filePath);
+                const newFileName = `${id}_${++maxIndex}.${response.data.filePath.split('.').pop()}`;
+                uploadedPhotos.push(`/uploads/${newFileName}`);
+                await axios.post("http://localhost:8000/rename-upload", { oldPath: response.data.filePath, newPath: newFileName });
             }
 
             const updatedProduct = {
@@ -149,8 +184,12 @@ const ProductAdminEdit = () => {
                 size: shouldDisplaySize(category) ? size : null,
                 price: parseFloat(price),
                 stock: parseInt(stock, 10),
-                photoPaths: uploadedPhotos.filter((path) => path),
-                mainImageIndex: mainImageIndex,
+                weight: parseFloat(weight),
+                photoPaths: [...new Set(uploadedPhotos)], // Ensure no duplicates
+                mainImageIndex: photoPaths.length === 0 ? 0 : mainImageIndex, // Set main image index to 0 if no photos previously existed
+                brand: category === "1" ? brand : null,
+                tags: tags,
+                deletedPhotos: deletedPhotos
             };
 
             await axios.put(`http://localhost:8000/api/admin/products/${id}`, updatedProduct);
@@ -212,7 +251,7 @@ const ProductAdminEdit = () => {
                                 >
                                     Description
                                 </label>
-                                <input
+                                <textarea
                                     type="text"
                                     id="description"
                                     placeholder="Entrez la description du produit"
@@ -222,6 +261,7 @@ const ProductAdminEdit = () => {
                                     }
                                     required
                                     className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
+                                    rows="5"
                                 />
                             </div>
                         </div>
@@ -251,6 +291,62 @@ const ProductAdminEdit = () => {
                                         </option>
                                     ))}
                                 </select>
+                            </div>
+                        </div>
+                        {category === "1" && (
+                            <div className="md:flex items-center mt-8">
+                                <div className="w-full flex flex-col">
+                                    <label className="font-semibold leading-none text-black" htmlFor="brand">
+                                        Marque
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="brand"
+                                        placeholder="Entrez le nom de la marque"
+                                        value={brand}
+                                        onChange={(e) => setBrand(e.target.value)}
+                                        className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
+                                    />
+                                </div>
+                            </div>
+                        )}
+                        <div className="md:flex items-center mt-8">
+                            <div className="w-full flex flex-col">
+                                <label className="font-semibold leading-none text-black" htmlFor="tags">
+                                    Tags
+                                </label>
+                                <div className="flex">
+                                    <input
+                                        type="text"
+                                        id="tags"
+                                        placeholder="Entrez un tag"
+                                        value={tagInput}
+                                        onChange={handleTagInputChange}
+                                        className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200 flex-grow"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={handleAddTag}
+                                        className="bg-blue-700 text-white px-4 py-2 rounded ml-2"
+                                    >
+                                        Ajouter
+                                    </button>
+                                </div>
+                                <div className="flex flex-wrap mt-2">
+                                    {tags.map((tag, index) => (
+                                        <div key={index}
+                                             className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full mr-2 mt-2">
+                                            {tag}
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveTag(index)}
+                                                className="ml-2 text-red-600"
+                                            >
+                                                &times;
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                         {shouldDisplayColor(category) && (
@@ -329,11 +425,29 @@ const ProductAdminEdit = () => {
                                     Prix
                                 </label>
                                 <input
-                                    type="number"
+                                    type="text"
                                     id="price"
                                     placeholder="Entrez le prix du produit"
                                     value={price}
                                     onChange={(e) => setPrice(e.target.value)}
+                                    required
+                                    className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
+                                />
+                            </div>
+                        </div>
+                        <div className="md:flex items-center mt-8">
+                            <div className="w-full flex flex-col">
+                                <label className="font-semibold leading-none text-black" htmlFor="weight">
+                                    Poids (Kg)
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    id="weight"
+                                    placeholder="Entrez le poids du produit en Kg"
+                                    value={weight}
+                                    onChange={(e) => setWeight(e.target.value)}
+                                    min="0"
                                     required
                                     className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
                                 />
@@ -353,6 +467,7 @@ const ProductAdminEdit = () => {
                                     placeholder="Entrez le stock du produit"
                                     value={stock}
                                     onChange={(e) => setStock(e.target.value)}
+                                    min="0"
                                     required
                                     className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
                                 />
@@ -373,38 +488,29 @@ const ProductAdminEdit = () => {
                                     onChange={handlePhotoChange}
                                     className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
                                 />
-                            </div>
-                        </div>
-                        {photoPaths.map((path, index) => (
-                            <div key={index} className="md:flex items-center mt-8">
-                                <div className="w-full flex flex-col">
-                                    <label
-                                        className="font-semibold leading-none text-black"
-                                        htmlFor={`photoPath${index}`}
-                                    >
-                                        Chemin de la photo {index + 1}
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id={`photoPath${index}`}
-                                        placeholder="Entrez le chemin de l'image"
-                                        value={path}
-                                        onChange={(e) => handlePhotoPathChange(index, e.target.value)}
-                                        className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
-                                    />
-                                    <label className="font-semibold leading-none text-black mt-4">
-                                        <input
-                                            type="radio"
-                                            name="mainImage"
-                                            checked={mainImageIndex === index}
-                                            onChange={() => setMainImageIndex(index)}
-                                            className="mr-2"
-                                        />
-                                        Définir comme image principale
-                                    </label>
+                                <div className="flex flex-col mt-4">
+                                    {photoPaths.map((path, index) => (
+                                        <div key={index} className="flex items-center mt-2">
+                                            <p className="mr-4">{path}</p>
+                                            <button
+                                                type="button"
+                                                className={`mr-4 px-3 py-1 rounded ${mainImageIndex === index ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+                                                onClick={() => setMainImageIndex(index)}
+                                            >
+                                                {mainImageIndex === index ? 'Image principale' : 'Définir comme principale'}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className="ml-2 text-red-600"
+                                                onClick={() => handleRemovePhoto(index)}
+                                            >
+                                                &times;
+                                            </button>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
-                        ))}
+                        </div>
                         <div className="flex items-center justify-center w-full mt-8">
                             <button
                                 type="submit"

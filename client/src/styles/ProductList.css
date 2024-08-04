@@ -28,6 +28,7 @@
     box-sizing: border-box;
     width: 20vw;
     height: auto;
+    position: relative;
 }
 
 .model-item {
@@ -152,4 +153,57 @@
 
 .product-stock .stock-status.out-of-stock {
     color: red;
+}
+
+.add-to-cart-button {
+    padding: 10px 20px;
+    color: white;
+    background-color: #28a745;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    position: absolute; /* Add this line */
+    bottom: 20px; /* Add this line */
+    right: 20px; /* Add this line */
+    transition: background-color 0.3s ease;
+}
+
+.add-to-cart-button:hover {
+    background-color: #218838;
+}
+
+.product-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.alert {
+    color: green;
+    font-weight: bold;
+    text-align: center;
+    margin: 10px 0;
+}
+
+.add-to-cart-button-details {
+    padding: 10px 20px;
+    color: white;
+    background-color: #28a745;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.add-to-cart-button-details:hover {
+    background-color: #218838;
+}
+
+.quantity-select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 100%;
+    box-sizing: border-box;
 }
