@@ -25,8 +25,9 @@ const ProductDetailsPage = () => {
                 const data = await response.json();
                 if (response.ok) {
                     setProduct(data);
-                    const sortedReviews = data.reviews.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                    setReviews(sortedReviews);
+                    const uniqueReviews = Array.from(new Set(data.reviews.map(review => review.review_id)))
+                                              .map(id => data.reviews.find(review => review.review_id === id));
+                    setReviews(uniqueReviews);
                 } else {
                     setAlert({ message: data.message || 'Une erreur s\'est produite lors de la récupération des articles', type: 'error' });
                 }
