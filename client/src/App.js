@@ -47,7 +47,7 @@ const BackgroundWrapper = ({ children }) => {
 
 const Content = () => {
   return (
-    <div style={{ paddingTop: '50px' }}>
+    <div>
       <Routes>
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
