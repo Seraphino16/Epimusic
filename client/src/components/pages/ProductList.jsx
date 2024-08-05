@@ -35,6 +35,34 @@ const ProductList = () => {
             });
     };
 
+    const handleAddToCart = (product) => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const token = localStorage.getItem('cart_token');
+        const data = {
+            model_id: product.model_id,
+            quantity: 1,
+        };
+
+        if (user) {
+            data.user_id = user.id;
+        } else if (token) {
+            data.token = token;
+        }
+
+        axios.post(`/api/cart/add/${product.id}`, data)
+            .then(response => {
+                console.log("Produit ajouté au panier : ", response.data);
+                setAlert("Produit ajouté au panier !");
+                if (response.data.token) {
+                    localStorage.setItem('cart_token', response.data.token);
+                }
+            })
+            .catch(error => {
+                console.error("Erreur lors de l'ajout du produit au panier : ", error);
+                setAlert("Erreur lors de l'ajout du produit au panier.");
+            });
+    };
+
     return (
         <div>
             {error && <p className="error">{error}</p>}

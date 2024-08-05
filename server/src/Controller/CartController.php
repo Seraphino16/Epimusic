@@ -6,21 +6,28 @@ use App\Entity\Cart;
 use App\Entity\CartItem;
 use App\Entity\Product;
 use App\Entity\Model;
+use App\Entity\Stock;
 use App\Entity\AnonymousCart;
 use App\Repository\CartRepository;
 use App\Repository\ProductRepository;
 use App\Repository\ModelRepository;
 use App\Repository\StockRepository;
 use App\Repository\AnonymousCartRepository;
+use App\Repository\CartItemRepository;
 use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Serializer\Encoder\JsonDecode;
+use Symfony\Component\Validator\Constraints\Json;
+use Symfony\Config\Framework\HttpClient\DefaultOptions\RetryFailedConfig;
 
-#[Route('/api')]
+#[Route('/api/cart')]
 class CartController extends AbstractController
 {
     private CartRepository $cartRepository;
@@ -29,7 +36,9 @@ class CartController extends AbstractController
     private StockRepository $stockRepository;
     private EntityManagerInterface $entityManager;
     private AnonymousCartRepository $anonymousCartRepository;
+    private CartItemRepository $cartItemsRepository;
     private UserRepository $userRepository;
+    private $session;
 
     public function __construct(
         CartRepository $cartRepository,
@@ -38,7 +47,9 @@ class CartController extends AbstractController
         StockRepository $stockRepository,
         EntityManagerInterface $entityManager,
         AnonymousCartRepository $anonymousCartRepository,
-        UserRepository $userRepository
+        CartItemRepository $cartItemRepository,
+        UserRepository $userRepository,
+        RequestStack $requestStack
     ) {
         $this->cartRepository = $cartRepository;
         $this->productRepository = $productRepository;
@@ -46,10 +57,12 @@ class CartController extends AbstractController
         $this->stockRepository = $stockRepository;
         $this->entityManager = $entityManager;
         $this->anonymousCartRepository = $anonymousCartRepository;
+        $this->cartItemsRepository = $cartItemRepository;
         $this->userRepository = $userRepository;
+        $this->session = $requestStack->getSession();
     }
 
-    #[Route('/cart/add/{productId}', name: 'cart_add_item', methods: ['POST'])]
+    #[Route('/add/{productId}', name: 'cart_add_item', methods: ['POST'])]
     public function addToCart(int $productId, Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -169,5 +182,106 @@ class CartController extends AbstractController
             'message' => 'Article ajouté au panier',
             'cart_total' => $cart->getTotal()
         ], Response::HTTP_OK);
+    }
+
+    #[Route('/', name: 'cart_get_items', methods: ["GET"])]
+    public function getCartItems(Request $request): JsonResponse
+    {
+        $token = $request->query->get('token');
+        $userId = $request->query->get('userId');
+
+        if (!$token && !$userId) {
+            return new JsonResponse(['error' => "Aucune donnéee n'a été trouvée"], Response::HTTP_BAD_REQUEST);
+        }
+
+        if ($token) {
+            $cart = $this->anonymousCartRepository->findOneBy(['token' => $token]);        
+        }
+
+        if ($userId) {
+            $cart = $this->cartRepository->findOneBy(['user' => $userId]);
+        }
+
+        $cartItems = $cart->getItems();
+        
+
+        $itemsData = [];
+        foreach ($cartItems as $cartItem) {
+            $itemsData[] = [
+                'id' => $cartItem->getId(),
+                'product' => $cartItem->getProduct()->getName(),
+                'product_id' => $cartItem->getProduct()->getId(),
+                'quantity' => $cartItem->getQuantity(),
+                'price' => $cartItem->getModel()->getPrice(),
+                'total' => $cartItem->getModel()->getPrice() * $cartItem->getQuantity()
+            ];
+        }
+
+        $data = [
+            'items' => $itemsData
+        ];
+
+        return new JsonResponse($data);
+    }
+
+    #[Route('/item/{itemId}', name: 'update_cart_item_quantity_token', methods: ['PATCH'])]
+    public function updateItemQuantity(int $itemId, Request $request, EntityManagerInterface $entityManager)
+    {
+        $data = json_decode($request->getContent(), true);
+        $quantity = $data['quantity'];
+
+        $cartItem = $entityManager->getRepository(CartItem::class)->find($itemId);
+
+        $stock = $entityManager->getRepository(Stock::class)->findOneBy([
+            'product' => $cartItem->getProduct()->getId()
+        ])->getQuantity();
+
+        if ($quantity < 1) {
+            return new JsonResponse(['error' => "Il doit rester au moins 1 article"], 400);
+        } else if ($quantity > $stock) {
+            return new JsonResponse(['error' => "Il ne reste plus d'autres articles disponibles"], 400);
+        }
+        
+        $cartItem->setQuantity($quantity);
+        
+        $entityManager->persist($cartItem);
+        $entityManager->flush();
+
+        $itemData = [
+                'id' => $cartItem->getId(),
+                'product' => $cartItem->getProduct()->getName(),
+                'product_id' => $cartItem->getProduct()->getId(),
+                'quantity' => $cartItem->getQuantity(),
+                'price' => $cartItem->getModel()->getPrice(),
+                'total' => $cartItem->getModel()->getPrice() * $cartItem->getQuantity()
+        ];
+
+        $data = [
+            'message' => "La quantité a bien été modifiée",
+            'item' => $itemData
+        ];
+
+        return new JsonResponse($data);
+    }
+
+    #[Route('/item/delete/{itemId}', name: 'delete_cart_item', methods: ['DELETE'])]
+    public function deleteItem(int $itemId, EntityManagerInterface $entityManager)
+    {
+        $cartItem = $entityManager->getRepository(CartItem::class)->find($itemId);
+
+        if (!$cartItem) {
+            return new JsonResponse(
+                ['error' => "Le produit n'a pas été  trouvé sur le serveur"],
+                Response::HTTP_NOT_FOUND
+            );
+        }
+
+        $entityManager->remove($cartItem);
+        $entityManager->flush();
+
+        return new JsonResponse(
+            ['message' => "Le produit a été enlevé de votre panier"],
+            Response::HTTP_OK
+        );
     }
 }
