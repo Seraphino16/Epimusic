@@ -191,7 +191,7 @@ const ProductDetailsPage = () => {
                             </div>
                             <div className="space-y-4">
                                 {reviews.map((review) => (
-                                    <div key={review.review_id} className="p-4 border border-gray-300 rounded">
+                                    <div key={review.review_id} className="p-4 border bg-white border-gray-300 rounded">
                                         <p className="font-bold">{review.user_id ? `${review.user_firstname} ${review.user_lastname}` : 'Anonyme'}</p>
                                         <p className="text-gray-500 text-sm">{new Date(review.created_at).toLocaleDateString()}</p>
                                         <p>{editingReview === review.review_id ? (

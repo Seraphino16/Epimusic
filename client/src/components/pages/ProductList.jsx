@@ -75,7 +75,7 @@ const ProductList = () => {
             <div className="product-list">
                 {products.length > 0 ? (
                     products.map((product) => (
-                        <div key={product.id} className="product-item transition-transform duration-300 ease-in-out hover:scale-105">
+                        <div key={product.id} className="product-item bg-white transition-transform duration-300 ease-in-out hover:scale-105">
                             <Link
                                 to={`/product/${product.id}`}
                                 className="product-link"
