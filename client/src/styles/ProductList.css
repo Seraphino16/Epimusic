@@ -13,13 +13,6 @@
     background-color: #0056b3;
 }
 
-.product-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-}
-
 .product-item {
     display: flex;
     border: 1px solid #ddd;
@@ -163,9 +156,9 @@
     border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
-    position: absolute; /* Add this line */
-    bottom: 20px; /* Add this line */
-    right: 20px; /* Add this line */
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
     transition: background-color 0.3s ease;
 }
 

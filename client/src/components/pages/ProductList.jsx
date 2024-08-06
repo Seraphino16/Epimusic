@@ -23,7 +23,6 @@ const ProductList = () => {
                     .map(id => {
                         return response.data.find(product => product.id === id);
                     });
-                    console.log(uniqueProducts);
                 setProducts(uniqueProducts);
             })
             .catch((error) => {
@@ -53,7 +52,6 @@ const ProductList = () => {
 
         axios.post(`http://localhost:8000/api/cart/add/${product.id}`, data)
             .then(response => {
-                console.log("Produit ajouté au panier : ", response.data);
                 setAlert("Produit ajouté au panier !");
                 if (response.data.token) {
                     localStorage.setItem('cart_token', response.data.token);
@@ -66,13 +64,13 @@ const ProductList = () => {
     };
 
     return (
-        <div>
+        <div className="container mx-auto">
             {error && <p className="error">{error}</p>}
             {alert && <p className="alert">{alert}</p>}
             <h1 className="text-center text-4xl font-bold my-4">
                 Liste des produits de la catégorie sélectionnée
             </h1>
-            <div className="product-list">
+            <div className="flex flex-wrap content-start justify-start gap-4">
                 {products.length > 0 ? (
                     products.map((product) => (
                         <div key={product.id} className="product-item bg-white transition-transform duration-300 ease-in-out hover:scale-105">
@@ -103,7 +101,7 @@ const ProductList = () => {
                                     </div>
                                     <div className="flex flex-column">
                                         <div className="product-details">
-                                            <p>{product.description}</p>
+                                            <p className="line-clamp-3">{product.description}</p>
                                             {product.stock !== undefined && (
                                                 <div className="product-stock">
                                                     {product.stock > 0 && product.stock <= 5 ? (

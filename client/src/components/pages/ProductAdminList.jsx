@@ -85,7 +85,7 @@ const ProductAdminList = () => {
     };
 
     return (
-        <div>
+        <div className="container mx-auto">
             {message && <p className="success">{message}</p>}
             {error && <p className="error">{error}</p>}
             <h1>Liste des Produits</h1>
@@ -104,7 +104,7 @@ const ProductAdminList = () => {
             >
                 Modifier les sélectionnés
             </button>
-            <div className="product-list">
+            <div className="flex flex-wrap content-start justify-start gap-4">
                 {products.map((product) => (
                     <div key={product.id} className="bg-white product-item">
                         {product.models.map((model, index) => (

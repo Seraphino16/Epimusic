@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, { useState, useEffect} from "react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import NavbarItem from "./NavbarItem";
 import SearchBar from "./SearchBar";
 import logo from "../../assets/logo.png";
@@ -38,13 +38,13 @@ const Navbar = () => {
     return (
         <nav
             className={`top-0 z-50 w-full flex items-center justify-between flex-wrap ${
-                isAuthRoute
-                    ? "bg-transparent"
-                    : "bg-transparent"
+                isAuthRoute ? "bg-transparent" : "bg-transparent"
             } py-2 px-4 lg:px-16 xl:px-48`}
         >
             <div className="flex items-center flex-shrink-0 text-black mr-6">
-                <img src={logo} alt="Logo" className="w-16 h-16 mr-2" />
+                <Link to="/">
+                    <img src={logo} alt="Logo" className="w-16 h-16 mr-2" />
+                </Link>
             </div>
             <div className="block lg:hidden">
                 <button
@@ -68,7 +68,6 @@ const Navbar = () => {
             >
                 <div className="flex flex-col lg:flex-row lg:items-center justify-center lg:space-x-8 lg:text-left lg:flex-grow lg:mt-0 space-y-4 lg:space-y-0">
                     <SearchBar />
-                    <NavbarItem text="Accueil" href="/" />
                     <NavbarItem text="Produits" href="/products" />
                     {userRole === "ROLE_ADMIN" && (
                         <NavbarItem text="Admin" href="/admin/" />
