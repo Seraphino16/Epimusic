@@ -1,16 +1,17 @@
-import React from 'react';
+import React, {useState} from 'react';
 
 const ProductImage = ({ images }) => {
    
     const { main = [], secondary = [] } = images;
+    const allImages = [...main, ...secondary];
+    const [selectedImage, setSelectedImage] = useState(main.length > 0 ? main[0] : '');
 
     return (
         <div className="relative">
-         
-            {main.length > 0 && (
+            {selectedImage && (
                 <div className="mb-4">
                     <img
-                        src={`http://localhost:8000${main[0]}`}
+                        src={`http://localhost:8000${selectedImage}`}
                         alt="Main"
                         className="w-full h-auto object-cover"
                         style={{ maxHeight: '500px' }}
@@ -18,14 +19,15 @@ const ProductImage = ({ images }) => {
                 </div>
             )}
 
-            {secondary.length > 0 && (
+            {allImages.length > 0 && (
                 <div className="flex gap-4 overflow-x-auto mt-4">
-                    {secondary.map((image, index) => (
+                    {allImages.map((image, index) => (
                         <img
                             key={index}
                             src={`http://localhost:8000${image}`}
-                            alt={`Secondary ${index}`}
+                            alt={`Image ${index}`}
                             className="w-24 h-24 object-cover cursor-pointer"
+                            onClick={() => setSelectedImage(image)}
                         />
                     ))}
                 </div>
