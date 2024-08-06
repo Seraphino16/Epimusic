@@ -104,21 +104,6 @@ const ProductList = () => {
                                     <div className="flex flex-column">
                                         <div className="product-details">
                                             <p>{product.description}</p>
-                                            <p className="product-category">
-                                                Catégorie : {product.category}
-                                            </p>
-                                            <div className="flex flex-row space-x-12">
-                                                {product.color && (
-                                                    <p className="product-color">
-                                                        Couleur : {product.color}
-                                                    </p>
-                                                )}
-                                                {product.size_value && product.size_unit && (
-                                                    <p className="product-size">
-                                                        Taille : {product.size_value} {product.size_unit}
-                                                    </p>
-                                                )}
-                                            </div>
                                             {product.stock !== undefined && (
                                                 <div className="product-stock">
                                                     {product.stock > 0 && product.stock <= 5 ? (
