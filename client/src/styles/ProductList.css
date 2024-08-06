@@ -207,3 +207,21 @@
     width: 100%;
     box-sizing: border-box;
 }
+
+.image-container {
+    position: relative;
+    display: inline-block;
+}
+
+.zoomed-image {
+    position: absolute;
+    border: 2px solid #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: none;
+    overflow: hidden;
+}
+
+.zoomed-image img {
+    position: absolute;
+    max-width: none;
+}
