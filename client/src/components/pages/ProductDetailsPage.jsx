@@ -17,6 +17,9 @@ const ProductDetailsPage = () => {
     const [reviews, setReviews] = useState([]);
     const [editingReview, setEditingReview] = useState(null);
     const [editReviewContent, setEditReviewContent] = useState('');
+    const [canPostReview, setCanPostReview] = useState(false);
+    const [hasPostedReview, setHasPostedReview] = useState(false);
+    const [refresh, setRefresh] = useState(false);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -25,9 +28,12 @@ const ProductDetailsPage = () => {
                 const data = await response.json();
                 if (response.ok) {
                     setProduct(data);
+
                     const uniqueReviews = Array.from(new Set(data.reviews.map(review => review.review_id)))
-                                              .map(id => data.reviews.find(review => review.review_id === id));
+                        .map(id => data.reviews.find(review => review.review_id === id));
                     setReviews(uniqueReviews);
+
+                    checkIfProductInCartAndReview(uniqueReviews);
                 } else {
                     setAlert({ message: data.message || 'Une erreur s\'est produite lors de la récupération des articles', type: 'error' });
                 }
@@ -38,7 +44,23 @@ const ProductDetailsPage = () => {
         };
 
         fetchProduct();
-    }, [id]);
+    }, [id, refresh]);
+
+    const checkIfProductInCartAndReview = async (productReviews = reviews) => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) return;
+        try {
+            const response = await axios.get(`http://localhost:8000/api/cart`, { params: { userId: user.id } });
+            const cartItems = response.data.items;
+            const productInCart = cartItems.some(item => item.product_id === parseInt(id));
+
+            const existingReview = productReviews.some(review => review.user_id === user.id);
+            setCanPostReview(productInCart && !existingReview);
+            setHasPostedReview(existingReview);
+        } catch (error) {
+            console.error("Erreur lors de la vérification du panier et des avis : ", error);
+        }
+    };
 
     const handleAddToCart = () => {
         const user = JSON.parse(localStorage.getItem('user'));
@@ -61,6 +83,7 @@ const ProductDetailsPage = () => {
                 if (response.data.token) {
                     localStorage.setItem('cart_token', response.data.token);
                 }
+                checkIfProductInCartAndReview();
             })
             .catch(error => {
                 console.error("Erreur lors de l'ajout du produit au panier : ", error);
@@ -83,6 +106,9 @@ const ProductDetailsPage = () => {
                 setAlert({ message: "Avis ajouté avec succès !", type: 'success' });
                 setReviews([response.data.review, ...reviews]);
                 setReview('');
+                setCanPostReview(false);
+                setHasPostedReview(true);
+                setRefresh(!refresh); // Rafraîchir les avis
             })
             .catch(error => {
                 console.error("Erreur lors de l'ajout de l'avis : ", error);
@@ -109,6 +135,7 @@ const ProductDetailsPage = () => {
                 setReviews(reviews.map(r => (r.review_id === editingReview ? response.data.review : r)));
                 setEditingReview(null);
                 setEditReviewContent('');
+                setRefresh(!refresh); // Rafraîchir les avis
             })
             .catch(error => {
                 console.error("Erreur lors de la mise à jour de l'avis : ", error);
@@ -127,6 +154,8 @@ const ProductDetailsPage = () => {
                 console.log("Avis supprimé : ", response.data);
                 setAlert({ message: "Avis supprimé avec succès !", type: 'success' });
                 setReviews(reviews.filter(r => r.review_id !== reviewId));
+                checkIfProductInCartAndReview();
+                setRefresh(!refresh); // Rafraîchir les avis
             })
             .catch(error => {
                 console.error("Erreur lors de la suppression de l'avis : ", error);
@@ -175,20 +204,26 @@ const ProductDetailsPage = () => {
                         </div>
                         <div className="space-y-4 mt-16 pt-12">
                             <h3 className="text-xl font-bold">Avis</h3>
-                            <div>
-                                <textarea
-                                    value={review}
-                                    onChange={(e) => setReview(e.target.value)}
-                                    className="w-full p-2 border border-gray-300 rounded"
-                                    placeholder="Écrire un avis"
-                                />
-                                <button
-                                    className="mt-2 p-2 bg-blue-500 text-white rounded"
-                                    onClick={handleAddReview}
-                                >
-                                    Écrire un avis
-                                </button>
-                            </div>
+                            {canPostReview ? (
+                                <div>
+                                    <textarea
+                                        value={review}
+                                        onChange={(e) => setReview(e.target.value)}
+                                        className="w-full p-2 border border-gray-300 rounded"
+                                        placeholder="Écrire un avis"
+                                    />
+                                    <button
+                                        className="mt-2 p-2 bg-blue-500 text-white rounded"
+                                        onClick={handleAddReview}
+                                    >
+                                        Écrire un avis
+                                    </button>
+                                </div>
+                            ) : hasPostedReview ? (
+                                <p className="text-red-500">Vous avez déjà posté un avis pour ce produit.</p>
+                            ) : (
+                                <p className="text-red-500">Vous devez ajouter ce produit au panier avant de pouvoir poster un avis.</p>
+                            )}
                             <div className="space-y-4">
                                 {reviews.map((review) => (
                                     <div key={review.review_id} className="p-4 border bg-white border-gray-300 rounded">

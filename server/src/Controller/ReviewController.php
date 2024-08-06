@@ -10,6 +10,7 @@ use App\Repository\ProductRepository;
 use App\Repository\ModelRepository;
 use App\Repository\UserRepository;
 use App\Repository\ReviewRepository;
+use App\Repository\CartRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -45,7 +46,7 @@ class ReviewController extends AbstractController
     }
 
     #[Route('/product/add/review', name: 'add_product_review', methods: ['POST'])]
-    public function addProductReview(Request $request): JsonResponse
+    public function addProductReview(Request $request, CartRepository $cartRepository): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
@@ -86,17 +87,38 @@ class ReviewController extends AbstractController
                     ['error' => 'Utilisateur non trouvé'],
                     Response::HTTP_NOT_FOUND);
             }
+
+            // Vérifiez si l'utilisateur a déjà posté un avis pour ce produit
+            $existingReview = $this->reviewRepository->findOneBy([
+                'user' => $user,
+                'product' => $product
+            ]);
+
+            if ($existingReview) {
+                return new JsonResponse(
+                    ['error' => 'Vous avez déjà posté un avis pour ce produit'],
+                    Response::HTTP_FORBIDDEN
+                );
+            }
+
+            // Vérifiez si l'utilisateur a le produit dans son panier
+            $cart = $cartRepository->findOneBy(['user' => $user]);
+            if (!$cart || !$cart->getItems()->exists(fn($key, $item) => $item->getProduct()->getId() === $productId)) {
+                return new JsonResponse(
+                    ['error' => 'Vous devez ajouter ce produit à votre panier avant de pouvoir laisser un avis'],
+                    Response::HTTP_FORBIDDEN
+                );
+            }
         }
 
         $review = new Review();
         $review->setProduct($product)
-               ->setModel($model)
-               ->setUser($user)
-               ->setRating($rating)
-               ->setComment($comment)
-               ->setCreatedAt(new \DateTime())
-               ->setUpdateAt(new \DateTime());
-
+            ->setModel($model)
+            ->setUser($user)
+            ->setRating($rating)
+            ->setComment($comment)
+            ->setCreatedAt(new \DateTime())
+            ->setUpdateAt(new \DateTime());
 
         $errors = $this->validator->validate($review);
         if (count($errors) > 0) {
