@@ -219,6 +219,8 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     display: none;
     overflow: hidden;
+    pointer-events: none; /* Pour que le cadre de zoom ne bloque pas les événements de la souris */
+    transform: translate(-50%, -50%); /* Pour centrer le cadre de zoom sur la souris */
 }
 
 .zoomed-image img {

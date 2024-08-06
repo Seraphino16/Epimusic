@@ -17,7 +17,7 @@ const ProductImage = ({ images }) => {
             const xPercent = x / width * 100;
             const yPercent = y / height * 100;
             zoomRef.current.style.backgroundPosition = `${xPercent}% ${yPercent}%`;
-            setZoomPosition({ top: e.pageY, left: e.pageX });
+            setZoomPosition({ top: y, left: x });
         }
     };
 
