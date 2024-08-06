@@ -95,13 +95,13 @@ const ProductList = () => {
                                         )}
                                     </div>
                                     <div>
-                                        <h2 className="product-name">
+                                        <h2 className="product-name line-clamp-1">
                                             {product.name}
                                         </h2>
                                     </div>
                                     <div className="flex flex-column">
                                         <div className="product-details">
-                                            <p className="line-clamp-3">{product.description}</p>
+                                            <p className="line-clamp-3 mb-2">{product.description}</p>
                                             {product.stock !== undefined && (
                                                 <div className="product-stock">
                                                     {product.stock > 0 && product.stock <= 5 ? (
@@ -121,7 +121,7 @@ const ProductList = () => {
                                             )}
                                         </div>
                                     </div>
-                                    <div>
+                                    <div className="mt-4">
                                         <h2>${product.price}</h2>
                                     </div>
                                 </div>
