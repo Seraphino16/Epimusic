@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import HomePage from './components/pages/HomePage';
 import ProductAdminList from './components/pages/ProductAdminList';
 import ProductAdminForm from './components/forms/ProductAdminForm';
 import ProductAdminEdit from './components/forms/ProductAdminEdit';
@@ -49,6 +50,7 @@ const Content = () => {
   return (
     <div>
       <Routes>
+        <Route path="/" element={<HomePage />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/products" element={<ProductCategoriesList />} />
