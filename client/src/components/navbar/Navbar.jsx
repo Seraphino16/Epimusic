@@ -1,8 +1,10 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import NavbarItem from "./NavbarItem";
 import SearchBar from "./SearchBar";
 import logo from "../../assets/logo.png";
+import { FaUserTie, FaUser, FaShoppingCart } from "react-icons/fa";
+import { IoLogInOutline } from "react-icons/io5";
 
 const Navbar = () => {
     const location = useLocation();
@@ -26,14 +28,6 @@ const Navbar = () => {
             }
         }
     }, []);
-
-    const handleLogout = () => {
-        localStorage.removeItem("user");
-        setIsLoggedIn(false);
-        setUserRole(null);
-        navigate("/login");
-        window.location.reload();
-    };
 
     return (
         <nav
@@ -68,17 +62,18 @@ const Navbar = () => {
             >
                 <div className="flex flex-col lg:flex-row lg:items-center justify-center lg:space-x-8 lg:text-left lg:flex-grow lg:mt-0 space-y-4 lg:space-y-0">
                     <SearchBar />
-                    <NavbarItem text="Produits" href="/products" />
+                    <div className="pt-2">
+                        <NavbarItem text="Produits" href="/products" />
+                    </div>
                     {userRole === "ROLE_ADMIN" && (
-                        <NavbarItem text="Admin" href="/admin/" />
+                        <NavbarItem icon={<FaUserTie size={24} />} href="/admin/" />
                     )}
                     {userRole === "ROLE_USER" && (
-                        <NavbarItem text="Profil" href="/profile/" />
+                        <NavbarItem icon={<FaUser size={24} />} href="/profile/" />
                     )}
-                    {isLoggedIn ? (
-                        <NavbarItem text="Déconnexion" onClick={handleLogout} />
-                    ) : (
-                        <NavbarItem text="Se Connecter" href="/login" />
+                    <NavbarItem icon={<FaShoppingCart size={24}/>} href="" />
+                    {!isLoggedIn && (
+                        <NavbarItem icon={<IoLogInOutline size={24} />} href="/login" />
                     )}
                 </div>
             </div>

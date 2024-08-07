@@ -14,6 +14,7 @@ import bgAuth from "./assets/bg-auth.png";
 import bgHome from "./assets/bg-home.png";
 import './App.css';
 import FilteredArticles from './components/Filtered/FilteredArticles';
+import AdminPanel from './components/pages/AdminPanel';
 
 const App = () => (
   <Router>
@@ -23,6 +24,8 @@ const App = () => (
     </BackgroundWrapper>
   </Router>
 );
+
+
 
 const BackgroundWrapper = ({ children }) => {
   const location = useLocation();
@@ -54,12 +57,12 @@ const Content = () => {
         <Route path="/products" element={<ProductCategoriesList />} />
         <Route path="/products/:category/:categoryId" element={<ProductList />} />
         <Route
-          path="/admin"
-          element={
+            path="/admin"
+            element={
             <ProtectedRoute requiredRole="ROLE_ADMIN">
-              <ProductAdminList />
+                <AdminPanel />
             </ProtectedRoute>
-          }
+        }
         />
         <Route
           path="/admin/create-product"
