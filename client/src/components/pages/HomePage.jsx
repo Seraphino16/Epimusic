@@ -6,13 +6,29 @@ import HomeCarousel from "../carousel/HomeCarousel";
 import vinyles from "../../assets/vinyles.jpg";
 import instruments from "../../assets/instruments.jpg";
 import goodies from "../../assets/goodies.jpeg";
-import bgHome from "../../assets/bg-home.png";
 
 const HomePage = () => {
     const [categories, setCategories] = useState([]);
     const [message] = useState("");
     const [error, setError] = useState("");
-    const imagesToDisplay = [vinyles, instruments, bgHome, goodies];
+
+    const imagesToDisplay = [
+        {
+            src: vinyles,
+            title: "Collection de Vinyles",
+            description: "Découvrez notre vaste collection de vinyles vintages et modernes"
+        },
+        {
+            src: instruments,
+            title: "Instruments de Musique",
+            description: "Trouvez une variété d’instruments de musique pour tous les profils."
+        },
+        {
+            src: goodies,
+            title: "Goodies",
+            description: "Parcourez notre gamme de produits et d’objets de collection EpiMusic."
+        },
+    ];
 
     useEffect(() => {
         axios
