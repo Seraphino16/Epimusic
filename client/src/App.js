@@ -11,9 +11,9 @@ import bgAuth from "./assets/bg-auth.png";
 import './App.css';
 import FilteredArticles from './components/Filtered/FilteredArticles';
 import AdminPanel from './components/pages/AdminPanel';
-import CartPage from './components/pages/Checkout/CartPage';
 import ProductAdminForm from './components/forms/ProductAdminForm';
 import UserProfile from './components/user/UserProfile';
+import CartPage from "./components/pages/Checkout/CartPage";
 
 const App = () => (
     <Router>
@@ -48,52 +48,36 @@ const BackgroundWrapper = ({ children }) => {
 };
 
 const Content = () => {
-  return (
-    <div>
-      <Routes>
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/products" element={<ProductCategoriesList />} />
-        <Route path="/products/:category/:categoryId" element={<ProductList />} />
-        <Route
-            path="/admin"
-            element={
-            <ProtectedRoute requiredRole="ROLE_ADMIN">
-                <AdminPanel />
-            </ProtectedRoute>
-        }
-        />
-        <Route
-          path="/admin/create-product"
-          element={
-            <ProtectedRoute requiredRole="ROLE_ADMIN">
-              <ProductAdminForm />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/edit-product/:id"
-          element={
-            <ProtectedRoute requiredRole="ROLE_ADMIN">
-              <ProductAdminEdit />
-            </ProtectedRoute>
-          }
-        />
-        <Route 
-          path="/product/:id"
-          element={<ProductDetailsPage />}
-        />
-        <Route 
-          path="/filters"
-          element={<FilteredArticles />}
-        />
-        <Route
-          path='/cart'
-          element={<CartPage />}
-        />
-      </Routes>
-    </div>
-  );
+    return (
+        <div>
+            <Routes>
+                <Route path="/register" element={<Register />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/products" element={<ProductCategoriesList />} />
+                <Route path="/products/:category/:categoryId" element={<ProductList />} />
+                <Route
+                    path="/admin/*"
+                    element={
+                        <ProtectedRoute requiredRole="ROLE_ADMIN">
+                            <AdminPanel />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/profile/*"
+                    element={
+                        <ProtectedRoute requiredRole="ROLE_USER">
+                            <UserProfile />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route path="/admin/create-product" element={<ProductAdminForm />} />
+                <Route path="/product/:id" element={<ProductDetailsPage />} />
+                <Route path="/cart" element={<CartPage />} />
+                <Route path="/filters" element={<FilteredArticles />} />
+            </Routes>
+        </div>
+    );
 };
 
 export default App;
