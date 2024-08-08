@@ -202,7 +202,7 @@ const ProductAdminEdit = () => {
                 }, 2000);
             } else {
                 setTimeout(() => {
-                    navigate("/admin/");
+                    navigate("/admin/products");
                 }, 2000);
             }
         } catch (error) {

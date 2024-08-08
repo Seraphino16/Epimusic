@@ -66,10 +66,10 @@ const Navbar = () => {
                         <NavbarItem text="Produits" href="/products" />
                     </div>
                     {userRole === "ROLE_ADMIN" && (
-                        <NavbarItem icon={<FaUserTie size={24} />} href="/admin/" />
+                        <NavbarItem icon={<FaUserTie size={24} />} href="/admin/user-card" />
                     )}
                     {userRole === "ROLE_USER" && (
-                        <NavbarItem icon={<FaUser size={24} />} href="/profile/" />
+                        <NavbarItem icon={<FaUser size={24} />} href="/profile/user-card" />
                     )}
                     <NavbarItem icon={<FaShoppingCart size={24}/>} href="" />
                     {!isLoggedIn && (

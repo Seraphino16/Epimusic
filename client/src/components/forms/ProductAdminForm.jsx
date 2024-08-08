@@ -96,8 +96,8 @@ const ProductAdminForm = () => {
                 weight: parseFloat(weight),
                 photoPaths: uploadedPhotos,
                 mainImageIndex: mainImageIndex,
-                brand: category === "1" ? brand : null,  // Ensure brand is only sent for category 1
-                tags: tags  // Ensure tags are included in the request
+                brand: category === "1" ? brand : null,
+                tags: tags
             };
 
             await axios.post("http://localhost:8000/api/admin/products", newProduct);
@@ -105,7 +105,7 @@ const ProductAdminForm = () => {
             setMessage("Produit créé avec succès !");
             setError("");
             setTimeout(() => {
-                navigate("/admin/");
+                navigate("/admin/products");
             }, 2000);
         } catch (error) {
             setError("Erreur lors de la création du produit !");

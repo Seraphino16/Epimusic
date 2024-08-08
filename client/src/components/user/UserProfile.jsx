@@ -1,15 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { IoLogOutOutline } from "react-icons/io5";
 import { useNavigate, Route, Routes } from "react-router-dom";
-import AdminTabs from "../admin/AdminTabs";
-import ProductAdminList from "./ProductAdminList";
-import UsersAdminList from "../admin/UsersAdminList";
-import OrdersAdminList from "../admin/OrdersAdminList";
+import UserTabs from "../user/UserTabs";
 import UserCard from "../cards/UserCard";
-import ProductAdminForm from "../forms/ProductAdminForm";
-import ProductAdminEdit from "../forms/ProductAdminEdit";
+import OrdersUserList from "../user/OrdersUserList";
 
-const AdminPanel = () => {
+const UserProfile = () => {
     const [user, setUser] = useState(null);
     const navigate = useNavigate();
 
@@ -28,12 +24,9 @@ const AdminPanel = () => {
 
     return (
         <div className="flex flex-col items-center p-6">
-            <h1 className="text-2xl font-bold mb-6 text-center">Admin Panel</h1>
-            <AdminTabs />
+            <h1 className="text-2xl font-bold mb-6 text-center">Profil Utilisateur</h1>
+            <UserTabs />
             <Routes>
-                <Route path="products" element={<ProductAdminList />} />
-                <Route path="users" element={<UsersAdminList />} />
-                <Route path="orders" element={<OrdersAdminList />} />
                 <Route
                     path="user-card"
                     element={
@@ -49,11 +42,10 @@ const AdminPanel = () => {
                         </>
                     }
                 />
-                <Route path="create-product" element={<ProductAdminForm />} />
-                <Route path="edit-product/:id" element={<ProductAdminEdit />} />
+                <Route path="orders" element={<OrdersUserList />} />
             </Routes>
         </div>
     );
 };
 
-export default AdminPanel;
+export default UserProfile;
