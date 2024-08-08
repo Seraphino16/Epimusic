@@ -15,7 +15,6 @@ import bgAuth from "./assets/bg-auth.png";
 import './App.css';
 import FilteredArticles from './components/Filtered/FilteredArticles';
 import AdminPanel from './components/pages/AdminPanel';
-import ProductAdminForm from './components/forms/ProductAdminForm';
 import UserProfile from './components/user/UserProfile';
 import CartPage from "./components/pages/Checkout/CartPage";
 
