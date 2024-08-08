@@ -71,7 +71,7 @@ const Navbar = () => {
                     {userRole === "ROLE_USER" && (
                         <NavbarItem icon={<FaUser size={24} />} href="/profile/user-card" />
                     )}
-                    <NavbarItem icon={<FaShoppingCart size={24}/>} href="" />
+                    <NavbarItem icon={<FaShoppingCart size={24}/>} href="/cart" />
                     {!isLoggedIn && (
                         <NavbarItem icon={<IoLogInOutline size={24} />} href="/login" />
                     )}

@@ -1,0 +1,76 @@
+import axios from "axios";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import Select from 'react-select';
+import ButtonDelete from "./ButtonDelete";
+
+const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
+
+    const [selectedOption, setSelectedOption] = useState({
+        value: item.quantity,
+        label: item.quantity
+    });
+    const [total, setTotal] = useState(item.total);
+
+    const options = Array.from({ length: 10}, (v, k) => ({
+        value: k + 1,
+        label: (k + 1).toString()
+    }))
+
+    const handleChangeQuantity = (selectedOption) => {
+        setSelectedOption(selectedOption);
+
+        axios.patch(`http://localhost:8000/api/cart/item/${item.id}`, {
+            quantity: selectedOption.value
+        },  {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then((response) => {
+            return response.data.item;
+        })
+        .then((item) => {
+            setTotal(item.total);
+            onQuantityChange(item.id, selectedOption.value, item.total);
+        })
+        .catch((error) => console.log(error))
+    }
+
+    return (
+        <div className="max-w-xl bg-white p-4 m-4 rounded-lg flex">
+            <div className="w-32 h-32">
+                <img
+                    src={`http://localhost:8000${item.image_path}`}
+                    alt={`${item.product}`}
+                   className="w-full h-full object-contain"
+                />
+            </div>
+            <div className="h-100% w-full p-4 flex flex-col content-between justify-between">
+                <Link
+                    to={`/product/${item.product_id}`}
+                    className="product-link"
+                >
+                    <h4 className="text-md md:text-lg underline">{item.product}</h4>
+                </Link>
+                <div className="flex justify-between items-end">
+                    <div className="flex items-center h-full">
+                        <Select 
+                            value={selectedOption}
+                            defaultValue={item.quantity}
+                            onChange={handleChangeQuantity}
+                            options={options}
+                            isSearchable={false}
+                            menuPlacement="auto"
+                        />
+                        <ButtonDelete id={item.id} onDeleteItem={onDeleteItem}/>
+                    </div>
+                    <p className="text-2xl">{total} €</p>
+                </div>
+            </div>
+        </div>
+        
+    )
+}
+
+export default CartItem;

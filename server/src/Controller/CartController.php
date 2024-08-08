@@ -203,17 +203,35 @@ class CartController extends AbstractController
         }
 
         $cartItems = $cart->getItems();
+
+        
         
 
         $itemsData = [];
         foreach ($cartItems as $cartItem) {
+
+            $image = null;
+            foreach ($cartItem->getModel()->getImage() as $img) {
+                if ($img->isMain()) {
+                    $image = $img->getPath();
+                    break;
+                }
+            }
+
+            $quantity = $cartItem->getQuantity();
+            $price = $cartItem->getModel()->getPrice();
+
+            $total = $quantity * $price;
+            $formattedTotal = number_format($total, 2, '.', '');
+
             $itemsData[] = [
                 'id' => $cartItem->getId(),
                 'product' => $cartItem->getProduct()->getName(),
                 'product_id' => $cartItem->getProduct()->getId(),
                 'quantity' => $cartItem->getQuantity(),
+                'image_path' => $image,
                 'price' => $cartItem->getModel()->getPrice(),
-                'total' => $cartItem->getModel()->getPrice() * $cartItem->getQuantity()
+                'total' => $formattedTotal
             ];
         }
 
@@ -229,6 +247,10 @@ class CartController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
         $quantity = $data['quantity'];
+
+        if (!$quantity) {
+            return new JsonResponse(['error' => "Nous n'avons pas pu effectuer ce changement sur notre serveur"], Response::HTTP_BAD_REQUEST);
+        }
 
         $cartItem = $entityManager->getRepository(CartItem::class)->find($itemId);
 
@@ -247,13 +269,19 @@ class CartController extends AbstractController
         $entityManager->persist($cartItem);
         $entityManager->flush();
 
+        $newQuantity = $cartItem->getQuantity();
+        $price = $cartItem->getModel()->getPrice();
+
+        $total = $newQuantity * $price;
+        $formattedTotal = number_format($total, 2, '.', '');
+
         $itemData = [
                 'id' => $cartItem->getId(),
                 'product' => $cartItem->getProduct()->getName(),
                 'product_id' => $cartItem->getProduct()->getId(),
                 'quantity' => $cartItem->getQuantity(),
                 'price' => $cartItem->getModel()->getPrice(),
-                'total' => $cartItem->getModel()->getPrice() * $cartItem->getQuantity()
+                'total' => $formattedTotal
         ];
 
         $data = [

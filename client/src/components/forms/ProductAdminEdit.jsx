@@ -166,14 +166,14 @@ const ProductAdminEdit = () => {
             for (let i = 0; i < photoFiles.length; i++) {
                 const formData = new FormData();
                 formData.append("file", photoFiles[i]);
-                const response = await axios.post("http://localhost:8000/upload", formData, {
+                const response = await axios.post("/upload", formData, {
                     headers: {
                         "Content-Type": "multipart/form-data",
                     },
                 });
                 const newFileName = `${id}_${++maxIndex}.${response.data.filePath.split('.').pop()}`;
                 uploadedPhotos.push(`/uploads/${newFileName}`);
-                await axios.post("http://localhost:8000/rename-upload", { oldPath: response.data.filePath, newPath: newFileName });
+                await axios.post("/rename-upload", { oldPath: response.data.filePath, newPath: newFileName });
             }
 
             const updatedProduct = {
