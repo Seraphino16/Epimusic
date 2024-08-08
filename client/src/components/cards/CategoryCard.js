@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const CategoryCard = ({ imageSrc, categoryName, categoryId }) => {
     return (
         <Link to={`/products/${categoryName.toLowerCase()}/${categoryId}`}>
-            <div className="card w-full sm:w-[45vw] md:w-[30vw] lg:w-[20vw] xl:w-[15vw] border border-[#ece0d1] rounded-lg text-[#634832] m-2 p-2 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg flex flex-col items-center justify-between">
+            <div className="bg-white card w-full sm:w-[45vw] md:w-[30vw] lg:w-[20vw] xl:w-[15vw] border border-[#ece0d1] rounded-lg text-[#634832] m-2 p-2 transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg flex flex-col items-center justify-between">
                 <img
                     src={imageSrc}
                     alt={categoryName}

@@ -5,19 +5,12 @@
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 14px;
     margin-bottom: 20px;
 }
 
 .create-button:hover {
     background-color: #0056b3;
-}
-
-.product-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
 }
 
 .product-item {
@@ -28,10 +21,19 @@
     box-sizing: border-box;
     width: 20vw;
     height: auto;
+    position: relative;
 }
 
 .model-item {
     margin-top: 10px;
+}
+
+.centered-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 20px;
 }
 
 .image-container {
@@ -152,4 +154,77 @@
 
 .product-stock .stock-status.out-of-stock {
     color: red;
+}
+
+.add-to-cart-button {
+    padding: 10px 20px;
+    color: white;
+    background-color: #28a745;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.add-to-cart-button:hover {
+    background-color: #218838;
+}
+
+.product-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.alert {
+    color: green;
+    font-weight: bold;
+    text-align: center;
+    margin: 10px 0;
+}
+
+.add-to-cart-button-details {
+    padding: 10px 20px;
+    color: white;
+    background-color: #28a745;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.add-to-cart-button-details:hover {
+    background-color: #218838;
+}
+
+.quantity-select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.image-container {
+    position: relative;
+    display: inline-block;
+}
+
+.zoomed-image {
+    position: absolute;
+    border: 2px solid #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: none;
+    overflow: hidden;
+    pointer-events: none; /* Pour que le cadre de zoom ne bloque pas les événements de la souris */
+    transform: translate(-50%, -50%); /* Pour centrer le cadre de zoom sur la souris */
+}
+
+.zoomed-image img {
+    position: absolute;
+    max-width: none;
 }

@@ -1,41 +1,44 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import NavbarItem from "./NavbarItem";
 import SearchBar from "./SearchBar";
 import logo from "../../assets/logo.png";
+import { FaUserTie, FaUser, FaShoppingCart } from "react-icons/fa";
+import { IoLogInOutline } from "react-icons/io5";
 
 const Navbar = () => {
+    const location = useLocation();
+    const isAuthRoute =
+        location.pathname === "/register" || location.pathname === "/login";
     const [isOpen, setIsOpen] = useState(false);
     const [userRole, setUserRole] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
-        const user = JSON.parse(localStorage.getItem('user'));
+        const user = JSON.parse(localStorage.getItem("user"));
         if (user) {
             setIsLoggedIn(true);
             if (Array.isArray(user.roles)) {
-                if (user.roles.includes('ROLE_ADMIN')) {
-                    setUserRole('ROLE_ADMIN');
-                } else if (user.roles.includes('ROLE_USER')) {
-                    setUserRole('ROLE_USER');
+                if (user.roles.includes("ROLE_ADMIN")) {
+                    setUserRole("ROLE_ADMIN");
+                } else if (user.roles.includes("ROLE_USER")) {
+                    setUserRole("ROLE_USER");
                 }
             }
         }
     }, []);
 
-    const handleLogout = () => {
-        localStorage.removeItem('user');
-        setIsLoggedIn(false);
-        setUserRole(null);
-        navigate('/login');
-        window.location.reload(); // This will refresh the page
-    };
-
     return (
-        <nav className="relative z-50 w-full flex items-center justify-between flex-wrap bg-[#2bebf1] py-2 shadow px-4 lg:px-16 xl:px-48">
+        <nav
+            className={`top-0 z-50 w-full flex items-center justify-between flex-wrap ${
+                isAuthRoute ? "bg-transparent" : "bg-transparent"
+            } py-2 px-4 lg:px-16 xl:px-48`}
+        >
             <div className="flex items-center flex-shrink-0 text-black mr-6">
-                <img src={logo} alt="Logo" className="w-16 h-16 mr-2" />
+                <Link to="/">
+                    <img src={logo} alt="Logo" className="w-16 h-16 mr-2" />
+                </Link>
             </div>
             <div className="block lg:hidden">
                 <button
@@ -59,19 +62,18 @@ const Navbar = () => {
             >
                 <div className="flex flex-col lg:flex-row lg:items-center justify-center lg:space-x-8 lg:text-left lg:flex-grow lg:mt-0 space-y-4 lg:space-y-0">
                     <SearchBar />
-                    <NavbarItem text="Accueil" href="/" />
-                    <NavbarItem text="Produits" href="/products" />
-                    {userRole === 'ROLE_ADMIN' && <NavbarItem text="Admin" href="/admin/" />}
-                    {userRole === 'ROLE_USER' && <NavbarItem text="Profil" href="/profile/" />}
-                    {isLoggedIn ? (
-                        <button
-                            onClick={handleLogout}
-                            className="block mt-4 lg:inline-block lg:mt-0 text-black hover:text-gray-800 mr-4"
-                        >
-                            Déconnexion
-                        </button>
-                    ) : (
-                        <NavbarItem text="Se Connecter" href="/login" />
+                    <div className="pt-2">
+                        <NavbarItem text="Produits" href="/products" />
+                    </div>
+                    {userRole === "ROLE_ADMIN" && (
+                        <NavbarItem icon={<FaUserTie size={24} />} href="/admin/user-card" />
+                    )}
+                    {userRole === "ROLE_USER" && (
+                        <NavbarItem icon={<FaUser size={24} />} href="/profile/user-card" />
+                    )}
+                    <NavbarItem icon={<FaShoppingCart size={24}/>} href="/cart" />
+                    {!isLoggedIn && (
+                        <NavbarItem icon={<IoLogInOutline size={24} />} href="/login" />
                     )}
                 </div>
             </div>

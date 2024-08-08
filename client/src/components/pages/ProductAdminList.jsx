@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "../../styles/ProductList.css";
 
 const ProductAdminList = () => {
@@ -85,28 +85,32 @@ const ProductAdminList = () => {
     };
 
     return (
-        <div>
+        <div className="container mx-auto">
             {message && <p className="success">{message}</p>}
             {error && <p className="error">{error}</p>}
-            <h1>Liste des Produits</h1>
-            <Link to="/admin/create-product">
-                <button className="create-button">Créer un nouveau produit</button>
-            </Link>
-            <button
-                className="group-delete-button"
-                onClick={deleteSelectedProducts}
-            >
-                Supprimer les sélectionnés
-            </button>
-            <button
-                className="group-edit-button"
-                onClick={editSelectedProducts}
-            >
-                Modifier les sélectionnés
-            </button>
-            <div className="product-list">
+            <div className="centered-container">
+                <h1 className="centered-title">Liste des Produits</h1>
+                <div className="button-group-group">
+                    <button className="create-button" onClick={() => navigate("/admin/create-product")}>
+                        Créer un nouveau produit
+                    </button>
+                    <button
+                        className="group-edit-button"
+                        onClick={editSelectedProducts}
+                    >
+                        Modifier les sélectionnés
+                    </button>
+                    <button
+                        className="group-delete-button"
+                        onClick={deleteSelectedProducts}
+                    >
+                        Supprimer les sélectionnés
+                    </button>
+                </div>
+            </div>
+            <div className="flex flex-wrap content-start justify-start gap-4">
                 {products.map((product) => (
-                    <div key={product.id} className="product-item">
+                    <div key={product.id} className="bg-white product-item">
                         {product.models.map((model, index) => (
                             <div key={index} className="model-item">
                                 <div>
@@ -140,10 +144,22 @@ const ProductAdminList = () => {
                                 </div>
                                 <div className="flex flex-column">
                                     <div className="product-details">
-                                        <p>{product.description}</p>
+                                        <p className="line-clamp-3">{product.description}</p>
                                         <p className="product-category">
                                             Catégorie : {product.category}
                                         </p>
+                                        {product.category === 'Instrument' && (
+                                            <div>
+                                                <p className="product-brand">
+                                                    Marque : {product.brands.join(', ')}
+                                                </p>
+                                            </div>
+                                        )}
+                                        <div>
+                                            <p className="product-tags">
+                                                Tags : {product.tags.join(', ')}
+                                            </p>
+                                        </div>
                                         <div className="flex flex-row space-x-12">
                                             {model.color && (
                                                 <p className="product-color">
@@ -156,6 +172,9 @@ const ProductAdminList = () => {
                                                 </p>
                                             )}
                                         </div>
+                                        <p className="product-weight">
+                                            Poids : {product.weight} Kg
+                                        </p>
                                         {product.stocks && product.stocks.length > 0 && (
                                             <div className="product-stock">
                                                 {product.stocks[0].quantity > 0 && product.stocks[0].quantity <= 5 ? (

@@ -46,7 +46,7 @@ const ProductCategoriesList = () => {
             <h1 className="text-center text-4xl font-bold my-4">
                 Toutes les catégories de produits
             </h1>
-            <div className="flex flex-wrap justify-center m-5">
+            <div className="flex flex-wrap justify-center">
                 {categories.map((category) => (
                     <CategoryCard
                         key={category.id}

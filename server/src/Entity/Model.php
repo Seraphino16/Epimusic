@@ -34,9 +34,19 @@ class Model
     #[ORM\ManyToMany(targetEntity: Image::class, inversedBy: 'models')]
     private Collection $image;
 
+     /**
+     * @var Collection<int, Review>
+     */
+    #[ORM\OneToMany(mappedBy: 'model', targetEntity: Review::class)]
+    private Collection $reviews;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $weight = null;
+
     public function __construct()
     {
         $this->image = new ArrayCollection();
+        $this->reviews = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -112,6 +122,18 @@ class Model
     public function removeImage(Image $image): static
     {
         $this->image->removeElement($image);
+
+        return $this;
+    }
+
+    public function getWeight(): ?float
+    {
+        return $this->weight;
+    }
+
+    public function setWeight(?float $weight): static
+    {
+        $this->weight = $weight;
 
         return $this;
     }
