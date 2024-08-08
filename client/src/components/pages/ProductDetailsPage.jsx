@@ -28,7 +28,7 @@ const ProductDetailsPage = () => {
                 const data = await response.json();
                 if (response.ok) {
                     setProduct(data);
-
+                    console.log(data)
                     const uniqueReviews = Array.from(new Set(data.reviews.map(review => review.review_id)))
                         .map(id => data.reviews.find(review => review.review_id === id));
                     setReviews(uniqueReviews);
@@ -180,6 +180,7 @@ const ProductDetailsPage = () => {
                             color={product.models[0]?.color || 'Non spécifié'}
                             size={`${product.models[0]?.size_value || ''} ${product.models[0]?.size_unit || ''}`}
                             price={product.models[0].price}
+                            weight={product.models[0].weight}
                         />
                         <div className="flex flex-col space-y-4">
                             <label htmlFor="quantity">Quantité :</label>

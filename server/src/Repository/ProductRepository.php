@@ -94,6 +94,7 @@ class ProductRepository extends ServiceEntityRepository
                     'm.id as model_id', 'm.price',
                     'col.name as color', 's.value as size_value', 's.unit as size_unit', 
                     'st.quantity as stock_quantity',
+                    'w.value as weight',
                     'i.path as image_url', 'i.is_main as is_main',
                     'r.id as review_id', 'r.rating', 'r.comment', 'r.created_at as review_created_at',
                     'u.id as user_id', 'u.firstName as user_firstname', 'u.lastName as user_lastname')
@@ -105,6 +106,7 @@ class ProductRepository extends ServiceEntityRepository
             ->leftJoin('m.image', 'i')
             ->leftJoin('p.reviews', 'r')
             ->leftJoin('r.user', 'u')
+            ->leftJoin('p.weights', 'w')
             ->where('p.id = :id')
             ->setParameter('id', $productId)
             ->getQuery()
@@ -132,6 +134,7 @@ class ProductRepository extends ServiceEntityRepository
                     'size_value' => $result['size_value'],
                     'size_unit' => $result['size_unit'],
                     'stock_quantity' => $result['stock_quantity'] ?? 0,
+                    'weight' => $result['weight'] ?? 0
                 ];
             }
 

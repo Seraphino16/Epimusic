@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ProductDescription = ({ category, description, stock, color, size, price }) => {
+const ProductDescription = ({ category, description, stock, color, size, price, weight }) => {
 
     const getSizeLabel = () => {
         switch (category.toLowerCase()) {
@@ -41,6 +41,10 @@ const ProductDescription = ({ category, description, stock, color, size, price }
             <div className="flex items-center mb-2">
                  <span className="font-semibold mr-2">Prix:</span>
                 <span className="text-gray-700">{price} $</span>
+            </div>
+            <div className="flex items-center mb-2">
+                 <span className="font-semibold mr-2">Poids:</span>
+                <span className="text-gray-700">{weight} kg</span>
             </div>
         </div>
     );
