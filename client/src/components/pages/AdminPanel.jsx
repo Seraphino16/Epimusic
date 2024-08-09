@@ -5,7 +5,7 @@ import AdminTabs from "../admin/AdminTabs";
 import ProductAdminList from "./ProductAdminList";
 import UsersAdminList from "../admin/UsersAdminList";
 import OrdersAdminList from "../admin/OrdersAdminList";
-import UserCard from "../cards/UserCard";
+import UserCard from "../user/UserCard";
 import ProductAdminForm from "../forms/ProductAdminForm";
 import ProductAdminEdit from "../forms/ProductAdminEdit";
 
