@@ -3,7 +3,7 @@ import { IoLogOutOutline } from "react-icons/io5";
 import { useNavigate, Route, Routes } from "react-router-dom";
 import UserTabs from "../user/UserTabs";
 import UserCard from "./UserCard";
-import OrdersUserList from "../user/OrdersUserList";
+import UserOrdersList from "./UserOrdersList";
 
 const UserProfile = () => {
     const [user, setUser] = useState(null);
@@ -42,7 +42,7 @@ const UserProfile = () => {
                         </>
                     }
                 />
-                <Route path="orders" element={<OrdersUserList />} />
+                <Route path="orders" element={<UserOrdersList />} />
             </Routes>
         </div>
     );
