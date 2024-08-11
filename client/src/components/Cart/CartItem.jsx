@@ -41,7 +41,7 @@ const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
         <div className="max-w-xl bg-white p-4 m-4 rounded-lg flex">
             <div className="w-32 h-32">
                 <img
-                    src={`${item.image_path}`}
+                    src={`http://localhost:8000${item.image_path}`}
                     alt={`${item.product}`}
                    className="w-full h-full object-contain"
                 />
