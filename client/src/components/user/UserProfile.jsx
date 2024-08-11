@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { IoLogOutOutline } from "react-icons/io5";
 import { useNavigate, Route, Routes } from "react-router-dom";
 import UserTabs from "../user/UserTabs";
-import UserCard from "./UserCard";
+import UserCard from "../Cart/UserCard";
 import UserOrdersList from "./UserOrdersList";
 
 const UserProfile = () => {

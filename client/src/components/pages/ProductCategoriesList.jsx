@@ -8,54 +8,33 @@ import goodies from "../../assets/goodies.jpeg";
 
 const ProductCategoriesList = () => {
     const [categories, setCategories] = useState([]);
-    const [message] = useState("");
     const [error, setError] = useState("");
 
     useEffect(() => {
-        axios
-            .get("http://localhost:8000/api/admin/categories")
-            .then((response) => {
+        const fetchCategories = async () => {
+            try {
+                const response = await axios.get("http://localhost:8000/api/admin/categories");
                 setCategories(response.data);
-            })
-            .catch((error) => {
-                console.error(
-                    "There was an error fetching the categories!",
-                    error
-                );
-                setError("There was an error fetching the categories!");
-            });
+            } catch (error) {
+                console.error("Erreur lors de la récupération des catégories : ", error);
+                setError("Erreur lors de la récupération des catégories.");
+            }
+        };
+
+        fetchCategories();
     }, []);
 
-    const getCategoryImage = (categoryName) => {
-        switch (categoryName) {
-            case "Vinyle":
-                return vinyles;
-            case "Instrument":
-                return instruments;
-            case "Goodies":
-                return goodies;
-            default:
-                return "https://placehold.co/500x300";
-        }
-    };
-
     return (
-        <div>
-            {message && <p className="success">{message}</p>}
-            {error && <p className="error">{error}</p>}
-            <h1 className="text-center text-4xl font-bold my-4">
-                Toutes les catégories de produits
-            </h1>
-            <div className="flex flex-wrap justify-center">
-                {categories.map((category) => (
-                    <CategoryCard
-                        key={category.id}
-                        imageSrc={getCategoryImage(category.name)}
-                        categoryName={category.name}
-                        categoryId={category.id}
-                    />
-                ))}
-            </div>
+        <div className="flex flex-wrap justify-center">
+            {error && <p className="text-red-500">{error}</p>}
+            {categories.map((category) => (
+                <CategoryCard
+                    key={category.id}
+                    imageSrc={`http://localhost:8000${category.imagePath}`}
+                    categoryName={category.name}
+                    categoryId={category.id}
+                />
+            ))}
         </div>
     );
 };
