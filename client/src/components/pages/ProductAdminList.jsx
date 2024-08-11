@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import "../../styles/ProductList.css";
+import "tailwindcss/tailwind.css";
 
 const ProductAdminList = () => {
     const [products, setProducts] = useState([]);
@@ -100,149 +100,102 @@ const ProductAdminList = () => {
     };
 
     return (
-        <div className="container mx-auto">
-            {message && <p className="success">{message}</p>}
-            {error && <p className="error">{error}</p>}
-            <div className="centered-container">
-                <h1 className="centered-title">Liste des Produits</h1>
-                <div className="button-group-group">
+        <div className="container mx-auto p-4">
+            {message && <p className="text-green-500 font-bold text-center mb-4">{message}</p>}
+            {error && <p className="text-red-500 font-bold text-center mb-4">{error}</p>}
+            <div className="text-center mb-6">
+                <h1 className="text-2xl font-bold mb-4">Liste des Produits</h1>
+                <div className="flex justify-center gap-4 mb-4">
                     <button
-                        className="create-button"
+                        className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700"
                         onClick={() => navigate("/admin/create-product")}
                     >
                         Créer un nouveau produit
                     </button>
                     <button
-                        className="group-edit-button"
+                        className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700"
                         onClick={editSelectedProducts}
                     >
                         Modifier les sélectionnés
                     </button>
                     <button
-                        className="group-delete-button"
+                        className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-700"
                         onClick={deleteSelectedProducts}
                     >
                         Supprimer les sélectionnés
                     </button>
                 </div>
             </div>
-            <div className="flex flex-wrap content-start justify-start gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {products.map((product) => (
-                    <div key={product.id} className="bg-white product-item">
+                    <div key={product.id} className="bg-white border border-gray-300 rounded-lg p-4 flex flex-col h-full">
                         {product.models.map((model, index) => (
-                            <div key={index} className="model-item">
+                            <div key={index} className="flex flex-col flex-grow">
                                 <input
                                     type="checkbox"
-                                    checked={selectedProducts.includes(
-                                        product.id
-                                    )}
-                                    onChange={() =>
-                                        handleSelectProduct(product.id)
-                                    }
-                                    className="select-checkbox"
+                                    checked={selectedProducts.includes(product.id)}
+                                    onChange={() => handleSelectProduct(product.id)}
+                                    className="w-5 h-5 mb-2"
                                 />
-                                <div className="image-container">
+                                <div className="flex justify-center items-center h-96 mb-4 overflow-hidden">
                                     {model.images
                                         .filter((image) => image.is_main)
                                         .map((image, idx) => (
-                                            <div
-                                                key={idx}
-                                                className="image-item"
-                                            >
+                                            <div key={idx} className="flex justify-center items-center">
                                                 <img
                                                     src={`http://localhost:8000${image.path}`}
                                                     alt={`Produit ${product.name}`}
+                                                    className="object-contain max-w-full max-h-full"
                                                 />
                                             </div>
                                         ))}
                                 </div>
-                                <h2 className="product-name">{product.name}</h2>
-                                <div className="product-details">
-                                    <p className="line-clamp-3">
-                                        {product.description}
-                                    </p>
-                                    <p className="product-category">
-                                        Catégorie : {product.category}
-                                    </p>
+                                <h2 className="text-lg font-bold mb-2">{product.name}</h2>
+                                <div className="flex flex-col flex-grow">
+                                    <p className="line-clamp-3">{product.description}</p>
+                                    <p className="text-gray-600">Catégorie : {product.category}</p>
                                     {product.category === "Instrument" && (
-                                        <p className="product-brand">
-                                            Marque : {product.brands.join(", ")}
-                                        </p>
+                                        <p className="text-gray-600">Marque : {product.brands.join(", ")}</p>
                                     )}
-                                    <p className="product-tags">
-                                        Tags : {product.tags.join(", ")}
-                                    </p>
-                                    <div className="flex flex-row space-x-12">
+                                    <p className="text-gray-600">Tags : {product.tags.join(", ")}</p>
+                                    <div className="flex flex-wrap gap-2 mb-2">
                                         {model.color && (
-                                            <p className="product-color">
-                                                Couleur : {model.color}
-                                            </p>
+                                            <p className="text-gray-600">Couleur : {model.color}</p>
                                         )}
                                         {model.size && (
-                                            <p className="product-size">
-                                                Taille : {model.size}
-                                            </p>
+                                            <p className="text-gray-600">Taille : {model.size}</p>
                                         )}
                                     </div>
-                                    <p className="product-weight">
-                                        Poids : {product.weight} Kg
-                                    </p>
-                                    {product.stocks &&
-                                        product.stocks.length > 0 && (
-                                            <div className="product-stock">
-                                                {product.stocks[0].quantity >
-                                                    0 &&
-                                                product.stocks[0].quantity <=
-                                                    5 ? (
-                                                    <>
-                                                        <p>
-                                                            Stock :{" "}
-                                                            {
-                                                                product
-                                                                    .stocks[0]
-                                                                    .quantity
-                                                            }
-                                                        </p>
-                                                        <p className="stock-status restocking">
-                                                            Réapprovisionnement
-                                                        </p>
-                                                    </>
-                                                ) : product.stocks[0].quantity >
-                                                  5 ? (
-                                                    <>
-                                                        <p>
-                                                            Stock :{" "}
-                                                            {
-                                                                product
-                                                                    .stocks[0]
-                                                                    .quantity
-                                                            }
-                                                        </p>
-                                                        <p className="stock-status in-stock">
-                                                            En stock
-                                                        </p>
-                                                    </>
-                                                ) : (
-                                                    <p className="stock-status out-of-stock">
-                                                        Rupture de stock
-                                                    </p>
-                                                )}
-                                            </div>
-                                        )}
+                                    <p className="text-gray-600">Poids : {product.weight} Kg</p>
+                                    {product.stocks && product.stocks.length > 0 && (
+                                        <div className="text-sm">
+                                            {product.stocks[0].quantity > 0 && product.stocks[0].quantity <= 5 ? (
+                                                <>
+                                                    <p>Stock : {product.stocks[0].quantity}</p>
+                                                    <p className="text-orange-500 font-bold">Réapprovisionnement</p>
+                                                </>
+                                            ) : product.stocks[0].quantity > 5 ? (
+                                                <>
+                                                    <p>Stock : {product.stocks[0].quantity}</p>
+                                                    <p className="text-green-500 font-bold">En stock</p>
+                                                </>
+                                            ) : (
+                                                <p className="text-red-500 font-bold">Rupture de stock</p>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
-                                <h2>${model.price}</h2>
-                                <div className="button-group">
+                                <h2 className="text-lg font-bold mb-2">${model.price}</h2>
+                                <div className="flex gap-2">
                                     <button
-                                        className="edit-button"
+                                        className="bg-green-500 text-white py-1 px-3 rounded hover:bg-green-700 flex-1"
                                         onClick={() => editProduct(product.id)}
                                     >
                                         Modifier
                                     </button>
                                     <button
-                                        className="delete-button"
-                                        onClick={() =>
-                                            deleteProduct(product.id)
-                                        }
+                                        className="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-700 flex-1"
+                                        onClick={() => deleteProduct(product.id)}
                                     >
                                         Supprimer
                                     </button>

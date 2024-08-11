@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, useParams } from "react-router-dom";
-import "../../styles/ProductList.css";
+import "tailwindcss/tailwind.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 
@@ -64,78 +64,71 @@ const ProductList = () => {
     };
 
     return (
-        <div className="container mx-auto">
-            {error && <p className="error">{error}</p>}
-            {alert && <p className="alert">{alert}</p>}
+        <div className="container mx-auto p-4">
+            {error && <p className="text-red-500 font-bold text-center mb-4">{error}</p>}
+            {alert && <p className="text-green-500 font-bold text-center mb-4">{alert}</p>}
             <h1 className="text-center text-4xl font-bold my-4">
                 Liste des produits de la catégorie sélectionnée
             </h1>
-            <div className="flex flex-wrap content-start justify-start gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {products.length > 0 ? (
                     products.map((product) => (
-                        <div key={product.id} className="product-item bg-white transition-transform duration-300 ease-in-out hover:scale-105">
+                        <div key={product.id} className="bg-white border border-gray-300 rounded-lg p-4 flex flex-col h-full transition-transform duration-300 ease-in-out hover:scale-105">
                             <Link
                                 to={`/product/${product.id}`}
-                                className="product-link"
+                                className="flex flex-col h-full"
                             >
-                                <div className="model-item">
-                                    <div className="image-container">
-                                        {product.image_url ? (
-                                            <div className="image-item">
-                                                <img
-                                                    src={`http://localhost:8000${product.image_url}`}
-                                                    alt={`Produit ${product.name}`}
-                                                    style={{ maxWidth: '100%', height: 'auto' }}
-                                                />
-                                            </div>
-                                        ) : (
-                                            <div className="no-image">
-                                                <p>Aucune image disponible</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <h2 className="product-name line-clamp-1">
-                                            {product.name}
-                                        </h2>
-                                    </div>
-                                    <div className="flex flex-column">
-                                        <div className="product-details">
-                                            <p className="line-clamp-3 mb-2">{product.description}</p>
-                                            {product.stock !== undefined && (
-                                                <div className="product-stock">
-                                                    {product.stock > 0 && product.stock <= 5 ? (
-                                                        <>
-                                                            <p>Stock : {product.stock}</p>
-                                                            <p className="stock-status restocking">Réapprovisionnement</p>
-                                                        </>
-                                                    ) : product.stock > 5 ? (
-                                                        <>
-                                                            <p>Stock : {product.stock}</p>
-                                                            <p className="stock-status in-stock">En stock</p>
-                                                        </>
-                                                    ) : (
-                                                        <p className="stock-status out-of-stock">Rupture de stock</p>
-                                                    )}
-                                                </div>
+                                <div className="flex-1 flex justify-center items-center mb-4">
+                                    {product.image_url ? (
+                                        <img
+                                            src={`http://localhost:8000${product.image_url}`}
+                                            alt={`Produit ${product.name}`}
+                                            className="object-contain max-w-full max-h-48"
+                                        />
+                                    ) : (
+                                        <div className="flex items-center justify-center w-full h-48 bg-gray-200 text-gray-600">
+                                            <p>Aucune image disponible</p>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex-1 flex flex-col justify-between">
+                                    <h2 className="text-lg font-bold mb-2 line-clamp-1">
+                                        {product.name}
+                                    </h2>
+                                    <p className="line-clamp-3 mb-2">{product.description}</p>
+                                    {product.stock !== undefined && (
+                                        <div className="text-sm mb-2">
+                                            {product.stock > 0 && product.stock <= 5 ? (
+                                                <>
+                                                    <p>Stock : {product.stock}</p>
+                                                    <p className="text-orange-500 font-bold">Réapprovisionnement</p>
+                                                </>
+                                            ) : product.stock > 5 ? (
+                                                <>
+                                                    <p>Stock : {product.stock}</p>
+                                                    <p className="text-green-500 font-bold">En stock</p>
+                                                </>
+                                            ) : (
+                                                <p className="text-red-500 font-bold">Rupture de stock</p>
                                             )}
                                         </div>
-                                    </div>
-                                    <div className="mt-4">
-                                        <h2>${product.price}</h2>
+                                    )}
+                                    <div className="text-xl font-bold">
+                                        ${product.price}
                                     </div>
                                 </div>
                             </Link>
                             <button
-                                className="add-to-cart-button"
+                                className="mt-4 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700 w-full flex items-center justify-center"
                                 onClick={() => handleAddToCart(product)}
                             >
-                                <FontAwesomeIcon icon={faShoppingCart} />
+                                <FontAwesomeIcon icon={faShoppingCart} className="mr-2" />
+                                Ajouter au panier
                             </button>
                         </div>
                     ))
                 ) : (
-                    <p>Aucun produit trouvé</p>
+                    <p className="text-center">Aucun produit trouvé</p>
                 )}
             </div>
         </div>
