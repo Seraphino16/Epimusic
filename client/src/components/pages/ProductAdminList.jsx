@@ -15,8 +15,9 @@ const ProductAdminList = () => {
     }, []);
 
     const fetchProducts = () => {
-        axios.get('http://localhost:8000/api/admin/products')
-            .then(response => {
+        axios
+            .get("http://localhost:8000/api/admin/products")
+            .then((response) => {
                 setProducts(response.data);
             })
             .catch((error) => {
@@ -24,21 +25,29 @@ const ProductAdminList = () => {
                     "Une erreur s'est produite lors de la récupération des produits !",
                     error
                 );
-                setError("Une erreur s'est produite lors de la récupération des produits !");
+                setError(
+                    "Une erreur s'est produite lors de la récupération des produits !"
+                );
             });
     };
 
     const deleteProduct = (id) => {
-        return axios.delete(`http://localhost:8000/api/admin/products/${id}`)
-            .then(response => {
-                setProducts(products.filter(product => product.id !== id));
-                setMessage('Produit supprimé avec succès !');
-                setError('');
+        return axios
+            .delete(`http://localhost:8000/api/admin/products/${id}`)
+            .then((response) => {
+                setProducts(products.filter((product) => product.id !== id));
+                setMessage("Produit supprimé avec succès !");
+                setError("");
             })
-            .catch(error => {
-                console.error('Une erreur s\'est produite lors de la suppression du produit !', error);
-                setError('Une erreur s\'est produite lors de la suppression du produit !');
-                setMessage('');
+            .catch((error) => {
+                console.error(
+                    "Une erreur s'est produite lors de la suppression du produit !",
+                    error
+                );
+                setError(
+                    "Une erreur s'est produite lors de la suppression du produit !"
+                );
+                setMessage("");
             });
     };
 
@@ -71,15 +80,21 @@ const ProductAdminList = () => {
     };
 
     const deleteSelectedProducts = () => {
-        if (window.confirm('Êtes-vous sûr de vouloir supprimer les produits sélectionnés ?')) {
-            Promise.all(selectedProducts.map(id => deleteProduct(id)))
+        if (
+            window.confirm(
+                "Êtes-vous sûr de vouloir supprimer les produits sélectionnés ?"
+            )
+        ) {
+            Promise.all(selectedProducts.map((id) => deleteProduct(id)))
                 .then(() => {
                     setSelectedProducts([]);
                     fetchProducts();
                 })
                 .catch(() => {
-                    setError('Une erreur s\'est produite lors de la suppression d\'un ou plusieurs produits !');
-                    setMessage('');
+                    setError(
+                        "Une erreur s'est produite lors de la suppression d'un ou plusieurs produits !"
+                    );
+                    setMessage("");
                 });
         }
     };
@@ -91,7 +106,10 @@ const ProductAdminList = () => {
             <div className="centered-container">
                 <h1 className="centered-title">Liste des Produits</h1>
                 <div className="button-group-group">
-                    <button className="create-button" onClick={() => navigate("/admin/create-product")}>
+                    <button
+                        className="create-button"
+                        onClick={() => navigate("/admin/create-product")}
+                    >
                         Créer un nouveau produit
                     </button>
                     <button
@@ -113,23 +131,24 @@ const ProductAdminList = () => {
                     <div key={product.id} className="bg-white product-item">
                         {product.models.map((model, index) => (
                             <div key={index} className="model-item">
-                                <div>
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedProducts.includes(
-                                            product.id
-                                        )}
-                                        onChange={() =>
-                                            handleSelectProduct(product.id)
-                                        }
-                                        className="select-checkbox"
-                                    />
-                                </div>
+                                <input
+                                    type="checkbox"
+                                    checked={selectedProducts.includes(
+                                        product.id
+                                    )}
+                                    onChange={() =>
+                                        handleSelectProduct(product.id)
+                                    }
+                                    className="select-checkbox"
+                                />
                                 <div className="image-container">
                                     {model.images
-                                        .filter(image => image.is_main)
+                                        .filter((image) => image.is_main)
                                         .map((image, idx) => (
-                                            <div key={idx} className="image-item">
+                                            <div
+                                                key={idx}
+                                                className="image-item"
+                                            >
                                                 <img
                                                     src={`http://localhost:8000${image.path}`}
                                                     alt={`Produit ${product.name}`}
@@ -137,66 +156,81 @@ const ProductAdminList = () => {
                                             </div>
                                         ))}
                                 </div>
-                                <div>
-                                    <h2 className="product-name">
-                                        {product.name}
-                                    </h2>
-                                </div>
-                                <div className="flex flex-column">
-                                    <div className="product-details">
-                                        <p className="line-clamp-3">{product.description}</p>
-                                        <p className="product-category">
-                                            Catégorie : {product.category}
+                                <h2 className="product-name">{product.name}</h2>
+                                <div className="product-details">
+                                    <p className="line-clamp-3">
+                                        {product.description}
+                                    </p>
+                                    <p className="product-category">
+                                        Catégorie : {product.category}
+                                    </p>
+                                    {product.category === "Instrument" && (
+                                        <p className="product-brand">
+                                            Marque : {product.brands.join(", ")}
                                         </p>
-                                        {product.category === 'Instrument' && (
-                                            <div>
-                                                <p className="product-brand">
-                                                    Marque : {product.brands.join(', ')}
-                                                </p>
-                                            </div>
-                                        )}
-                                        <div>
-                                            <p className="product-tags">
-                                                Tags : {product.tags.join(', ')}
+                                    )}
+                                    <p className="product-tags">
+                                        Tags : {product.tags.join(", ")}
+                                    </p>
+                                    <div className="flex flex-row space-x-12">
+                                        {model.color && (
+                                            <p className="product-color">
+                                                Couleur : {model.color}
                                             </p>
-                                        </div>
-                                        <div className="flex flex-row space-x-12">
-                                            {model.color && (
-                                                <p className="product-color">
-                                                    Couleur : {model.color}
-                                                </p>
-                                            )}
-                                            {model.size && (
-                                                <p className="product-size">
-                                                    Taille : {model.size}
-                                                </p>
-                                            )}
-                                        </div>
-                                        <p className="product-weight">
-                                            Poids : {product.weight} Kg
-                                        </p>
-                                        {product.stocks && product.stocks.length > 0 && (
+                                        )}
+                                        {model.size && (
+                                            <p className="product-size">
+                                                Taille : {model.size}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <p className="product-weight">
+                                        Poids : {product.weight} Kg
+                                    </p>
+                                    {product.stocks &&
+                                        product.stocks.length > 0 && (
                                             <div className="product-stock">
-                                                {product.stocks[0].quantity > 0 && product.stocks[0].quantity <= 5 ? (
+                                                {product.stocks[0].quantity >
+                                                    0 &&
+                                                product.stocks[0].quantity <=
+                                                    5 ? (
                                                     <>
-                                                        <p>Stock : {product.stocks[0].quantity}</p>
-                                                        <p className="stock-status restocking">Réapprovisionnement</p>
+                                                        <p>
+                                                            Stock :{" "}
+                                                            {
+                                                                product
+                                                                    .stocks[0]
+                                                                    .quantity
+                                                            }
+                                                        </p>
+                                                        <p className="stock-status restocking">
+                                                            Réapprovisionnement
+                                                        </p>
                                                     </>
-                                                ) : product.stocks[0].quantity > 5 ? (
+                                                ) : product.stocks[0].quantity >
+                                                  5 ? (
                                                     <>
-                                                        <p>Stock : {product.stocks[0].quantity}</p>
-                                                        <p className="stock-status in-stock">En stock</p>
+                                                        <p>
+                                                            Stock :{" "}
+                                                            {
+                                                                product
+                                                                    .stocks[0]
+                                                                    .quantity
+                                                            }
+                                                        </p>
+                                                        <p className="stock-status in-stock">
+                                                            En stock
+                                                        </p>
                                                     </>
                                                 ) : (
-                                                    <p className="stock-status out-of-stock">Rupture de stock</p>
+                                                    <p className="stock-status out-of-stock">
+                                                        Rupture de stock
+                                                    </p>
                                                 )}
                                             </div>
                                         )}
-                                    </div>
                                 </div>
-                                <div>
-                                    <h2>${model.price}</h2>
-                                </div>
+                                <h2>${model.price}</h2>
                                 <div className="button-group">
                                     <button
                                         className="edit-button"
