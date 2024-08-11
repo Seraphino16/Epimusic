@@ -29,14 +29,37 @@ const ProductAdminEdit = () => {
     const [tagInput, setTagInput] = useState("");
     const [deletedPhotos, setDeletedPhotos] = useState([]);
 
+    const [models, setModels] = useState([]);
+    const [currentModelIndex, setCurrentModelIndex] = useState(0);
+    const [stocks, setStocks] = useState([]);
+
+
     const searchParams = new URLSearchParams(location.search);
     const selectedProductIds = searchParams.get('selectedProducts')?.split(',') || [];
     const currentEditIndex = parseInt(searchParams.get('currentEditIndex')) || 0;
+
+    const getStockForModel = (model) => {
+        const stock = stocks.find(stock =>
+            stock.color === model.color &&
+            (stock.size === model.size || stock.size === null)
+        );
+        
+        console.log('Searching for Stock:', {
+            color: model.color,
+            size: model.size
+        });
+        console.log('Available Stocks:', stocks);
+        console.log('Found Stock:', stock);
+        
+        return stock || { quantity: 0 }; // Retourner un stock par défaut si aucun stock n'est trouvé
+    };
+    
 
     useEffect(() => {
         axios.get(`http://localhost:8000/api/admin/products/${id}`)
             .then((response) => {
                 const productData = response.data;
+                console.log(productData);
                 setProduct(productData);
                 setName(productData.name);
                 setDescription(productData.description);
@@ -44,18 +67,37 @@ const ProductAdminEdit = () => {
                 setBrand(productData.brands.length > 0 ? productData.brands[0] : "");
                 setTags(productData.tags);
                 setWeight(productData.weight);
+                setModels(productData.models || []);
+                setStocks(productData.stocks || []);
 
                 if (productData.models.length > 0) {
-                    const model = productData.models[0];
+                    const model = productData.models[currentModelIndex];
                     setColor(model.color_id || "");
                     setSize(model.size_id || "");
                     setPrice(model.price);
                     setPhotoPaths(model.images.map((img) => img.path));
                     setMainImageIndex(model.images.findIndex((img) => img.is_main));
+                    
                 }
-                if (productData.stocks.length > 0) {
-                    setStock(productData.stocks[0].quantity);
+                
+                // if (productData.stocks.length > 0) {
+                //     setStocks(productData.stocks.quantity);
+
+                   
+                // }
+
+                if (productData.models.length > 0) {
+                    const model = productData.models[currentModelIndex];
+                    updateModelData(model);
                 }
+
+                const getStockForModel = (model) => {
+                    return productData.stocks.find(stock =>
+                        stock.color === model.color_id &&
+                        (stock.size === model.size_id || stock.size === null)
+                    ) || { quantity: 0 };
+                }
+
                 if (productData.category_id === 2 || productData.category_id === 3) {
                     axios.get(`http://localhost:8000/api/admin/sizes/category/${productData.category_id}`)
                         .then((response) => {
@@ -94,7 +136,7 @@ const ProductAdminEdit = () => {
     const handleCategoryChange = (value) => {
         setCategory(value);
 
-        if (value === "2" || value === "3") {
+        if (value === 2 || value === 3) {
             axios.get(`http://localhost:8000/api/admin/sizes/category/${value}`)
                 .then((response) => {
                     setSizes(response.data);
@@ -110,11 +152,11 @@ const ProductAdminEdit = () => {
     };
 
     const shouldDisplayColor = (category) => {
-        return category === "1" || category === "3";
+        return category === 1 || category === 3;
     };
 
     const shouldDisplaySize = (category) => {
-        return category === "2" || category === "3";
+        return category === 2 || category === 3;
     };
 
     const handleTagInputChange = (e) => {
@@ -147,403 +189,472 @@ const ProductAdminEdit = () => {
         if (mainImageIndex === index) setMainImageIndex(0);
     };
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-
-        if (price <= 0 || stock < 0 || weight < 0) {
-            setError("Le prix doit être supérieur à zéro, le stock et le poids ne peuvent pas être négatifs !");
+    const updateModelData = (index) => {
+        const model = models[index];
+        
+        if (!model) {
+            console.error('Le modèle est indéfini');
             return;
         }
+    
+        // Met à jour les données du modèle
+        setPrice(model.price || "");
+        setPhotoPaths(model.images.map((img) => img.path) || []);
+        setMainImageIndex(model.images.findIndex((img) => img.is_main) || 0);
+        setColor(model.color_id || "");
+        setSize(model.size_id || "");
+    
+        // Trouver le stock pour ce modèle en utilisant l'index
+        const modelStock = stocks[index] || { quantity: 0 }; // Utilisez l'index pour obtenir le stock
+        setStock(modelStock.quantity || 0); // Met à jour le stock pour ce modèle
+    };
+    
 
-        try {
-            const uploadedPhotos = [...photoPaths];
-            let maxIndex = uploadedPhotos.reduce((max, path) => {
-                const parts = path.split('_');
-                const index = parseInt(parts[parts.length - 1].split('.')[0], 10);
-                return Math.max(max, index);
-            }, 0);
+    const updateStock = (colorId, sizeId) => {
+        const stockItem = stocks.find(stock =>
+            stock.color === colorId && (stock.size === sizeId || stock.size === null)
+        );
+        setStock(stockItem ? stockItem.quantity : "");
+    };
+    
 
-            for (let i = 0; i < photoFiles.length; i++) {
-                const formData = new FormData();
-                formData.append("file", photoFiles[i]);
-                const response = await axios.post("/upload", formData, {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                });
-                const newFileName = `${id}_${++maxIndex}.${response.data.filePath.split('.').pop()}`;
-                uploadedPhotos.push(`/uploads/${newFileName}`);
-                await axios.post("/rename-upload", { oldPath: response.data.filePath, newPath: newFileName });
-            }
-
-            const updatedProduct = {
-                name: name,
-                description: description,
-                category: category,
-                color: shouldDisplayColor(category) ? color : null,
-                size: shouldDisplaySize(category) ? size : null,
-                price: parseFloat(price),
-                stock: parseInt(stock, 10),
-                weight: parseFloat(weight),
-                photoPaths: [...new Set(uploadedPhotos)], // Ensure no duplicates
-                mainImageIndex: photoPaths.length === 0 ? 0 : mainImageIndex, // Set main image index to 0 if no photos previously existed
-                brand: category === "1" ? brand : null,
-                tags: tags,
-                deletedPhotos: deletedPhotos
-            };
-
-            await axios.put(`http://localhost:8000/api/admin/products/${id}`, updatedProduct);
-
-            setMessage("Produit mis à jour avec succès!");
-            setError("");
-            if (currentEditIndex < selectedProductIds.length - 1) {
-                setTimeout(() => {
-                    navigate(`/admin/edit-product/${selectedProductIds[currentEditIndex + 1]}?selectedProducts=${selectedProductIds.join(',')}&currentEditIndex=${currentEditIndex + 1}`);
-                }, 2000);
-            } else {
-                setTimeout(() => {
-                    navigate("/admin/products");
-                }, 2000);
-            }
-        } catch (error) {
-            setError("Erreur lors de la mise à jour du produit!");
-            setMessage("");
-            console.error("Erreur lors de la mise à jour du produit!", error);
+    const handleNextModel = () => {
+        if (currentModelIndex < models.length - 1) {
+            const newIndex = currentModelIndex + 1;
+            setCurrentModelIndex(newIndex);
+            updateModelData(newIndex); // Met à jour les données du modèle suivant
         }
     };
+    
+    const handlePreviousModel = () => {
+        if (currentModelIndex > 0) {
+            const newIndex = currentModelIndex - 1;
+            setCurrentModelIndex(newIndex);
+            updateModelData(newIndex); // Met à jour les données du modèle précédent
+        }
+    };
+    
+
+    
+    
+
+    const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (price <= 0 || stock < 0 || weight < 0) {
+        setError("Le prix doit être supérieur à zéro, le stock et le poids ne peuvent pas être négatifs !");
+        return;
+    }
+
+    try {
+        const uploadedPhotos = [...photoPaths];
+        let maxIndex = uploadedPhotos.reduce((max, path) => {
+            const parts = path.split('_');
+            const index = parseInt(parts[parts.length - 1].split('.')[0], 10);
+            return Math.max(max, index);
+        }, 0);
+
+        for (let i = 0; i < photoFiles.length; i++) {
+            const formData = new FormData();
+            formData.append("file", photoFiles[i]);
+            const response = await axios.post("http://localhost:8000/upload", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+            const newFileName = `${id}_${++maxIndex}.${response.data.filePath.split('.').pop()}`;
+            uploadedPhotos.push(`/uploads/${newFileName}`);
+            await axios.post("http://localhost:8000/rename-upload", { oldPath: response.data.filePath, newPath: newFileName });
+        }
+
+        const updatedModels = models.map((model, index) => ({
+            price: parseFloat(model.price),
+            color: model.color_id,
+            size: model.size_id,
+            stock: stocks[index] ? stocks[index].quantity : 0,
+            photoPaths: model.images.map((img) => img.path),
+            mainImageIndex: model.images.findIndex((img) => img.is_main) || 0
+        }));
+
+        const updatedProduct = {
+            name: name,
+            description: description,
+            category: category,
+            models: updatedModels,
+            weight: parseFloat(weight),
+            photoPaths: [...new Set(uploadedPhotos)], // Assurez-vous qu'il n'y a pas de doublons
+            mainImageIndex: photoPaths.length === 0 ? 0 : mainImageIndex, // Définir l'index de l'image principale
+            brand: category === "1" ? brand : null,
+            tags: tags,
+            deletedPhotos: deletedPhotos
+        };
+
+        await axios.put(`http://localhost:8000/api/admin/products/${id}`, updatedProduct);
+
+        setMessage("Produit mis à jour avec succès!");
+        setError("");
+        if (currentEditIndex < selectedProductIds.length - 1) {
+            setTimeout(() => {
+                navigate(`/admin/edit-product/${selectedProductIds[currentEditIndex + 1]}?selectedProducts=${selectedProductIds.join(',')}&currentEditIndex=${currentEditIndex + 1}`);
+            }, 2000);
+        } else {
+            setTimeout(() => {
+                navigate("/admin/");
+            }, 2000);
+        }
+    } catch (error) {
+        setError("Erreur lors de la mise à jour du produit!");
+        setMessage("");
+        console.error("Erreur lors de la mise à jour du produit!", error);
+    }
+};
+
 
     if (!product) return <div>Chargement...</div>;
 
     return (
-        <div className="w-full">
-            <div className="max-w-5xl mx-auto px-6 sm:px-6 lg:px-8 mt-8 mb-8">
-                <div className="bg-white w-full shadow rounded p-8 sm:p-12">
-                    <p className="text-3xl font-bold leading-7 text-center text-black">
-                        Mettre à jour le produit
-                    </p>
-                    {message && <p className="success">{message}</p>}
-                    {error && <p className="error">{error}</p>}
-                    <form onSubmit={handleSubmit}>
-                        <div className="md:flex items-center mt-12">
+    <div className="w-full">
+        <div className="max-w-5xl mx-auto px-6 sm:px-6 lg:px-8 mt-8 mb-8">
+            <div className="bg-white w-full shadow rounded p-8 sm:p-12">
+                <p className="text-3xl font-bold leading-7 text-center text-black">
+                    Mettre à jour le produit
+                </p>
+                {message && <p className="success">{message}</p>}
+                {error && <p className="error">{error}</p>}
+                <form onSubmit={handleSubmit}>
+                    <div className="md:flex items-center mt-12">
+                        <div className="w-full flex flex-col">
+                            <label
+                                className="font-semibold leading-none text-black"
+                                htmlFor="name"
+                            >
+                                Nom
+                            </label>
+                            <input
+                                type="text"
+                                id="name"
+                                placeholder="Entrez le nom du produit"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                required
+                                className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
+                            />
+                        </div>
+                    </div>
+                    <div className="md:flex items-center mt-8">
+                        <div className="w-full flex flex-col">
+                            <label
+                                className="font-semibold leading-none text-black"
+                                htmlFor="description"
+                            >
+                                Description
+                            </label>
+                            <textarea
+                                id="description"
+                                placeholder="Entrez la description du produit"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                required
+                                className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
+                                rows="5"
+                            />
+                        </div>
+                    </div>
+                    <div className="md:flex items-center mt-8">
+                        <div className="w-full flex flex-col">
+                            <label
+                                className="font-semibold leading-none text-black"
+                                htmlFor="category"
+                            >
+                                Catégorie
+                            </label>
+                            <select
+                                id="category"
+                                value={category}
+                                onChange={(e) => handleCategoryChange(e.target.value)}
+                                required
+                                className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
+                            >
+                                <option value="" className="text-gray-500">
+                                    Sélectionnez une catégorie
+                                </option>
+                                {categories.map((cat) => (
+                                    <option key={cat.id} value={cat.id}>
+                                        {cat.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                    {category === "1" && (
+                        <div className="md:flex items-center mt-8">
                             <div className="w-full flex flex-col">
-                                <label
-                                    className="font-semibold leading-none text-black"
-                                    htmlFor="name"
-                                >
-                                    Nom
+                                <label className="font-semibold leading-none text-black" htmlFor="brand">
+                                    Marque
                                 </label>
                                 <input
                                     type="text"
-                                    id="name"
-                                    placeholder="Entrez le nom du produit"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    required
+                                    id="brand"
+                                    placeholder="Entrez le nom de la marque"
+                                    value={brand}
+                                    onChange={(e) => setBrand(e.target.value)}
                                     className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
                                 />
                             </div>
                         </div>
-                        <div className="md:flex items-center mt-8">
-                            <div className="w-full flex flex-col">
-                                <label
-                                    className="font-semibold leading-none text-black"
-                                    htmlFor="description"
-                                >
-                                    Description
-                                </label>
-                                <textarea
+                    )}
+                    <div className="md:flex items-center mt-8">
+                        <div className="w-full flex flex-col">
+                            <label className="font-semibold leading-none text-black" htmlFor="tags">
+                                Tags
+                            </label>
+                            <div className="flex">
+                                <input
                                     type="text"
-                                    id="description"
-                                    placeholder="Entrez la description du produit"
-                                    value={description}
-                                    onChange={(e) =>
-                                        setDescription(e.target.value)
-                                    }
-                                    required
-                                    className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
-                                    rows="5"
+                                    id="tags"
+                                    placeholder="Entrez un tag"
+                                    value={tagInput}
+                                    onChange={handleTagInputChange}
+                                    className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200 flex-grow"
                                 />
+                                <button
+                                    type="button"
+                                    onClick={handleAddTag}
+                                    className="bg-blue-700 text-white px-4 py-2 rounded ml-2"
+                                >
+                                    Ajouter
+                                </button>
+                            </div>
+                            <div className="flex flex-wrap mt-2">
+                                {tags.map((tag, index) => (
+                                    <div key={index} className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full mr-2 mt-2">
+                                        {tag}
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveTag(index)}
+                                            className="ml-2 text-red-600"
+                                        >
+                                            &times;
+                                        </button>
+                                    </div>
+                                ))}
                             </div>
                         </div>
+                    </div>
+
+                    
+                    {models.length > 1 && (
+                        <div className="flex items-center justify-center w-full mt-8">
+                            <button
+                                type="button"
+                                onClick={handlePreviousModel}
+                                disabled={currentModelIndex === 0}
+                                className="font-semibold leading-none text-white py-4 px-10 bg-blue-700 rounded hover:bg-blue-600 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:outline-none"
+                            >
+                                Modèle Précédent
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleNextModel}
+                                disabled={currentModelIndex === models.length - 1}
+                                className="font-semibold leading-none text-white py-4 px-10 bg-blue-700 rounded hover:bg-blue-600 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:outline-none"
+                            >
+                                Modèle Suivant
+                            </button>
+                        </div>
+                    )}
+
+                    {shouldDisplayColor(category) && (
                         <div className="md:flex items-center mt-8">
-                            <div className="w-full flex flex-col">
+                            <div className="w-full md:w-1/2 flex flex-col">
                                 <label
                                     className="font-semibold leading-none text-black"
-                                    htmlFor="category"
+                                    htmlFor="color"
                                 >
-                                    Catégorie
+                                    Couleur
                                 </label>
                                 <select
-                                    id="category"
-                                    value={category}
-                                    onChange={(e) =>
-                                        handleCategoryChange(e.target.value)
-                                    }
-                                    required
+                                    id="color"
+                                    value={color}
+                                    onChange={(e) => setColor(e.target.value)}
                                     className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
                                 >
                                     <option value="" className="text-gray-500">
-                                        Sélectionnez une catégorie
+                                        Sélectionnez une couleur
                                     </option>
-                                    {categories.map((cat) => (
-                                        <option key={cat.id} value={cat.id}>
-                                            {cat.name}
+                                    {colors.map((clr) => (
+                                        <option key={clr.id} value={clr.id}>
+                                            {clr.name}
                                         </option>
                                     ))}
                                 </select>
                             </div>
                         </div>
-                        {category === "1" && (
-                            <div className="md:flex items-center mt-8">
-                                <div className="w-full flex flex-col">
-                                    <label className="font-semibold leading-none text-black" htmlFor="brand">
-                                        Marque
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="brand"
-                                        placeholder="Entrez le nom de la marque"
-                                        value={brand}
-                                        onChange={(e) => setBrand(e.target.value)}
-                                        className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
-                                    />
-                                </div>
-                            </div>
-                        )}
+                    )}
+
+                    {shouldDisplaySize(category) && (
                         <div className="md:flex items-center mt-8">
-                            <div className="w-full flex flex-col">
-                                <label className="font-semibold leading-none text-black" htmlFor="tags">
-                                    Tags
+                            <div className="w-full md:w-1/2 flex flex-col">
+                                <label
+                                    className="font-semibold leading-none text-black"
+                                    htmlFor="size"
+                                >
+                                    Taille
                                 </label>
-                                <div className="flex">
-                                    <input
-                                        type="text"
-                                        id="tags"
-                                        placeholder="Entrez un tag"
-                                        value={tagInput}
-                                        onChange={handleTagInputChange}
-                                        className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200 flex-grow"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={handleAddTag}
-                                        className="bg-blue-700 text-white px-4 py-2 rounded ml-2"
-                                    >
-                                        Ajouter
-                                    </button>
-                                </div>
-                                <div className="flex flex-wrap mt-2">
-                                    {tags.map((tag, index) => (
-                                        <div key={index}
-                                             className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full mr-2 mt-2">
-                                            {tag}
-                                            <button
-                                                type="button"
-                                                onClick={() => handleRemoveTag(index)}
-                                                className="ml-2 text-red-600"
-                                            >
-                                                &times;
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                        {shouldDisplayColor(category) && (
-                            <div className="md:flex items-center mt-8">
-                                <div className="w-full md:w-1/2 flex flex-col">
-                                    <label
-                                        className="font-semibold leading-none text-black"
-                                        htmlFor="color"
-                                    >
-                                        Couleur
-                                    </label>
-                                    <select
-                                        id="color"
-                                        value={color}
-                                        onChange={(e) =>
-                                            setColor(e.target.value)
-                                        }
-                                        className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
-                                    >
-                                        <option
-                                            value=""
-                                            className="text-gray-500"
-                                        >
-                                            Sélectionnez une couleur
+                                <select
+                                    id="size"
+                                    value={size}
+                                    onChange={(e) => setSize(e.target.value)}
+                                    className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
+                                >
+                                    <option value="" className="text-gray-500">
+                                        Sélectionnez une taille
+                                    </option>
+                                    {sizes.map((sz) => (
+                                        <option key={sz.id} value={sz.id}>
+                                            {sz.name}
                                         </option>
-                                        {colors.map((col) => (
-                                            <option
-                                                key={col.id}
-                                                value={col.id}
-                                            >
-                                                {col.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-                        )}
-                        {shouldDisplaySize(category) && (
-                            <div className="md:flex items-center mt-8">
-                                <div className="w-full flex flex-col">
-                                    <label
-                                        className="font-semibold leading-none text-black"
-                                        htmlFor="size"
-                                    >
-                                        Taille
-                                    </label>
-                                    <select
-                                        id="size"
-                                        value={size}
-                                        onChange={(e) =>
-                                            setSize(e.target.value)
-                                        }
-                                        className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
-                                    >
-                                        <option
-                                            value=""
-                                            className="text-gray-500"
-                                        >
-                                            Sélectionnez une taille
-                                        </option>
-                                        {sizes.map((s) => (
-                                            <option key={s.id} value={s.id}>
-                                                {s.value} {s.unit}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-                        )}
-                        <div className="md:flex items-center mt-8">
-                            <div className="w-full flex flex-col">
-                                <label
-                                    className="font-semibold leading-none text-black"
-                                    htmlFor="price"
-                                >
-                                    Prix
-                                </label>
-                                <input
-                                    type="text"
-                                    id="price"
-                                    placeholder="Entrez le prix du produit"
-                                    value={price}
-                                    onChange={(e) => setPrice(e.target.value)}
-                                    required
-                                    className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
-                                />
-                            </div>
-                        </div>
-                        <div className="md:flex items-center mt-8">
-                            <div className="w-full flex flex-col">
-                                <label className="font-semibold leading-none text-black" htmlFor="weight">
-                                    Poids (Kg)
-                                </label>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    id="weight"
-                                    placeholder="Entrez le poids du produit en Kg"
-                                    value={weight}
-                                    onChange={(e) => setWeight(e.target.value)}
-                                    min="0"
-                                    required
-                                    className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
-                                />
-                            </div>
-                        </div>
-                        <div className="md:flex items-center mt-8">
-                            <div className="w-full flex flex-col">
-                                <label
-                                    className="font-semibold leading-none text-black"
-                                    htmlFor="stock"
-                                >
-                                    Stock
-                                </label>
-                                <input
-                                    type="number"
-                                    id="stock"
-                                    placeholder="Entrez le stock du produit"
-                                    value={stock}
-                                    onChange={(e) => setStock(e.target.value)}
-                                    min="0"
-                                    required
-                                    className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
-                                />
-                            </div>
-                        </div>
-                        <div className="md:flex items-center mt-8">
-                            <div className="w-full flex flex-col">
-                                <label
-                                    className="font-semibold leading-none text-black"
-                                    htmlFor="photos"
-                                >
-                                    Photos
-                                </label>
-                                <input
-                                    type="file"
-                                    id="photos"
-                                    multiple
-                                    onChange={handlePhotoChange}
-                                    className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
-                                />
-                                <div className="flex flex-col mt-4">
-                                    {photoPaths.map((path, index) => (
-                                        <div key={index} className="flex items-center mt-2">
-                                            <p className="mr-4">{path}</p>
-                                            <button
-                                                type="button"
-                                                className={`mr-4 px-3 py-1 rounded ${mainImageIndex === index ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
-                                                onClick={() => setMainImageIndex(index)}
-                                            >
-                                                {mainImageIndex === index ? 'Image principale' : 'Définir comme principale'}
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="ml-2 text-red-600"
-                                                onClick={() => handleRemovePhoto(index)}
-                                            >
-                                                &times;
-                                            </button>
-                                        </div>
                                     ))}
-                                </div>
+                                </select>
                             </div>
                         </div>
+                    )}
+
+                    <div className="md:flex items-center mt-8">
+                        <div className="w-full flex flex-col">
+                            <label
+                                className="font-semibold leading-none text-black"
+                                htmlFor="price"
+                            >
+                                Prix
+                            </label>
+                            <input
+                                type="number"
+                                id="price"
+                                placeholder="Entrez le prix du produit"
+                                value={price}
+                                onChange={(e) => setPrice(e.target.value)}
+                                min="0.01"
+                                step="0.01"
+                                required
+                                className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
+                            />
+                        </div>
+                    </div>
+                    <div className="md:flex items-center mt-8">
+                        <div className="w-full flex flex-col">
+                            <label
+                                className="font-semibold leading-none text-black"
+                                htmlFor="weight"
+                            >
+                                Poids
+                            </label>
+                            <input
+                                type="number"
+                                id="weight"
+                                placeholder="Entrez le poids du produit en Kg"
+                                value={weight}
+                                onChange={(e) => setWeight(e.target.value)}
+                                min="0"
+                                step="0.01"
+                                required
+                                className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
+                            />
+                        </div>
+                    </div>
+                    <div className="md:flex items-center mt-8">
+                        <div className="w-full flex flex-col">
+                            <label
+                                className="font-semibold leading-none text-black"
+                                htmlFor="stock"
+                            >
+                                Stock
+                            </label>
+                            <input
+                                type="number"
+                                id="stock"
+                                placeholder="Entrez le stock du produit"
+                                value={stock}
+                                onChange={(e) => setStock(e.target.value)}
+                                min="0"
+                                required
+                                className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
+                            />
+                        </div>
+                    </div>
+                    <div className="md:flex items-center mt-8">
+                        <div className="w-full flex flex-col">
+                            <label
+                                className="font-semibold leading-none text-black"
+                                htmlFor="photos"
+                            >
+                                Photos
+                            </label>
+                            <input
+                                type="file"
+                                id="photos"
+                                multiple
+                                onChange={handlePhotoChange}
+                                className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
+                            />
+                            <div className="flex flex-col mt-4">
+                                {photoPaths.map((path, index) => (
+                                    <div key={index} className="flex items-center mt-2">
+                                        <p className="mr-4">{path}</p>
+                                        <button
+                                            type="button"
+                                            className={`mr-4 px-3 py-1 rounded ${mainImageIndex === index ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+                                            onClick={() => setMainImageIndex(index)}
+                                        >
+                                            {mainImageIndex === index ? 'Image principale' : 'Définir comme principale'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="ml-2 text-red-600"
+                                            onClick={() => handleRemovePhoto(index)}
+                                        >
+                                            &times;
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex items-center justify-center w-full mt-8">
+                        <button
+                            type="submit"
+                            className="font-semibold leading-none text-white py-4 px-10 bg-blue-700 rounded hover:bg-blue-600 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:outline-none"
+                        >
+                            Mettre à jour le produit
+                        </button>
+                    </div>
+                    {selectedProductIds.length > 1 && (
                         <div className="flex items-center justify-center w-full mt-8">
                             <button
-                                type="submit"
+                                type="button"
+                                onClick={() => navigate(`/admin/edit-product/${selectedProductIds[currentEditIndex - 1]}?selectedProducts=${selectedProductIds.join(',')}&currentEditIndex=${currentEditIndex - 1}`)}
+                                disabled={currentEditIndex === 0}
                                 className="font-semibold leading-none text-white py-4 px-10 bg-blue-700 rounded hover:bg-blue-600 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:outline-none"
                             >
-                                Mettre à jour le produit
+                                Précédent
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => navigate(`/admin/edit-product/${selectedProductIds[currentEditIndex + 1]}?selectedProducts=${selectedProductIds.join(',')}&currentEditIndex=${currentEditIndex + 1}`)}
+                                disabled={currentEditIndex === selectedProductIds.length - 1}
+                                className="font-semibold leading-none text-white py-4 px-10 bg-blue-700 rounded hover:bg-blue-600 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:outline-none"
+                            >
+                                Suivant
                             </button>
                         </div>
-                        {selectedProductIds.length > 1 && (
-                            <div className="flex items-center justify-center w-full mt-8">
-                                <button
-                                    type="button"
-                                    onClick={() => navigate(`/admin/edit-product/${selectedProductIds[currentEditIndex - 1]}?selectedProducts=${selectedProductIds.join(',')}&currentEditIndex=${currentEditIndex - 1}`)}
-                                    disabled={currentEditIndex === 0}
-                                    className="font-semibold leading-none text-white py-4 px-10 bg-blue-700 rounded hover:bg-blue-600 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:outline-none"
-                                >
-                                    Précédent
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => navigate(`/admin/edit-product/${selectedProductIds[currentEditIndex + 1]}?selectedProducts=${selectedProductIds.join(',')}&currentEditIndex=${currentEditIndex + 1}`)}
-                                    disabled={currentEditIndex === selectedProductIds.length - 1}
-                                    className="font-semibold leading-none text-white py-4 px-10 bg-blue-700 rounded hover:bg-blue-600 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:outline-none"
-                                >
-                                    Suivant
-                                </button>
-                            </div>
-                        )}
-                    </form>
-                </div>
+                    )}
+                </form>
             </div>
         </div>
-    );
+    </div>
+);
+
+    
 };
 
 export default ProductAdminEdit;

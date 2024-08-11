@@ -34,6 +34,7 @@ const CartPage = () => {
             }
         })
         .then((response) => {
+           
                 return response.data;
         })
         .then((data) => {

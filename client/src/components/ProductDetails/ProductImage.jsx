@@ -1,16 +1,27 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const ProductImage = ({ images }) => {
-    const { main = [], secondary = [] } = images;
-    const allImages = [...main, ...secondary];
-    const [selectedImage, setSelectedImage] = useState(main.length > 0 ? main[0] : (secondary.length > 0 ? secondary[0] : ''));
-    const zoomRef = useRef(null);
-    const imgRef = useRef(null);
+
+    const mainImages = images.filter(img => img.is_main);
+    const secondaryImages = images.filter(img => !img.is_main);
+
+    const [selectedImage, setSelectedImage] = useState(mainImages.length > 0 ? mainImages[0].path : (secondaryImages.length > 0 ? secondaryImages[0].path : ''));
     const [isZoomed, setIsZoomed] = useState(false);
     const [zoomPosition, setZoomPosition] = useState({ top: 0, left: 0 });
 
+    const zoomRef = useRef(null);
+    const imgRef = useRef(null);
+
+    useEffect(() => {
+        if (mainImages.length > 0) {
+            setSelectedImage(mainImages[0].path);
+        } else if (secondaryImages.length > 0) {
+            setSelectedImage(secondaryImages[0].path);
+        }
+    }, [images]);
+
     const handleMouseMove = (e) => {
-        if (isZoomed) {
+        if (isZoomed && imgRef.current) {
             const { top, left, width, height } = imgRef.current.getBoundingClientRect();
             const x = e.pageX - left - window.scrollX;
             const y = e.pageY - top - window.scrollY;
@@ -63,15 +74,15 @@ const ProductImage = ({ images }) => {
                 </div>
             )}
 
-            {allImages.length > 0 && (
+            {images.length > 0 && (
                 <div className="flex gap-4 overflow-x-auto mt-4">
-                    {allImages.map((image, index) => (
+                    {[...mainImages, ...secondaryImages].map((image, index) => (
                         <img
                             key={index}
-                            src={`http://localhost:8000${image}`}
+                            src={`http://localhost:8000${image.path}`}
                             alt={`Image ${index}`}
-                            className="w-24 h-24 object-cover cursor-pointer"
-                            onClick={() => setSelectedImage(image)}
+                            className={`w-24 h-24 object-cover cursor-pointer ${image.is_main ? 'border-2 border-blue-500' : ''}`}
+                            onClick={() => setSelectedImage(image.path)}
                         />
                     ))}
                 </div>
