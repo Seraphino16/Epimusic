@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../../styles/HomeCarousel.css";
+import "../../styles/HomeCarousel.css"; // Assurez-vous que vos styles CSS sont importés
 
 const HomeCarousel = ({ images }) => {
     const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -20,14 +20,41 @@ const HomeCarousel = ({ images }) => {
     }, []);
 
     return (
-        <div className="relative carousel-container w-full h-screen flex items-center justify-center mt-8">
+        <div className="carousel-container relative w-full h-screen mt-8">
+            {/* Carousel Images */}
+            <div className="carousel-inner relative w-full h-full overflow-hidden">
+                <div
+                    className="carousel-images"
+                    style={{
+                        transform: `translateX(-${activeImageIndex * 100}%)`,
+                        transition: 'transform 0.7s ease-in-out'
+                    }}
+                >
+                    {images.map((image, index) => (
+                        <div
+                            key={index}
+                            className="carousel-image-wrapper"
+                        >
+                            <img 
+                                src={image.src} 
+                                alt={image.title}
+                                className="carousel-image"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="text-center px-4 md:px-8 lg:px-16">
+                                    <h2 className="carousel-title">{image.title}</h2>
+                                    <p className="carousel-description">{image.description}</p>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Carousel Navigation Buttons */}
             <button
                 onClick={prevImage}
-                className="absolute z-30 left-0 top-0 bottom-0 flex items-center"
-                style={{
-                    backgroundColor: "rgba(255, 255, 255, 0.5)",
-                    width: "5%",
-                }}
+                className="carousel-control prev"
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -35,7 +62,7 @@ const HomeCarousel = ({ images }) => {
                     viewBox="0 0 24 24"
                     strokeWidth={2}
                     stroke="currentColor"
-                    className="w-6 h-6 mx-auto"
+                    className="icon"
                 >
                     <path
                         strokeLinecap="round"
@@ -44,46 +71,9 @@ const HomeCarousel = ({ images }) => {
                     />
                 </svg>
             </button>
-            {images.map((image, index) => (
-                <div
-                    key={index}
-                    style={{
-                        display: index === activeImageIndex ? 'block' : 'none',
-                        position: 'absolute',
-                        width: '100%',
-                        height: '100%',
-                        transition: 'opacity 0.7s ease-in-out',
-                        opacity: index === activeImageIndex ? 1 : 0,
-                    }}
-                    className="carousel-image-wrapper"
-                >
-                    <img 
-                        src={image.src} 
-                        alt={image.title}
-                        style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'contain',
-                        }}
-                        className="carousel-image"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="text-center px-20">
-                            <h2 className="text-4xl font-bold text-white">{image.title}</h2>
-                            <p className="max-w-xl mt-3 text-gray-300">
-                                {image.description}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            ))}
             <button
                 onClick={nextImage}
-                className="absolute z-30 right-0 top-0 bottom-0 flex items-center"
-                style={{
-                    backgroundColor: "rgba(255, 255, 255, 0.5)",
-                    width: "5%",
-                }}
+                className="carousel-control next"
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -91,7 +81,7 @@ const HomeCarousel = ({ images }) => {
                     viewBox="0 0 24 24"
                     strokeWidth={2}
                     stroke="currentColor"
-                    className="w-6 h-6 mx-auto"
+                    className="icon"
                 >
                     <path
                         strokeLinecap="round"
