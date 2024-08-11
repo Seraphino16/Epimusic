@@ -33,6 +33,9 @@ class Size
     #[ORM\ManyToMany(targetEntity: Category::class, mappedBy: 'sizes')]
     private Collection $categories;
 
+    #[ORM\OneToOne(mappedBy: 'Size', cascade: ['persist', 'remove'])]
+    private ?Dimension $dimension = null;
+
     public function __construct()
     {
         $this->models = new ArrayCollection();
@@ -121,6 +124,23 @@ class Size
         if ($this->categories->removeElement($category)) {
             $category->removeSize($this);
         }
+
+        return $this;
+    }
+
+    public function getDimension(): ?Dimension
+    {
+        return $this->dimension;
+    }
+
+    public function setDimension(Dimension $dimension): static
+    {
+        // set the owning side of the relation if necessary
+        if ($dimension->getSize() !== $this) {
+            $dimension->setSize($this);
+        }
+
+        $this->dimension = $dimension;
 
         return $this;
     }

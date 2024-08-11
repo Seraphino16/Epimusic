@@ -15,6 +15,7 @@ import FilteredArticles from './components/Filtered/FilteredArticles';
 import AdminPanel from './components/pages/AdminPanel';
 import UserProfile from './components/user/UserProfile';
 import CartPage from "./components/pages/Checkout/CartPage";
+import ShippingPage from './components/pages/Checkout/ShippingPage';
 
 const App = () => (
     <Router>
@@ -74,6 +75,7 @@ const Content = () => {
                 <Route path="/admin/create-product" element={<ProductAdminForm />} />
                 <Route path="/product/:id" element={<ProductDetailsPage />} />
                 <Route path="/cart" element={<CartPage />} />
+                <Route path='/delivery' element={<ShippingPage />} />
                 <Route path="/filters" element={<FilteredArticles />} />
             </Routes>
         </div>

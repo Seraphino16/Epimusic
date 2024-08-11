@@ -3,12 +3,9 @@ import CartList from "../../Cart/CartList";
 import axios from "axios";
 import CartSummary from "../../Cart/CartSummary";
 import Alert from "../../Alerts/Alert";
-// import { response } from "express";
+import CartButton from "../../Buttons/CartButton";
 
 const CartPage = () => {
-
-    // const [message, setMessage] = useState();
-    // const [error, setError] = useState();
     const [items, setItems] = useState([]);
     const [userId, setUserId] = useState();
     const [cartToken, setCartToken] = useState();
@@ -27,6 +24,9 @@ const CartPage = () => {
     }, []);
 
     useEffect(() => {
+        if (!userId && !cartToken) {
+            return;
+        }
         axios.get("http://localhost:8000/api/cart", {
             params: {
                 userId: userId,
@@ -54,6 +54,9 @@ const CartPage = () => {
 
         setTotal(t);
         setQuantity(q)
+
+        localStorage.setItem('cart_price', t);
+        localStorage.setItem('cart_quantity', q);
     }, [items]);
 
     const handleQuantityChange = (id, newQuantity, newTotal) => {
@@ -76,14 +79,33 @@ const CartPage = () => {
         
     };
 
-    if (items) {
-        console.log(items.length);
-    }
+    const getShippingCost = () => {
+        if (!userId && !cartToken) {
+            console.log('Pas de user ou de token');
+            return;
+        }
 
-    if (cartToken) {
-        console.log(cartToken);
+        axios.get("http://localhost:8000/api/shipping/cost", {
+            params: {
+                userId: userId,
+                token: cartToken
+            }
+        })
+        .then((response) => {
+            return response.data;
+        })
+        .then((data) => {
+            console.log(data.shippingCosts);
+            localStorage.setItem("cart_shipping_costs", data.shippingCosts);
+            window.location.href = "/delivery";
+        })
+        .catch((error) => {
+            if (error.response) {
+                console.log(error.response.data.message);
+                setAlert({ message: error.response.data.message, type: "error" })
+            }
+        })        
     }
-
 
     return (
         <div className="w-9/12 m-auto">
@@ -100,7 +122,13 @@ const CartPage = () => {
                         onQuantityChange={handleQuantityChange}
                         onDeleteItem={handleDeleteItem}    
                         />
-                        <CartSummary total={total} quantity={quantity} />
+                        <div className="w-full lg:w-1/2 xl:w-1/3 md:p-4 mb-4">
+                            <CartSummary total={total} quantity={quantity} />
+                            <CartButton 
+                                text="Valider mon panier"
+                                handleClick={getShippingCost}
+                            />
+                        </div>
                     </>
                     ) : (
                         <div className="text-center mt-40 text-2xl">
