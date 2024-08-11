@@ -45,29 +45,18 @@ const HomePage = () => {
             });
     }, []);
 
-    const getCategoryImage = (categoryName) => {
-        switch (categoryName) {
-            case "Vinyle":
-                return vinyles;
-            case "Instrument":
-                return instruments;
-            case "Goodies":
-                return goodies;
-            default:
-                return "https://placehold.co/500x300";
-        }
-    };
 
     return (
         <div>
             {message && <p className="success">{message}</p>}
             {error && <p className="error">{error}</p>}
-            <HomeCarousel images={imagesToDisplay} />
+            <HomeCarousel images={imagesToDisplay}/>
             <div className="flex flex-wrap justify-center">
+                {error && <p className="text-red-500">{error}</p>}
                 {categories.map((category) => (
                     <CategoryCard
                         key={category.id}
-                        imageSrc={getCategoryImage(category.name)}
+                        imageSrc={`http://localhost:8000${category.imagePath}`}
                         categoryName={category.name}
                         categoryId={category.id}
                     />

@@ -34,10 +34,10 @@ class Model
     #[ORM\ManyToMany(targetEntity: Image::class, inversedBy: 'models')]
     private Collection $image;
 
-     /**
+    /**
      * @var Collection<int, Review>
      */
-    #[ORM\OneToMany(mappedBy: 'model', targetEntity: Review::class)]
+    #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'model')]
     private Collection $reviews;
 
     #[ORM\Column(nullable: true)]
