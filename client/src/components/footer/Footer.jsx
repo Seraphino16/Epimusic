@@ -4,10 +4,10 @@ import logo from "../../assets/logo.png";
 const Footer = () => {
     return (
         <footer className="text-gray-600 body-font bg-white bottom-0 w-full bg-opacity-50 mt-24">
-            <div className="container px-5 py-24 mx-auto flex md:items-center lg:items-start md:flex-row md:flex-nowrap flex-wrap flex-col">
+            <div className="container px-5 py-12 mx-auto flex md:items-center lg:items-start md:flex-row md:flex-nowrap flex-wrap flex-col">
                 <div className="w-64 flex-shrink-0 md:mx-0 mx-auto text-center md:text-left md:mt-0 mt-10">
                     <a className="flex title-font font-medium items-center md:justify-start justify-center text-gray-900">
-                        <div className="w-13 h-13 overflow-hidden">
+                        <div className="w-2/5 h-2/5">
                             <img
                                 src={logo}
                                 alt="EpiMusic logo"
@@ -19,7 +19,7 @@ const Footer = () => {
                         Your Music, Your World.
                     </p>
                 </div>
-                <div className="flex-grow flex flex-wrap md:pr-20 -mb-10 md:text-left text-center order-first">
+                <div className="flex-grow flex flex-wrap md:pr-20 -mb-10 md:text-left text-center order-first justify-center">
                     <div className="lg:w-1/4 md:w-1/2 w-full px-4">
                         <h2 className="title-font font-medium text-gray-900 tracking-widest text-xl mb-3">
                             <a href="/products">PRODUITS</a>
