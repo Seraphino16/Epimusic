@@ -15,12 +15,14 @@ import FilteredArticles from './components/Filtered/FilteredArticles';
 import AdminPanel from './components/pages/AdminPanel';
 import UserProfile from './components/user/UserProfile';
 import CartPage from "./components/pages/Checkout/CartPage";
+import Footer from "./components/footer/Footer";
 
 const App = () => (
     <Router>
         <BackgroundWrapper>
             <Navbar />
             <Content />
+            <Footer />
         </BackgroundWrapper>
     </Router>
 );
