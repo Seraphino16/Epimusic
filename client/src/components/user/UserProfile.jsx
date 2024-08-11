@@ -4,6 +4,9 @@ import { useNavigate, Route, Routes } from "react-router-dom";
 import UserTabs from "../user/UserTabs";
 import UserCard from "../Cart/UserCard";
 import UserOrdersList from "./UserOrdersList";
+import UserAddressBook from "./UserAddressBook";
+import AddressForm from "../forms/AddressForm";
+import AddressEditForm from "../forms/AddressEditForm";
 
 const UserProfile = () => {
     const [user, setUser] = useState(null);
@@ -43,6 +46,9 @@ const UserProfile = () => {
                     }
                 />
                 <Route path="orders" element={<UserOrdersList />} />
+                <Route path="address-book" element={<UserAddressBook />} />
+                <Route path="address-book/create" element={<AddressForm />} />
+                <Route path="address-book/edit/:id" element={<AddressEditForm />} />
             </Routes>
         </div>
     );

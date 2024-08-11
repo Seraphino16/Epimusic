@@ -5,7 +5,8 @@ const UserTabs = () => {
     const location = useLocation();
     const tabs = [
         { name: "Mes Informations", path: "/profile/user-card" },
-        { name: "Mes Commandes", path: "/profile/orders" }
+        { name: "Mes Commandes", path: "/profile/orders" },
+        { name: "Carnet d'Adresses", path: "/profile/address-book" },
     ];
 
     return (
