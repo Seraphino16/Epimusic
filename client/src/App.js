@@ -20,9 +20,13 @@ import Footer from "./components/footer/Footer";
 const App = () => (
     <Router>
         <BackgroundWrapper>
-            <Navbar />
-            <Content />
-            <Footer />
+            <div className="flex flex-col min-h-screen">
+                <Navbar />
+                <div className="flex-grow">
+                    <Content />
+                </div>
+                <Footer />
+            </div>
         </BackgroundWrapper>
     </Router>
 );
@@ -50,36 +54,34 @@ const BackgroundWrapper = ({ children }) => {
 
 const Content = () => {
     return (
-        <div>
-            <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/products" element={<ProductCategoriesList />} />
-                <Route path="/products/:category/:categoryId" element={<ProductList />} />
-                <Route
-                    path="/admin/*"
-                    element={
-                        <ProtectedRoute requiredRole="ROLE_ADMIN">
-                            <AdminPanel />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/profile/*"
-                    element={
-                        <ProtectedRoute requiredRole="ROLE_USER">
-                            <UserProfile />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route path="/admin/create-product" element={<ProductAdminForm />} />
-                <Route path="/product/:id" element={<ProductDetailsPage />} />
-                <Route path="/cart" element={<CartPage />} />
-                <Route path="/filters" element={<FilteredArticles />} />
-            </Routes>
-        </div>
+        <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/products" element={<ProductCategoriesList />} />
+            <Route path="/products/:category/:categoryId" element={<ProductList />} />
+            <Route
+                path="/admin/*"
+                element={
+                    <ProtectedRoute requiredRole="ROLE_ADMIN">
+                        <AdminPanel />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/profile/*"
+                element={
+                    <ProtectedRoute requiredRole="ROLE_USER">
+                        <UserProfile />
+                    </ProtectedRoute>
+                }
+            />
+            <Route path="/admin/create-product" element={<ProductAdminForm />} />
+            <Route path="/product/:id" element={<ProductDetailsPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/filters" element={<FilteredArticles />} />
+        </Routes>
     );
-  };
+};
 
 export default App;
