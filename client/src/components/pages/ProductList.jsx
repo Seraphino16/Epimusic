@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 import ProductColors from "../ProductDetails/ProductColors";
 import ProductSizes from "../ProductDetails/ProductSizes";
-import FilteredArticles from "../Filtered/FilteredArticles";
+import ProductFilter from "../Filtered/ProductFilter";
 
 const ProductList = () => {
     const { categoryId } = useParams();
@@ -16,9 +16,33 @@ const ProductList = () => {
     const [error, setError] = useState("");
     const [alert, setAlert] = useState("");
 
+    const [filteredProducts, setFilteredProducts] = useState([]);
+    const [filters, setFilters] = useState({
+        brands: [],
+        colors: [],
+        sizes: [],
+        priceRange: [0, 1000],
+        weightRange: [0, 50],
+    });
+
+    const [availableFilterBrands, setAvailableBrands] = useState([]);
+    const [availableFilterColors, setAvailableColors] = useState([]);
+    const [availableFilterSizes, setAvailableSizes] = useState([]);
+    const [maxPrice, setMaxPrice] = useState(1000);
+    const [maxWeight, setMaxWeight] = useState(50);
+
+    const [shouldApplyFilters, setShouldApplyFilters] = useState(false);
+
     useEffect(() => {
         fetchProducts();
     }, [categoryId]);
+
+    useEffect(() => {
+        if (shouldApplyFilters) {
+            applyFilters();
+            setShouldApplyFilters(false);
+        }
+    }, [filters, products, shouldApplyFilters]);
 
     useEffect(() => {
         products.forEach(product => {
@@ -45,9 +69,75 @@ const ProductList = () => {
             const uniqueProducts = Array.from(new Set(response.data.map(product => product.id)))
                 .map(id => response.data.find(product => product.id === id));
             setProducts(uniqueProducts);
+            console.log(products);
+
+            const brandsSet = new Set();
+            const colorsSet = new Set();
+            const sizesSet = new Set();
+            let highestPrice = 0;
+            let highestWeight = 0;
+
+            uniqueProducts.forEach(product => {
+                product.brands.forEach(brand => brandsSet.add(brand));
+                product.models.forEach(model => {
+                    if (model.color) colorsSet.add(model.color);
+                    if (model.size) sizesSet.add(model.size);
+                    if (model.price > highestPrice) highestPrice = model.price;
+                    if (model.weight && model.weight > highestWeight) highestWeight = model.weight;
+                });
+            });
+
+            setAvailableBrands(Array.from(brandsSet));
+            setAvailableColors(Array.from(colorsSet));
+            setAvailableSizes(Array.from(sizesSet));
+            setMaxPrice(highestPrice);
+            setMaxWeight(highestWeight);
+
+            setFilters(prevFilters => ({
+                ...prevFilters,
+                priceRange: [0, highestPrice],
+                weightRange: [0, highestWeight]
+            }));
+
         } catch (error) {
             setError("Une erreur s'est produite lors de la récupération des produits !");
         }
+    };
+
+    const applyFilters = () => {
+        let filtered = products;
+
+        if (filters.brands.length > 0) {
+            filtered = filtered.filter(product =>
+                filters.brands.some(brand => product.brands.includes(brand))
+            );
+        }
+
+        if (filters.colors.length > 0) {
+            filtered = filtered.filter(product =>
+                product.models.some(model => filters.colors.includes(model.color))
+            );
+        }
+
+        if (filters.sizes.length > 0) {
+            filtered = filtered.filter(product =>
+                product.models.some(model => filters.sizes.includes(model.size))
+            );
+        }
+
+        if (filters.priceRange.length === 2) {
+            filtered = filtered.filter(product =>
+                product.models.some(model => model.price >= filters.priceRange[0] && model.price <= filters.priceRange[1])
+            );
+        }
+
+        if (filters.weightRange.length === 2) {
+            filtered = filtered.filter(product =>
+                product.models.some(model => model.weight >= filters.weightRange[0] && model.weight <= filters.weightRange[1])
+            );
+        }
+
+        setFilteredProducts(filtered);
     };
 
     const handleColorSelect = (productId, color) => {
@@ -58,8 +148,8 @@ const ProductList = () => {
                 .filter(model => model.color === color)
                 .map(model => model.size);
 
-            const updatedSize = availableSizes.includes(selectedSizes[product.id]) 
-                ? selectedSizes[product.id] 
+            const updatedSize = availableSizes.includes(selectedSizes[product.id])
+                ? selectedSizes[product.id]
                 : availableSizes[0];
 
             setSelectedSizes(prevSizes => ({
@@ -113,6 +203,10 @@ const ProductList = () => {
             });
     };
 
+    const handleApplyFilters = () => {
+        setShouldApplyFilters(true);
+    };
+
     return (
         <div className="container mx-auto p-4">
             {error && <p className="text-red-500 font-bold text-center mb-4">{error}</p>}
@@ -122,12 +216,25 @@ const ProductList = () => {
             </h1>
             <div className="flex">
                 <div className="w-1/4 min-w-[300px] h-screen sticky top-0 bg-white p-4 border-r border-gray-300">
-                    <FilteredArticles />
+                    <ProductFilter
+                        brands={availableFilterBrands}
+                        colors={availableFilterColors}
+                        sizes={availableFilterSizes}
+                        maxPrice={maxPrice}
+                        maxWeight={maxWeight}
+                        onFiltersChange={setFilters}
+                    />
+                    <button
+                        className="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 w-full"
+                        onClick={handleApplyFilters}
+                    >
+                        Appliquer les filtres
+                    </button>
                 </div>
                 <div className="w-3/4 flex-1 p-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {products.length > 0 ? (
-                            products.map((product) => {
+                        {filteredProducts.length > 0 ? (
+                            filteredProducts.map((product) => {
                                 const selectedColor = selectedColors[product.id];
                                 const selectedSize = selectedSizes[product.id];
                                 const filteredModel = product.models.find(
