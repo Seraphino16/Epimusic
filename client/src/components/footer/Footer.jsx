@@ -22,7 +22,7 @@ const Footer = () => {
                 <div className="flex-grow flex flex-wrap md:pr-20 -mb-10 md:text-left text-center order-first justify-center">
                     <div className="lg:w-1/4 md:w-1/2 w-full px-4">
                         <h2 className="title-font font-medium text-gray-900 tracking-widest text-xl mb-3">
-                            <a href="/products">PRODUITS</a>
+                            <a href="/products">Produits</a>
                         </h2>
                         <div className="list-none mb-10">
                             <li>
