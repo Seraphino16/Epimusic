@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../../styles/HomeCarousel.css"; // Assurez-vous que vos styles CSS sont importés
+import "../../styles/HomeCarousel.css";
 
 const HomeCarousel = ({ images }) => {
     const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -21,7 +21,6 @@ const HomeCarousel = ({ images }) => {
 
     return (
         <div className="carousel-container relative w-full h-screen mt-8">
-            {/* Carousel Images */}
             <div className="carousel-inner relative w-full h-full overflow-hidden">
                 <div
                     className="carousel-images"
@@ -40,10 +39,10 @@ const HomeCarousel = ({ images }) => {
                                 alt={image.title}
                                 className="carousel-image"
                             />
-                            <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="absolute inset-0 flex items-center text-center justify-center">
                                 <div className="text-center px-4 md:px-8 lg:px-16">
-                                    <h2 className="carousel-title">{image.title}</h2>
-                                    <p className="carousel-description">{image.description}</p>
+                                    <a className="carousel-title text-4xl underline" href={image.link}>{image.title}</a>
+                                    <p className="carousel-description text-xl">{image.description}</p>
                                 </div>
                             </div>
                         </div>
@@ -51,7 +50,6 @@ const HomeCarousel = ({ images }) => {
                 </div>
             </div>
 
-            {/* Carousel Navigation Buttons */}
             <button
                 onClick={prevImage}
                 className="carousel-control prev"
