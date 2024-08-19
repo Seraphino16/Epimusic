@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 import ProductColors from "../ProductDetails/ProductColors";
 import ProductSizes from "../ProductDetails/ProductSizes";
+import FilteredArticles from "../Filtered/FilteredArticles";
 
 const ProductList = () => {
     const { categoryId } = useParams();
@@ -57,8 +58,8 @@ const ProductList = () => {
                 .filter(model => model.color === color)
                 .map(model => model.size);
 
-            const updatedSize = availableSizes.includes(selectedSizes[productId]) 
-                ? selectedSizes[productId] 
+            const updatedSize = availableSizes.includes(selectedSizes[product.id]) 
+                ? selectedSizes[product.id] 
                 : availableSizes[0];
 
             setSelectedSizes(prevSizes => ({
@@ -119,106 +120,112 @@ const ProductList = () => {
             <h1 className="text-center text-4xl font-bold my-4">
                 Liste des produits de la catégorie sélectionnée
             </h1>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {products.length > 0 ? (
-                    products.map((product) => {
-                        const selectedColor = selectedColors[product.id];
-                        const selectedSize = selectedSizes[product.id];
-                        const filteredModel = product.models.find(
-                            model => model.color === selectedColor && model.size === selectedSize
-                        );
+            <div className="flex">
+                <div className="w-1/4 min-w-[300px] h-screen sticky top-0 bg-white p-4 border-r border-gray-300">
+                    <FilteredArticles />
+                </div>
+                <div className="w-3/4 flex-1 p-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {products.length > 0 ? (
+                            products.map((product) => {
+                                const selectedColor = selectedColors[product.id];
+                                const selectedSize = selectedSizes[product.id];
+                                const filteredModel = product.models.find(
+                                    model => model.color === selectedColor && model.size === selectedSize
+                                );
 
-                        const uniqueColors = Array.from(new Set(product.models.map(model => model.color)));
-                        const availableSizes = filteredModel ? 
-                            Array.from(new Set(product.models.filter(model => model.color === selectedColor).map(model => model.size))) 
-                            : [];
+                                const uniqueColors = Array.from(new Set(product.models.map(model => model.color)));
+                                const availableSizes = filteredModel ? 
+                                    Array.from(new Set(product.models.filter(model => model.color === selectedColor).map(model => model.size))) 
+                                    : [];
 
-                        const promotion = product.promotions.length > 0 ? product.promotions[0] : null;
+                                const promotion = product.promotions.length > 0 ? product.promotions[0] : null;
 
-                        return (
-                            <div key={product.id} className="bg-white border border-gray-300 rounded-lg p-4 flex flex-col h-full transition-transform duration-300 ease-in-out hover:scale-105">
-                                <Link
-                                    to={`/product/${product.id}`}
-                                    className="flex flex-col h-full"
-                                >
-                                    <div className="flex-1 flex justify-center items-center mb-4">
-                                        {filteredModel?.images && filteredModel.images.length > 0 ? (
-                                            <img
-                                                src={`http://localhost:8000${filteredModel.images.find(img => img.is_main)?.path}`}
-                                                alt={`Produit ${product.name}`}
-                                                className="object-contain max-w-full max-h-48"
-                                            />
-                                        ) : (
-                                            <div className="flex items-center justify-center w-full h-48 bg-gray-200 text-gray-600">
-                                                <p>Aucune image disponible</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                    </Link>
-                                    <div className="flex-1 flex flex-col justify-between">
-                                        <h2 className="text-lg font-bold mb-2 line-clamp-1">
-                                            {product.name}
-                                        </h2>
-                                        <p className="line-clamp-3 mb-2">{product.description}</p>
-                                        <ProductColors
-                                            colors={uniqueColors}
-                                            selectedColor={selectedColor}
-                                            onColorSelect={(color) => handleColorSelect(product.id, color)}
-                                        />
-                                        <ProductSizes
-                                            sizes={availableSizes}
-                                            selectedSize={selectedSize}
-                                            onSizeSelect={(size) => handleSizeSelect(product.id, size)}
-                                        />
-                                        {filteredModel?.stock !== undefined && (
-                                            <div className="text-sm mb-2">
-                                                {filteredModel.stock > 0 && filteredModel.stock <= 5 ? (
-                                                    <>
-                                                        <p>Stock : {filteredModel.stock}</p>
-                                                        <p className="text-orange-500 font-bold">Réapprovisionnement</p>
-                                                    </>
-                                                ) : filteredModel.stock > 5 ? (
-                                                    <>
-                                                        <p>Stock : {filteredModel.stock}</p>
-                                                        <p className="text-green-500 font-bold">En stock</p>
-                                                    </>
+                                return (
+                                    <div key={product.id} className="bg-white border border-gray-300 rounded-lg p-4 flex flex-col h-full transition-transform duration-300 ease-in-out hover:scale-105">
+                                        <Link
+                                            to={`/product/${product.id}`}
+                                            className="flex flex-col h-full"
+                                        >
+                                            <div className="flex-1 flex justify-center items-center mb-4">
+                                                {filteredModel?.images && filteredModel.images.length > 0 ? (
+                                                    <img
+                                                        src={`http://localhost:8000${filteredModel.images.find(img => img.is_main)?.path}`}
+                                                        alt={`Produit ${product.name}`}
+                                                        className="object-contain max-w-full max-h-48"
+                                                    />
                                                 ) : (
-                                                    <p className="text-red-500 font-bold">Rupture de stock</p>
+                                                    <div className="flex items-center justify-center w-full h-48 bg-gray-200 text-gray-600">
+                                                        <p>Aucune image disponible</p>
+                                                    </div>
                                                 )}
                                             </div>
-                                        )}
-                                        {promotion ? (
-                                            <div className="flex flex-col mb-2">
-                                                <span className="text-gray-500 line-through text-lg">
+                                        </Link>
+                                        <div className="flex-1 flex flex-col justify-between">
+                                            <h2 className="text-lg font-bold mb-2 line-clamp-1">
+                                                {product.name}
+                                            </h2>
+                                            <p className="line-clamp-3 mb-2">{product.description}</p>
+                                            <ProductColors
+                                                colors={uniqueColors}
+                                                selectedColor={selectedColor}
+                                                onColorSelect={(color) => handleColorSelect(product.id, color)}
+                                            />
+                                            <ProductSizes
+                                                sizes={availableSizes}
+                                                selectedSize={selectedSize}
+                                                onSizeSelect={(size) => handleSizeSelect(product.id, size)}
+                                            />
+                                            {filteredModel?.stock !== undefined && (
+                                                <div className="text-sm mb-2">
+                                                    {filteredModel.stock > 0 && filteredModel.stock <= 5 ? (
+                                                        <>
+                                                            <p>Stock : {filteredModel.stock}</p>
+                                                            <p className="text-orange-500 font-bold">Réapprovisionnement</p>
+                                                        </>
+                                                    ) : filteredModel.stock > 5 ? (
+                                                        <>
+                                                            <p>Stock : {filteredModel.stock}</p>
+                                                            <p className="text-green-500 font-bold">En stock</p>
+                                                        </>
+                                                    ) : (
+                                                        <p className="text-red-500 font-bold">Rupture de stock</p>
+                                                    )}
+                                                </div>
+                                            )}
+                                            {promotion ? (
+                                                <div className="flex flex-col mb-2">
+                                                    <span className="text-gray-500 line-through text-lg">
+                                                        ${filteredModel?.price?.toFixed(2) || 'Non disponible'}
+                                                    </span>
+                                                    <span className="text-red-600 text-xl font-bold">
+                                                        ${promotion.promo_price}
+                                                    </span>
+                                                    <p className="text-sm text-red-600 font-bold">
+                                                        Promotion du {promotion.start_date} au {promotion.end_date}
+                                                    </p>
+                                                </div>
+                                            ) : (
+                                                <p className="text-xl font-bold">
                                                     ${filteredModel?.price?.toFixed(2) || 'Non disponible'}
-                                                </span>
-                                                <span className="text-red-600 text-xl font-bold">
-                                                    ${promotion.promo_price}
-                                                </span>
-                                                <p className="text-sm text-red-600 font-bold">
-                                                    Promotion du {promotion.start_date} au {promotion.end_date}
                                                 </p>
-                                            </div>
-                                        ) : (
-                                            <p className="text-xl font-bold">
-                                                ${filteredModel?.price?.toFixed(2) || 'Non disponible'}
-                                            </p>
-                                        )}
+                                            )}
+                                        </div>
+                                        <button
+                                            className="mt-4 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700 w-full flex items-center justify-center"
+                                            onClick={() => handleAddToCart(product)}
+                                        >
+                                            <FontAwesomeIcon icon={faShoppingCart} className="mr-2" />
+                                            Ajouter au panier
+                                        </button>
                                     </div>
-                               
-                                <button
-                                    className="mt-4 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700 w-full flex items-center justify-center"
-                                    onClick={() => handleAddToCart(product)}
-                                >
-                                    <FontAwesomeIcon icon={faShoppingCart} className="mr-2" />
-                                    Ajouter au panier
-                                </button>
-                            </div>
-                        );
-                    })
-                ) : (
-                    <p className="text-center">Aucun produit trouvé</p>
-                )}
+                                );
+                            })
+                        ) : (
+                            <p className="text-center col-span-full">Aucun produit trouvé.</p>
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
     );
