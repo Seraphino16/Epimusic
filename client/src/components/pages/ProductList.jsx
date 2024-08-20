@@ -45,19 +45,19 @@ const ProductList = () => {
     }, [filters, products, shouldApplyFilters]);
 
     useEffect(() => {
-        products.forEach(product => {
+        products.forEach((product) => {
             if (product.models && product.models.length > 0) {
                 const firstColor = product.models[0].color;
                 const firstSize = product.models[0].size;
 
-                setSelectedColors(prevColors => ({
+                setSelectedColors((prevColors) => ({
                     ...prevColors,
-                    [product.id]: prevColors[product.id] || firstColor
+                    [product.id]: prevColors[product.id] || firstColor,
                 }));
 
-                setSelectedSizes(prevSizes => ({
+                setSelectedSizes((prevSizes) => ({
                     ...prevSizes,
-                    [product.id]: prevSizes[product.id] || firstSize
+                    [product.id]: prevSizes[product.id] || firstSize,
                 }));
             }
         });
@@ -65,9 +65,12 @@ const ProductList = () => {
 
     const fetchProducts = async () => {
         try {
-            const response = await axios.get(`http://localhost:8000/api/products/category/${categoryId}`);
-            const uniqueProducts = Array.from(new Set(response.data.map(product => product.id)))
-                .map(id => response.data.find(product => product.id === id));
+            const response = await axios.get(
+                `http://localhost:8000/api/products/category/${categoryId}`
+            );
+            const uniqueProducts = Array.from(
+                new Set(response.data.map((product) => product.id))
+            ).map((id) => response.data.find((product) => product.id === id));
             setProducts(uniqueProducts);
             console.log(products);
 
@@ -77,13 +80,14 @@ const ProductList = () => {
             let highestPrice = 0;
             let highestWeight = 0;
 
-            uniqueProducts.forEach(product => {
-                product.brands.forEach(brand => brandsSet.add(brand));
-                product.models.forEach(model => {
+            uniqueProducts.forEach((product) => {
+                product.brands.forEach((brand) => brandsSet.add(brand));
+                product.models.forEach((model) => {
                     if (model.color) colorsSet.add(model.color);
                     if (model.size) sizesSet.add(model.size);
                     if (model.price > highestPrice) highestPrice = model.price;
-                    if (model.weight && model.weight > highestWeight) highestWeight = model.weight;
+                    if (model.weight && model.weight > highestWeight)
+                        highestWeight = model.weight;
                 });
             });
 
@@ -93,14 +97,17 @@ const ProductList = () => {
             setMaxPrice(highestPrice);
             setMaxWeight(highestWeight);
 
-            setFilters(prevFilters => ({
+            setFilters((prevFilters) => ({
                 ...prevFilters,
                 priceRange: [0, highestPrice],
-                weightRange: [0, highestWeight]
+                weightRange: [0, highestWeight],
             }));
 
+            handleApplyFilters();
         } catch (error) {
-            setError("Une erreur s'est produite lors de la récupération des produits !");
+            setError(
+                "Une erreur s'est produite lors de la récupération des produits !"
+            );
         }
     };
 
@@ -108,32 +115,44 @@ const ProductList = () => {
         let filtered = products;
 
         if (filters.brands.length > 0) {
-            filtered = filtered.filter(product =>
-                filters.brands.some(brand => product.brands.includes(brand))
+            filtered = filtered.filter((product) =>
+                filters.brands.some((brand) => product.brands.includes(brand))
             );
         }
 
         if (filters.colors.length > 0) {
-            filtered = filtered.filter(product =>
-                product.models.some(model => filters.colors.includes(model.color))
+            filtered = filtered.filter((product) =>
+                product.models.some((model) =>
+                    filters.colors.includes(model.color)
+                )
             );
         }
 
         if (filters.sizes.length > 0) {
-            filtered = filtered.filter(product =>
-                product.models.some(model => filters.sizes.includes(model.size))
+            filtered = filtered.filter((product) =>
+                product.models.some((model) =>
+                    filters.sizes.includes(model.size)
+                )
             );
         }
 
         if (filters.priceRange.length === 2) {
-            filtered = filtered.filter(product =>
-                product.models.some(model => model.price >= filters.priceRange[0] && model.price <= filters.priceRange[1])
+            filtered = filtered.filter((product) =>
+                product.models.some(
+                    (model) =>
+                        model.price >= filters.priceRange[0] &&
+                        model.price <= filters.priceRange[1]
+                )
             );
         }
 
         if (filters.weightRange.length === 2) {
-            filtered = filtered.filter(product =>
-                product.models.some(model => model.weight >= filters.weightRange[0] && model.weight <= filters.weightRange[1])
+            filtered = filtered.filter((product) =>
+                product.models.some(
+                    (model) =>
+                        model.weight >= filters.weightRange[0] &&
+                        model.weight <= filters.weightRange[1]
+                )
             );
         }
 
@@ -141,20 +160,22 @@ const ProductList = () => {
     };
 
     const handleColorSelect = (productId, color) => {
-        setSelectedColors(prevColors => {
+        setSelectedColors((prevColors) => {
             const updatedColors = { ...prevColors, [productId]: color };
-            const product = products.find(p => p.id === productId);
+            const product = products.find((p) => p.id === productId);
             const availableSizes = product.models
-                .filter(model => model.color === color)
-                .map(model => model.size);
+                .filter((model) => model.color === color)
+                .map((model) => model.size);
 
-            const updatedSize = availableSizes.includes(selectedSizes[product.id])
+            const updatedSize = availableSizes.includes(
+                selectedSizes[product.id]
+            )
                 ? selectedSizes[product.id]
                 : availableSizes[0];
 
-            setSelectedSizes(prevSizes => ({
+            setSelectedSizes((prevSizes) => ({
                 ...prevSizes,
-                [productId]: updatedSize
+                [productId]: updatedSize,
             }));
 
             return updatedColors;
@@ -162,20 +183,23 @@ const ProductList = () => {
     };
 
     const handleSizeSelect = (productId, size) => {
-        setSelectedSizes(prevSizes => ({
+        setSelectedSizes((prevSizes) => ({
             ...prevSizes,
-            [productId]: size
+            [productId]: size,
         }));
     };
 
     const handleAddToCart = (product) => {
-        const user = JSON.parse(localStorage.getItem('user'));
-        const token = localStorage.getItem('cart_token');
-        const model = product.models.find(model => {
+        const user = JSON.parse(localStorage.getItem("user"));
+        const token = localStorage.getItem("cart_token");
+        const model = product.models.find((model) => {
             if (!model.color && !model.size) {
                 return true;
             }
-            return model.color === selectedColors[product.id] && model.size === selectedSizes[product.id];
+            return (
+                model.color === selectedColors[product.id] &&
+                model.size === selectedSizes[product.id]
+            );
         });
 
         if (!model) return;
@@ -191,11 +215,12 @@ const ProductList = () => {
             data.token = token;
         }
 
-        axios.post(`http://localhost:8000/api/cart/add/${product.id}`, data)
-            .then(response => {
+        axios
+            .post(`http://localhost:8000/api/cart/add/${product.id}`, data)
+            .then((response) => {
                 setAlert("Produit ajouté au panier !");
                 if (response.data.token) {
-                    localStorage.setItem('cart_token', response.data.token);
+                    localStorage.setItem("cart_token", response.data.token);
                 }
             })
             .catch(() => {
@@ -209,8 +234,16 @@ const ProductList = () => {
 
     return (
         <div className="container mx-auto p-4">
-            {error && <p className="text-red-500 font-bold text-center mb-4">{error}</p>}
-            {alert && <p className="text-green-500 font-bold text-center mb-4">{alert}</p>}
+            {error && (
+                <p className="text-red-500 font-bold text-center mb-4">
+                    {error}
+                </p>
+            )}
+            {alert && (
+                <p className="text-green-500 font-bold text-center mb-4">
+                    {alert}
+                </p>
+            )}
             <h1 className="text-center text-4xl font-bold my-4">
                 Liste des produits de la catégorie sélectionnée
             </h1>
@@ -235,35 +268,70 @@ const ProductList = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {filteredProducts.length > 0 ? (
                             filteredProducts.map((product) => {
-                                const selectedColor = selectedColors[product.id];
+                                const selectedColor =
+                                    selectedColors[product.id];
                                 const selectedSize = selectedSizes[product.id];
                                 const filteredModel = product.models.find(
-                                    model => model.color === selectedColor && model.size === selectedSize
+                                    (model) =>
+                                        model.color === selectedColor &&
+                                        model.size === selectedSize
                                 );
 
-                                const uniqueColors = Array.from(new Set(product.models.map(model => model.color)));
-                                const availableSizes = filteredModel ? 
-                                    Array.from(new Set(product.models.filter(model => model.color === selectedColor).map(model => model.size))) 
+                                const uniqueColors = Array.from(
+                                    new Set(
+                                        product.models.map(
+                                            (model) => model.color
+                                        )
+                                    )
+                                );
+                                const availableSizes = filteredModel
+                                    ? Array.from(
+                                          new Set(
+                                              product.models
+                                                  .filter(
+                                                      (model) =>
+                                                          model.color ===
+                                                          selectedColor
+                                                  )
+                                                  .map((model) => model.size)
+                                          )
+                                      )
                                     : [];
 
-                                const promotion = product.promotions.length > 0 ? product.promotions[0] : null;
+                                const promotion =
+                                    product.promotions.length > 0
+                                        ? product.promotions[0]
+                                        : null;
 
                                 return (
-                                    <div key={product.id} className="bg-white border border-gray-300 rounded-lg p-4 flex flex-col h-full transition-transform duration-300 ease-in-out hover:scale-105">
+                                    <div
+                                        key={product.id}
+                                        className="bg-white border border-gray-300 rounded-lg p-4 flex flex-col h-full transition-transform duration-300 ease-in-out hover:scale-105"
+                                    >
                                         <Link
                                             to={`/product/${product.id}`}
                                             className="flex flex-col h-full"
                                         >
                                             <div className="flex-1 flex justify-center items-center mb-4">
-                                                {filteredModel?.images && filteredModel.images.length > 0 ? (
+                                                {filteredModel?.images &&
+                                                filteredModel.images.length >
+                                                    0 ? (
                                                     <img
-                                                        src={`http://localhost:8000${filteredModel.images.find(img => img.is_main)?.path}`}
+                                                        src={`http://localhost:8000${
+                                                            filteredModel.images.find(
+                                                                (img) =>
+                                                                    img.is_main
+                                                            )?.path
+                                                        }`}
                                                         alt={`Produit ${product.name}`}
                                                         className="object-contain max-w-full max-h-48"
                                                     />
                                                 ) : (
                                                     <div className="flex items-center justify-center w-full h-48 bg-gray-200 text-gray-600">
-                                                        <p>Aucune image disponible</p>
+                                                        <p>
+                                                            Aucune image
+                                                            disponible
+                                                        </p>
                                                     </div>
                                                 )}
                                             </div>
@@ -272,64 +340,110 @@ const ProductList = () => {
                                             <h2 className="text-lg font-bold mb-2 line-clamp-1">
                                                 {product.name}
                                             </h2>
-                                            <p className="line-clamp-3 mb-2">{product.description}</p>
+                                            <p className="line-clamp-3 mb-2">
+                                                {product.description}
+                                            </p>
                                             <ProductColors
                                                 colors={uniqueColors}
                                                 selectedColor={selectedColor}
-                                                onColorSelect={(color) => handleColorSelect(product.id, color)}
+                                                onColorSelect={(color) =>
+                                                    handleColorSelect(
+                                                        product.id,
+                                                        color
+                                                    )
+                                                }
                                             />
                                             <ProductSizes
                                                 sizes={availableSizes}
                                                 selectedSize={selectedSize}
-                                                onSizeSelect={(size) => handleSizeSelect(product.id, size)}
+                                                onSizeSelect={(size) =>
+                                                    handleSizeSelect(
+                                                        product.id,
+                                                        size
+                                                    )
+                                                }
                                             />
-                                            {filteredModel?.stock !== undefined && (
+                                            {filteredModel?.stock !==
+                                                undefined && (
                                                 <div className="text-sm mb-2">
-                                                    {filteredModel.stock > 0 && filteredModel.stock <= 5 ? (
+                                                    {filteredModel.stock > 0 &&
+                                                    filteredModel.stock <= 5 ? (
                                                         <>
-                                                            <p>Stock : {filteredModel.stock}</p>
-                                                            <p className="text-orange-500 font-bold">Réapprovisionnement</p>
+                                                            <p>
+                                                                Stock :{" "}
+                                                                {
+                                                                    filteredModel.stock
+                                                                }
+                                                            </p>
+                                                            <p className="text-orange-500 font-bold">
+                                                                Réapprovisionnement
+                                                            </p>
                                                         </>
-                                                    ) : filteredModel.stock > 5 ? (
+                                                    ) : filteredModel.stock >
+                                                      5 ? (
                                                         <>
-                                                            <p>Stock : {filteredModel.stock}</p>
-                                                            <p className="text-green-500 font-bold">En stock</p>
+                                                            <p>
+                                                                Stock :{" "}
+                                                                {
+                                                                    filteredModel.stock
+                                                                }
+                                                            </p>
+                                                            <p className="text-green-500 font-bold">
+                                                                En stock
+                                                            </p>
                                                         </>
                                                     ) : (
-                                                        <p className="text-red-500 font-bold">Rupture de stock</p>
+                                                        <p className="text-red-500 font-bold">
+                                                            Rupture de stock
+                                                        </p>
                                                     )}
                                                 </div>
                                             )}
                                             {promotion ? (
                                                 <div className="flex flex-col mb-2">
                                                     <span className="text-gray-500 line-through text-lg">
-                                                        ${filteredModel?.price?.toFixed(2) || 'Non disponible'}
+                                                        $
+                                                        {filteredModel?.price?.toFixed(
+                                                            2
+                                                        ) || "Non disponible"}
                                                     </span>
                                                     <span className="text-red-600 text-xl font-bold">
                                                         ${promotion.promo_price}
                                                     </span>
                                                     <p className="text-sm text-red-600 font-bold">
-                                                        Promotion du {promotion.start_date} au {promotion.end_date}
+                                                        Promotion du{" "}
+                                                        {promotion.start_date}{" "}
+                                                        au {promotion.end_date}
                                                     </p>
                                                 </div>
                                             ) : (
                                                 <p className="text-xl font-bold">
-                                                    ${filteredModel?.price?.toFixed(2) || 'Non disponible'}
+                                                    $
+                                                    {filteredModel?.price?.toFixed(
+                                                        2
+                                                    ) || "Non disponible"}
                                                 </p>
                                             )}
                                         </div>
                                         <button
                                             className="mt-4 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700 w-full flex items-center justify-center"
-                                            onClick={() => handleAddToCart(product)}
+                                            onClick={() =>
+                                                handleAddToCart(product)
+                                            }
                                         >
-                                            <FontAwesomeIcon icon={faShoppingCart} className="mr-2" />
+                                            <FontAwesomeIcon
+                                                icon={faShoppingCart}
+                                                className="mr-2"
+                                            />
                                             Ajouter au panier
                                         </button>
                                     </div>
                                 );
                             })
                         ) : (
-                            <p className="text-center col-span-full">Aucun produit trouvé.</p>
+                            <p className="text-center col-span-full">
+                                Aucun produit trouvé.
+                            </p>
                         )}
                     </div>
                 </div>
