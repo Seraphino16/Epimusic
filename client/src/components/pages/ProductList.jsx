@@ -34,6 +34,10 @@ const ProductList = () => {
     const [shouldApplyFilters, setShouldApplyFilters] = useState(false);
 
     useEffect(() => {
+        applyFilters();
+    }, [filters, products]);
+
+    useEffect(() => {
         fetchProducts();
     }, [categoryId]);
 
@@ -257,12 +261,6 @@ const ProductList = () => {
                         maxWeight={maxWeight}
                         onFiltersChange={setFilters}
                     />
-                    <button
-                        className="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 w-full"
-                        onClick={handleApplyFilters}
-                    >
-                        Appliquer les filtres
-                    </button>
                 </div>
                 <div className="w-3/4 flex-1 p-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
