@@ -146,111 +146,122 @@ const ProductFilter = ({
                 )}
             </div>
 
-            <div className="mb-2 border bg-gray-100 shadow rounded-lg px-2 py-4">
-                <h4
-                    className="text-lg font-medium text-gray-700 cursor-pointer flex justify-between items-center"
-                    onClick={() => setIsColorsOpen(!isColorsOpen)}
-                >
-                    Couleurs
-                    <span>
-                        {isColorsOpen ? (
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                                className="w-5 h-5"
-                            >
-                                <path
-                                    fillRule="evenodd"
-                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                    clipRule="evenodd"
-                                />
-                            </svg>
-                        ) : (
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                                className="w-5 h-5"
-                            >
-                                <path
-                                    fillRule="evenodd"
-                                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                    clipRule="evenodd"
-                                />
-                            </svg>
-                        )}
-                    </span>
-                </h4>
-                {isColorsOpen && (
-                    <div className="grid grid-cols-2 gap-2 mt-2">
-                        {colors.map((color, index) => (
-                            <div key={index} className="flex items-center">
-                                <input
-                                    type="checkbox"
-                                    value={color}
-                                    onChange={() => handleColorChange(color)}
-                                    className="mr-2 text-red-600 focus:ring-red-500"
-                                />
-                                <p className="text-gray-600">{color}</p>
+            {colors.length > 0 && (
+                <div className="mb-2 border bg-gray-100 shadow rounded-lg px-2 py-4">
+                    <>
+                        <h4
+                            className="text-lg font-medium text-gray-700 cursor-pointer flex justify-between items-center"
+                            onClick={() => setIsColorsOpen(!isColorsOpen)}
+                        >
+                            Couleurs
+                            <span>
+                                {isColorsOpen ? (
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 20 20"
+                                        fill="currentColor"
+                                        className="w-5 h-5"
+                                    >
+                                        <path
+                                            fillRule="evenodd"
+                                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                            clipRule="evenodd"
+                                        />
+                                    </svg>
+                                ) : (
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 20 20"
+                                        fill="currentColor"
+                                        className="w-5 h-5"
+                                    >
+                                        <path
+                                            fillRule="evenodd"
+                                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                                            clipRule="evenodd"
+                                        />
+                                    </svg>
+                                )}
+                            </span>
+                        </h4>
+                        {isColorsOpen && (
+                            <div className="grid grid-cols-2 gap-2 mt-2">
+                                {colors.map((color, index) => (
+                                    <div
+                                        key={index}
+                                        className="flex items-center"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            value={color}
+                                            onChange={() =>
+                                                handleColorChange(color)
+                                            }
+                                            className="mr-2 text-red-600 focus:ring-red-500"
+                                        />
+                                        <p className="text-gray-600">{color}</p>
+                                    </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
-                )}
-            </div>
+                        )}
+                    </>
+                </div>
+            )}
 
-            <div className="mb-2 border bg-gray-100 shadow rounded-lg px-2 py-4">
-                <h4
-                    className="text-lg font-medium text-gray-700 cursor-pointer flex justify-between items-center"
-                    onClick={() => setIsSizesOpen(!isSizesOpen)}
-                >
-                    Tailles
-                    <span>
-                        {isSizesOpen ? (
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                                className="w-5 h-5"
-                            >
-                                <path
-                                    fillRule="evenodd"
-                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                    clipRule="evenodd"
-                                />
-                            </svg>
-                        ) : (
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                                className="w-5 h-5"
-                            >
-                                <path
-                                    fillRule="evenodd"
-                                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                    clipRule="evenodd"
-                                />
-                            </svg>
-                        )}
-                    </span>
-                </h4>
-                {isSizesOpen && (
-                    <div className="grid grid-cols-2 gap-2 mt-2">
-                        {sizes.map((size, index) => (
-                            <div key={index} className="flex items-center">
-                                <input
-                                    type="checkbox"
-                                    value={size}
-                                    onChange={() => handleSizeChange(size)}
-                                    className="mr-2 text-red-600 focus:ring-red-500"
-                                />
-                                <p className="text-gray-600">{size}</p>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
+            {sizes.length > 0 && (
+                <div className="mb-2 border bg-gray-100 shadow rounded-lg px-2 py-4">
+                    <h4
+                        className="text-lg font-medium text-gray-700 cursor-pointer flex justify-between items-center"
+                        onClick={() => setIsSizesOpen(!isSizesOpen)}
+                    >
+                        Tailles
+                        <span>
+                            {isSizesOpen ? (
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                    className="w-5 h-5"
+                                >
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
+                            ) : (
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                    className="w-5 h-5"
+                                >
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
+                            )}
+                        </span>
+                    </h4>
+                    {isSizesOpen && (
+                        <div className="grid grid-cols-2 gap-2 mt-2">
+                            {sizes.map((size, index) => (
+                                <div key={index} className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        value={size}
+                                        onChange={() => handleSizeChange(size)}
+                                        className="mr-2 text-red-600 focus:ring-red-500"
+                                    />
+                                    <p className="text-gray-600">{size}</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
 
             <div className="mb-2 border bg-gray-100 shadow rounded-lg px-2 py-4">
                 <h4
