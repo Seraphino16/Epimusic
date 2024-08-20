@@ -51,16 +51,21 @@ const ProductAdminEdit = () => {
                 setBrand(productData.brand || "");
                 setTags(productData.tags || []);
                 setModels(productData.models || []);
+                setPhotoPaths(productData.photoPaths || []);
 
                 if (productData.models.length > 0) {
                     const firstModel = productData.models[0];
                     setPrice(firstModel.price || "");
                     setPhotoPaths(firstModel.images.map((img) => img.path) || []);
                     setMainImageIndex(firstModel.images.findIndex((img) => img.is_main) || 0);
-                    setColor(firstModel.color_id || "");
-                    setSize(firstModel.size_id || "");
+                    setColor(firstModel.color_id);
+                    setSize(firstModel.size_id);
                     setWeight(firstModel.weight || "");
                     setStock(firstModel.stock || 0);
+                    setMainImageIndex(firstModel.images.findIndex((img) => img.is_main) || 0);
+
+                    console.log(color)
+                    console.log(size)
                 }
                 
                 // if (productData.stocks.length > 0) {
@@ -69,8 +74,8 @@ const ProductAdminEdit = () => {
                    
                 // }
 
-                if (productData.category_id === 2 || productData.category_id === 3) {
-                    axios.get(`http://localhost:8000/api/admin/sizes/category/${productData.category_id}`)
+                if (productData.category.id === 2 || productData.category.id === 3) {
+                    axios.get(`http://localhost:8000/api/admin/sizes/category/${productData.category.id}`)
                         .then((response) => {
                             setSizes(response.data);
                         })
@@ -248,6 +253,7 @@ const ProductAdminEdit = () => {
             color: model.color_id,
             size: model.size_id,
             stock: model.stock,
+            weight: model.weight,
             photoPaths: model.images.map((img) => img.path),
             mainImageIndex: model.images.findIndex((img) => img.is_main) || 0
         }));
@@ -260,7 +266,7 @@ const ProductAdminEdit = () => {
             weight: parseFloat(weight),
             photoPaths: [...new Set(uploadedPhotos)],
             mainImageIndex: photoPaths.length === 0 ? 0 : mainImageIndex,
-            brand: category === "1" ? brand : null,
+            brand: category === 1 ? brand : null,
             tags: tags,
             deletedPhotos: deletedPhotos
         };
@@ -496,7 +502,7 @@ const ProductAdminEdit = () => {
                                     </option>
                                     {sizes.map((sz) => (
                                         <option key={sz.id} value={sz.id}>
-                                            {sz.name}
+                                            {sz.value}
                                         </option>
                                     ))}
                                 </select>

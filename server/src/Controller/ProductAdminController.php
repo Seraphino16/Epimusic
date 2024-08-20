@@ -307,8 +307,8 @@ public function getProducts(EntityManagerInterface $entityManager): JsonResponse
 
             $models[] = [
                 'model_id' => $model->getId(),
-                'color' => $model->getColor() ? $model->getColor()->getName() : null,
-                'size' => $model->getSize() ? $model->getSize()->getValue() : null,
+                'color_id' => $model->getColor() ? $model->getColor()->getId() : null,
+                'size_id' => $model->getSize() ? $model->getSize()->getId() : null,
                 'price' => $model->getPrice(),
                 'images' => $images,
                 'weight' => $model->getWeight(),
@@ -334,7 +334,7 @@ public function getProducts(EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
-        if (!isset($data['category'], $data['name'], $data['description'], $data['models']) || !is_array($data['models'])) {
+        if (!isset($data['category'], $data['name'], $data['description'], $data['models'])) {
             return new JsonResponse(['error' => 'Invalid data'], 400);
         }
     
