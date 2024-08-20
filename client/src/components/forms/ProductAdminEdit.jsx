@@ -32,28 +32,12 @@ const ProductAdminEdit = () => {
     const [models, setModels] = useState([]);
     const [currentModelIndex, setCurrentModelIndex] = useState(0);
     const [stocks, setStocks] = useState([]);
+   
 
 
     const searchParams = new URLSearchParams(location.search);
     const selectedProductIds = searchParams.get('selectedProducts')?.split(',') || [];
     const currentEditIndex = parseInt(searchParams.get('currentEditIndex')) || 0;
-
-    const getStockForModel = (model) => {
-        const stock = stocks.find(stock =>
-            stock.color === model.color &&
-            (stock.size === model.size || stock.size === null)
-        );
-        
-        console.log('Searching for Stock:', {
-            color: model.color,
-            size: model.size
-        });
-        console.log('Available Stocks:', stocks);
-        console.log('Found Stock:', stock);
-        
-        return stock || { quantity: 0 }; // Retourner un stock par défaut si aucun stock n'est trouvé
-    };
-    
 
     useEffect(() => {
         axios.get(`http://localhost:8000/api/admin/products/${id}`)
@@ -63,21 +47,20 @@ const ProductAdminEdit = () => {
                 setProduct(productData);
                 setName(productData.name);
                 setDescription(productData.description);
-                setCategory(productData.category_id);
-                setBrand(productData.brands.length > 0 ? productData.brands[0] : "");
-                setTags(productData.tags);
-                setWeight(productData.weight);
+                setCategory(productData.category.id);
+                setBrand(productData.brand || "");
+                setTags(productData.tags || []);
                 setModels(productData.models || []);
-                setStocks(productData.stocks || []);
 
                 if (productData.models.length > 0) {
-                    const model = productData.models[currentModelIndex];
-                    setColor(model.color_id || "");
-                    setSize(model.size_id || "");
-                    setPrice(model.price);
-                    setPhotoPaths(model.images.map((img) => img.path));
-                    setMainImageIndex(model.images.findIndex((img) => img.is_main));
-                    
+                    const firstModel = productData.models[0];
+                    setPrice(firstModel.price || "");
+                    setPhotoPaths(firstModel.images.map((img) => img.path) || []);
+                    setMainImageIndex(firstModel.images.findIndex((img) => img.is_main) || 0);
+                    setColor(firstModel.color_id || "");
+                    setSize(firstModel.size_id || "");
+                    setWeight(firstModel.weight || "");
+                    setStock(firstModel.stock || 0);
                 }
                 
                 // if (productData.stocks.length > 0) {
@@ -85,18 +68,6 @@ const ProductAdminEdit = () => {
 
                    
                 // }
-
-                if (productData.models.length > 0) {
-                    const model = productData.models[currentModelIndex];
-                    updateModelData(model);
-                }
-
-                const getStockForModel = (model) => {
-                    return productData.stocks.find(stock =>
-                        stock.color === model.color_id &&
-                        (stock.size === model.size_id || stock.size === null)
-                    ) || { quantity: 0 };
-                }
 
                 if (productData.category_id === 2 || productData.category_id === 3) {
                     axios.get(`http://localhost:8000/api/admin/sizes/category/${productData.category_id}`)
@@ -132,6 +103,8 @@ const ProductAdminEdit = () => {
             });
 
     }, [id]);
+
+    
 
     const handleCategoryChange = (value) => {
         setCategory(value);
@@ -179,7 +152,7 @@ const ProductAdminEdit = () => {
         setPhotoFiles(newPhotoFiles);
 
         if (photoPaths.length === 0 && newPhotoFiles.length > 0) {
-            setMainImageIndex(0); // Set the first new image as main if no images exist
+            setMainImageIndex(0);
         }
     };
 
@@ -188,54 +161,57 @@ const ProductAdminEdit = () => {
         setPhotoPaths(photoPaths.filter((_, i) => i !== index));
         if (mainImageIndex === index) setMainImageIndex(0);
     };
-
-    const updateModelData = (index) => {
-        const model = models[index];
-        
-        if (!model) {
-            console.error('Le modèle est indéfini');
-            return;
-        }
-    
-        // Met à jour les données du modèle
-        setPrice(model.price || "");
-        setPhotoPaths(model.images.map((img) => img.path) || []);
-        setMainImageIndex(model.images.findIndex((img) => img.is_main) || 0);
-        setColor(model.color_id || "");
-        setSize(model.size_id || "");
-    
-        // Trouver le stock pour ce modèle en utilisant l'index
-        const modelStock = stocks[index] || { quantity: 0 }; // Utilisez l'index pour obtenir le stock
-        setStock(modelStock.quantity || 0); // Met à jour le stock pour ce modèle
-    };
     
 
-    const updateStock = (colorId, sizeId) => {
-        const stockItem = stocks.find(stock =>
-            stock.color === colorId && (stock.size === sizeId || stock.size === null)
-        );
-        setStock(stockItem ? stockItem.quantity : "");
-    };
-    
+    const saveCurrentModelData = () => {
 
-    const handleNextModel = () => {
-        if (currentModelIndex < models.length - 1) {
-            const newIndex = currentModelIndex + 1;
-            setCurrentModelIndex(newIndex);
-            updateModelData(newIndex); // Met à jour les données du modèle suivant
-        }
+        const updatedModels = [...models];
+    
+        updatedModels[currentModelIndex] = {
+            ...updatedModels[currentModelIndex],
+            color_id: color,
+            size_id: size,
+            price: parseFloat(price),
+            stock: parseInt(stock, 10),
+            images: photoPaths.map((path, index) => ({
+                path,
+                is_main: index === mainImageIndex
+            }))
+        };
+    
+        setModels(updatedModels);
     };
     
     const handlePreviousModel = () => {
+        saveCurrentModelData();
+    
         if (currentModelIndex > 0) {
-            const newIndex = currentModelIndex - 1;
-            setCurrentModelIndex(newIndex);
-            updateModelData(newIndex); // Met à jour les données du modèle précédent
+            setCurrentModelIndex(currentModelIndex - 1);
+            updateModelData(currentModelIndex - 1);
         }
     };
     
-
+    const handleNextModel = () => {
+        saveCurrentModelData(); 
     
+        if (currentModelIndex < models.length - 1) {
+            setCurrentModelIndex(currentModelIndex + 1);
+            updateModelData(currentModelIndex + 1); 
+        }
+    };
+    
+    const updateModelData = (index) => {
+        const model = models[index];
+        if (model) {
+            setPrice(model.price || "");
+            setPhotoPaths(model.images.map((img) => img.path) || []);
+            setMainImageIndex(model.images.findIndex((img) => img.is_main) || 0);
+            setColor(model.color_id || "");
+            setSize(model.size_id || "");
+            setWeight(model.weight || "");
+            setStock(model.stock || 0);
+        }
+    };
     
 
     const handleSubmit = async (event) => {
@@ -271,7 +247,7 @@ const ProductAdminEdit = () => {
             price: parseFloat(model.price),
             color: model.color_id,
             size: model.size_id,
-            stock: stocks[index] ? stocks[index].quantity : 0,
+            stock: model.stock,
             photoPaths: model.images.map((img) => img.path),
             mainImageIndex: model.images.findIndex((img) => img.is_main) || 0
         }));
@@ -282,12 +258,14 @@ const ProductAdminEdit = () => {
             category: category,
             models: updatedModels,
             weight: parseFloat(weight),
-            photoPaths: [...new Set(uploadedPhotos)], // Assurez-vous qu'il n'y a pas de doublons
-            mainImageIndex: photoPaths.length === 0 ? 0 : mainImageIndex, // Définir l'index de l'image principale
+            photoPaths: [...new Set(uploadedPhotos)],
+            mainImageIndex: photoPaths.length === 0 ? 0 : mainImageIndex,
             brand: category === "1" ? brand : null,
             tags: tags,
             deletedPhotos: deletedPhotos
         };
+
+        console.log("Données du produit mises à jour : ", updatedProduct);
 
         await axios.put(`http://localhost:8000/api/admin/products/${id}`, updatedProduct);
 
@@ -447,7 +425,10 @@ const ProductAdminEdit = () => {
                         <div className="flex items-center justify-center w-full mt-8">
                             <button
                                 type="button"
-                                onClick={handlePreviousModel}
+                                onClick={() => {
+                                    saveCurrentModelData();
+                                    handlePreviousModel(); 
+                                }}
                                 disabled={currentModelIndex === 0}
                                 className="font-semibold leading-none text-white py-4 px-10 bg-blue-700 rounded hover:bg-blue-600 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:outline-none"
                             >
@@ -455,7 +436,10 @@ const ProductAdminEdit = () => {
                             </button>
                             <button
                                 type="button"
-                                onClick={handleNextModel}
+                                onClick={() => {
+                                    saveCurrentModelData();
+                                    handleNextModel(); 
+                                }}
                                 disabled={currentModelIndex === models.length - 1}
                                 className="font-semibold leading-none text-white py-4 px-10 bg-blue-700 rounded hover:bg-blue-600 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:outline-none"
                             >
@@ -541,6 +525,7 @@ const ProductAdminEdit = () => {
                             />
                         </div>
                     </div>
+
                     <div className="md:flex items-center mt-8">
                         <div className="w-full flex flex-col">
                             <label
@@ -562,6 +547,7 @@ const ProductAdminEdit = () => {
                             />
                         </div>
                     </div>
+
                     <div className="md:flex items-center mt-8">
                         <div className="w-full flex flex-col">
                             <label
@@ -582,6 +568,7 @@ const ProductAdminEdit = () => {
                             />
                         </div>
                     </div>
+
                     <div className="md:flex items-center mt-8">
                         <div className="w-full flex flex-col">
                             <label
@@ -620,6 +607,7 @@ const ProductAdminEdit = () => {
                             </div>
                         </div>
                     </div>
+
                     <div className="flex items-center justify-center w-full mt-8">
                         <button
                             type="submit"

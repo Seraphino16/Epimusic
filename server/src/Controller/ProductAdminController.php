@@ -252,56 +252,81 @@ public function getProducts(EntityManagerInterface $entityManager): JsonResponse
     }
 
     #[Route('/api/admin/products/{id}', name: 'api_product_get', methods: ['GET'])]
-    public function getProduct(Product $product): JsonResponse
+    public function getProduct(EntityManagerInterface $entityManager, ProductRepository $productRepository, $id): JsonResponse
     {   
     
+        $product = $productRepository->find($id);
+        $now = new \DateTime();
+        $promotions = $entityManager->getRepository(Promotion::class)
+            ->createQueryBuilder('p')
+            ->where('p.product = :product')
+            ->andWhere('p.start_date <= :now')
+            ->andWhere('p.end_date >= :now')
+            ->setParameter('product', $product)
+            ->setParameter('now', $now)
+            ->getQuery()
+            ->getResult();
+
+        $promoDetails = [];
+        foreach ($promotions as $promotion) {
+            if ($promotion->isActive()) {
+                $promoDetails[] = [
+                    'promo_price' => $promotion->getPromoPrice(),
+                    'start_date' => $promotion->getStartDate()->format('Y-m-d'),
+                    'end_date' => $promotion->getEndDate()->format('Y-m-d')
+                ];
+            }
+        }
+
+        if (!$product) {
+            return $this->json(['error' => 'The product does not exist'], 404);
+        }
+
+        $category = $product->getCategory();
+        $categoryData =  [
+            'id' => $category->getId(),
+            'name' => $category->getName()
+        ];
+
         $models = [];
         foreach ($product->getModels() as $model) {
             $images = [];
             foreach ($model->getImage() as $image) {
                 $images[] = [
                     'path' => $image->getPath(),
-                    'is_main' => $image->isMain(),
+                    'is_main' => $image->isMain()
                 ];
             }
+
+            $stock = $entityManager->getRepository(Stock::class)->findOneBy([
+                'product' => $product,
+                'color' => $model->getColor(),
+                'size' => $model->getSize()
+            ]);
+            $quantity = $stock ? $stock->getQuantity() : 0;
+
             $models[] = [
-                'color' => $model->getColor()?->getName(),
-                'size' => $model->getSize()?->getValue(),
+                'model_id' => $model->getId(),
+                'color' => $model->getColor() ? $model->getColor()->getName() : null,
+                'size' => $model->getSize() ? $model->getSize()->getValue() : null,
                 'price' => $model->getPrice(),
                 'images' => $images,
+                'weight' => $model->getWeight(),
+                'stock' => $quantity
             ];
+        
         }
-
-        // Get stock details
-        $stocks = $product->getStocks();
-        $stockData = [];
-        foreach ($stocks as $stock) {
-            $stockData[] = [
-                'color' => $stock->getColor()?->getName(),
-                'size' => $stock->getSize()?->getValue(),
-                'quantity' => $stock->getQuantity(),
-            ];
-        }
-
-        $brands = $product->getBrands()->map(fn($brand) => $brand->getName())->toArray();
-        $tags = $product->getTags()->map(fn($tag) => $tag->getName())->toArray();
-
-        $weight = $product->getWeights()->first() ? $product->getWeights()->first()->getValue() : 0;
 
         $data = [
             'id' => $product->getId(),
             'name' => $product->getName(),
             'description' => $product->getDescription(),
-            'category' => $product->getCategory()->getName(),
-            'category_id' => $product->getCategory()->getId(),
-            'weight' => $weight,
+            'category' => $categoryData,
             'models' => $models,
-            'stocks' => $stockData,
-            'brands' => $brands,
-            'tags' => $tags,
+            'promotions' => $promoDetails,
         ];
 
-        return new JsonResponse($data);
+        return $this->json($data);
     }
 
     #[Route('/api/admin/products/{id}', name: 'api_product_update', methods: ['PUT'])]
@@ -309,35 +334,50 @@ public function getProducts(EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
-        if (!isset($data['category'], $data['name'], $data['description'], $data['price'], $data['photoPaths'], $data['mainImageIndex'], $data['stock'], $data['weight'])) {
+        if (!isset($data['category'], $data['name'], $data['description'], $data['models']) || !is_array($data['models'])) {
             return new JsonResponse(['error' => 'Invalid data'], 400);
         }
-
-        if ($data['price'] <= 0 || $data['stock'] < 0 || $data['weight'] < 0) {
-            return new JsonResponse(['error' => 'Le prix doit être supérieur à zéro, le stock et le poids ne peuvent pas être négatifs !'], 400);
-        }
-
+    
         $category = $entityManager->getRepository(Category::class)->find($data['category']);
-        $color = isset($data['color']) ? $entityManager->getRepository(Color::class)->find($data['color']) : null;
-        $size = isset($data['size']) ? $entityManager->getRepository(Size::class)->find($data['size']) : null;
-
-        if (!$category || ($data['color'] && !$color) || ($data['size'] && !$size)) {
-            return new JsonResponse(['error' => 'Invalid references'], 404);
-        }
+ 
 
         $product->setName($data['name']);
         $product->setDescription($data['description']);
         $product->setCategory($category);
 
-        // Update the model
-        $model = $product->getModels()[0];
-        if ($color) $model->setColor($color);
-        if ($size) $model->setSize($size);
-        $model->setPrice($data['price']);
+        foreach ($data['models'] as $index => $modelData) {
+            if (!isset($modelData['price']) ||
+                !isset($modelData['stock']) ||
+                !isset($modelData['weight']) ||
+                !isset($modelData['photoPaths']) ||
+                !isset($modelData['mainImageIndex'])) {
+        
+                return new JsonResponse(['error' => 'Invalid model data'], 400);
+            }
+
+            if ($modelData['price'] <= 0 || $modelData['stock'] < 0 || $modelData['weight'] < 0) {
+                return new JsonResponse(['error' => 'Le prix doit être supérieur à zéro, le stock et le poids ne peuvent pas être négatifs !'], 400);
+            }
+
+               // Update the model
+                $model = $product->getModels()[$index];
+                if (!$model) {
+                    return new JsonResponse(['error' => 'Model not found'], 404);
+                }
+
+                $color = isset($modelData['color']) ? $entityManager->getRepository(Color::class)->find($modelData['color']) : null;
+                $size = isset($modelData['size']) ? $entityManager->getRepository(Size::class)->find($modelData['size']) : null;
+
+                $model->setColor($color);
+                $model->setSize($size);
+                $model->setPrice($modelData['price']);
+                $model->setWeight($modelData['weight']);
+            }
+
 
         // Clear existing images and delete them from the file system
         foreach ($model->getImage() as $image) {
-            if (!in_array($image->getPath(), $data['photoPaths'])) {
+            if (!in_array($image->getPath(), $modelData['photoPaths'])) {
                 $existingImagePath = $this->getParameter('uploads_directory') . '/' . basename($image->getPath());
                 if (file_exists($existingImagePath)) {
                     unlink($existingImagePath);
@@ -348,7 +388,7 @@ public function getProducts(EntityManagerInterface $entityManager): JsonResponse
         }
 
         // Handle new photo paths
-        foreach ($data['photoPaths'] as $index => $path) {
+        foreach ($modelData['photoPaths'] as $index => $path) {
             // Check if the image already exists in the database
             $existingImage = $model->getImage()->filter(function ($image) use ($path) {
                 return $image->getPath() === $path;
@@ -357,7 +397,7 @@ public function getProducts(EntityManagerInterface $entityManager): JsonResponse
             if (!$existingImage) {
                 if (!str_contains($path, '/uploads/')) {
                     $originalFilePath = $this->getParameter('uploads_directory') . '/' . basename($path);
-                    $newFileName = $product->getId() . '_' . $index . '.' . pathinfo($originalFilePath, PATHINFO_EXTENSION);
+                    $newFileName = $product->getId() . '_' . $model->getId() . '_' . $index . '.' . pathinfo($originalFilePath, PATHINFO_EXTENSION);
                     $newFilePath = $this->getParameter('uploads_directory') . '/' . $newFileName;
 
                     try {
@@ -371,20 +411,22 @@ public function getProducts(EntityManagerInterface $entityManager): JsonResponse
 
                 $image = new Image();
                 $image->setPath($path);
-                $image->setMain($index === $data['mainImageIndex']);
+                $image->setMain($index === $modelData['mainImageIndex']);
                 $model->addImage($image);
                 $entityManager->persist($image);
             } else {
                 // If the image exists, just update the main flag
-                $existingImage->setMain($index === $data['mainImageIndex']);
+                $existingImage->setMain($index === $modelData['mainImageIndex']);
             }
         }
 
         // Handle stock
-        $stock = $product->getStocks()[0];
-        $stock->setQuantity($data['stock']);
-        if ($color) $stock->setColor($color);
-        if ($size) $stock->setSize($size);
+        $stock = $entityManager->getRepository(Stock::class)->findOneBy([
+            'product' => $product,
+            'color' => $color,
+            'size' => $size
+        ]);
+        $stock->setQuantity($modelData['stock']);
 
         $entityManager->persist($stock);
 
