@@ -89,7 +89,8 @@ const ProductList = () => {
                 product.models.forEach((model) => {
                     if (model.color) colorsSet.add(model.color);
                     if (model.size) sizesSet.add(model.size);
-                    if (model.price > highestPrice) highestPrice = model.price + 1;
+                    if (model.price > highestPrice)
+                        highestPrice = model.price + 1;
                     if (model.weight && model.weight > highestWeight)
                         highestWeight = model.weight;
                 });
@@ -310,7 +311,7 @@ const ProductList = () => {
                                             to={`/product/${product.id}`}
                                             className="flex flex-col h-full"
                                         >
-                                            <div className="flex-1 flex justify-center items-center mb-4">
+                                            <div className="flex-1 flex justify-center items-center mb-1">
                                                 {filteredModel?.images &&
                                                 filteredModel.images.length >
                                                     0 ? (
@@ -341,62 +342,80 @@ const ProductList = () => {
                                             <p className="line-clamp-3 mb-2">
                                                 {product.description}
                                             </p>
-                                            <ProductColors
-                                                colors={uniqueColors}
-                                                selectedColor={selectedColor}
-                                                onColorSelect={(color) =>
-                                                    handleColorSelect(
-                                                        product.id,
-                                                        color
-                                                    )
-                                                }
-                                            />
-                                            <ProductSizes
-                                                sizes={availableSizes}
-                                                selectedSize={selectedSize}
-                                                onSizeSelect={(size) =>
-                                                    handleSizeSelect(
-                                                        product.id,
-                                                        size
-                                                    )
-                                                }
-                                            />
-                                            {filteredModel?.stock !==
-                                                undefined && (
-                                                <div className="text-sm mb-2">
-                                                    {filteredModel.stock > 0 &&
-                                                    filteredModel.stock <= 5 ? (
+
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex-1">
+                                                    <ProductColors
+                                                        colors={uniqueColors}
+                                                        selectedColor={
+                                                            selectedColor
+                                                        }
+                                                        onColorSelect={(
+                                                            color
+                                                        ) =>
+                                                            handleColorSelect(
+                                                                product.id,
+                                                                color
+                                                            )
+                                                        }
+                                                    />
+                                                    <ProductSizes
+                                                        sizes={availableSizes}
+                                                        selectedSize={
+                                                            selectedSize
+                                                        }
+                                                        onSizeSelect={(size) =>
+                                                            handleSizeSelect(
+                                                                product.id,
+                                                                size
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+                                                <div className="w-1/3 ml-4">
+                                                    {" "}
+                                                    {filteredModel?.stock !==
+                                                        undefined && (
                                                         <>
-                                                            <p>
-                                                                Stock :{" "}
-                                                                {
-                                                                    filteredModel.stock
-                                                                }
-                                                            </p>
-                                                            <p className="text-orange-500 font-bold">
-                                                                Réapprovisionnement
-                                                            </p>
+                                                            {filteredModel.stock >
+                                                                0 &&
+                                                            filteredModel.stock <=
+                                                                5 ? (
+                                                                <>
+                                                                    <p>
+                                                                        Stock :{" "}
+                                                                        {
+                                                                            filteredModel.stock
+                                                                        }
+                                                                    </p>
+                                                                    <p className="text-orange-500 font-bold">
+                                                                        Réapprovisionnement
+                                                                    </p>
+                                                                </>
+                                                            ) : filteredModel.stock >
+                                                              5 ? (
+                                                                <>
+                                                                    <p>
+                                                                        Stock :{" "}
+                                                                        {
+                                                                            filteredModel.stock
+                                                                        }
+                                                                    </p>
+                                                                    <p className="text-green-500 font-bold">
+                                                                        En stock
+                                                                    </p>
+                                                                </>
+                                                            ) : (
+                                                                <p className="text-red-500 font-bold">
+                                                                    Rupture de
+                                                                    stock
+                                                                </p>
+                                                            )}
                                                         </>
-                                                    ) : filteredModel.stock >
-                                                      5 ? (
-                                                        <>
-                                                            <p>
-                                                                Stock :{" "}
-                                                                {
-                                                                    filteredModel.stock
-                                                                }
-                                                            </p>
-                                                            <p className="text-green-500 font-bold">
-                                                                En stock
-                                                            </p>
-                                                        </>
-                                                    ) : (
-                                                        <p className="text-red-500 font-bold">
-                                                            Rupture de stock
-                                                        </p>
                                                     )}
                                                 </div>
-                                            )}
+                                            </div>
+
                                             {promotion ? (
                                                 <div className="flex flex-col mb-2">
                                                     <span className="text-gray-500 line-through text-lg">
@@ -423,6 +442,7 @@ const ProductList = () => {
                                                 </p>
                                             )}
                                         </div>
+
                                         <button
                                             className={`mt-4 py-2 px-4 rounded w-full flex items-center justify-center ${
                                                 filteredModel?.stock > 0
@@ -444,9 +464,7 @@ const ProductList = () => {
                                 );
                             })
                         ) : (
-                            <p className="text-center col-span-full">
-                                Aucun produit trouvé.
-                            </p>
+                            <p className="text-center">Aucun produit trouvé</p>
                         )}
                     </div>
                 </div>
