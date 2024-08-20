@@ -424,10 +424,15 @@ const ProductList = () => {
                                             )}
                                         </div>
                                         <button
-                                            className="mt-4 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700 w-full flex items-center justify-center"
+                                            className={`mt-4 py-2 px-4 rounded w-full flex items-center justify-center ${
+                                                filteredModel?.stock > 0
+                                                    ? "bg-green-500 text-white hover:bg-green-700"
+                                                    : "bg-gray-400 text-gray-700 cursor-not-allowed"
+                                            }`}
                                             onClick={() =>
                                                 handleAddToCart(product)
                                             }
+                                            disabled={filteredModel?.stock <= 5}
                                         >
                                             <FontAwesomeIcon
                                                 icon={faShoppingCart}
