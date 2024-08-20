@@ -13,11 +13,14 @@ const ProductFilter = ({
     const [selectedSizes, setSelectedSizes] = useState([]);
     const [priceRange, setPriceRange] = useState([0, maxPrice]);
     const [weightRange, setWeightRange] = useState([0, maxWeight]);
-
+    const [isPriceOpen, setIsPriceOpen] = useState(false);
+    const [isEditingMin, setIsEditingMin] = useState(false);
+    const [isEditingMax, setIsEditingMax] = useState(false);
+    const [minPriceInput, setMinPriceInput] = useState(priceRange[0]);
+    const [maxPriceInput, setMaxPriceInput] = useState(priceRange[1]);
     const [isBrandsOpen, setIsBrandsOpen] = useState(true);
     const [isColorsOpen, setIsColorsOpen] = useState(true);
     const [isSizesOpen, setIsSizesOpen] = useState(true);
-    const [isPriceOpen, setIsPriceOpen] = useState(true);
     const [isWeightOpen, setIsWeightOpen] = useState(true);
 
     const handleBrandChange = (brand) => {
@@ -33,6 +36,21 @@ const ProductFilter = ({
             priceRange,
             weightRange,
         });
+    };
+
+    const handleMinPriceChange = (e) => {
+        const value = Math.max(0, Math.min(maxPrice, e.target.value));
+        setMinPriceInput(value);
+        handlePriceRangeChange([value, priceRange[1]]);
+    };
+
+    const handleMaxPriceChange = (e) => {
+        const value = Math.max(
+            minPriceInput,
+            Math.min(maxPrice, e.target.value)
+        );
+        setMaxPriceInput(value);
+        handlePriceRangeChange([priceRange[0], value]);
     };
 
     const handleColorChange = (color) => {
@@ -300,8 +318,8 @@ const ProductFilter = ({
                     </span>
                 </h4>
                 {isPriceOpen && (
-                    <div className="flex items-center flex-column mt-2">
-                        <div>
+                    <div className="flex flex-col mt-2">
+                        <div className="flex items-center mb-2">
                             <input
                                 type="range"
                                 min="0"
@@ -313,10 +331,62 @@ const ProductFilter = ({
                                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                             />
                         </div>
-                        <div>
-                            <span className="ml-4 text-gray-600">
-                                {priceRange[0]} - {priceRange[1]} €
-                            </span>
+                        <div className="flex items-center">
+                            {isEditingMin ? (
+                                <input
+                                    type="number"
+                                    value={minPriceInput}
+                                    onChange={handleMinPriceChange}
+                                    onBlur={() => {
+                                        setIsEditingMin(false);
+                                        handlePriceRangeChange([
+                                            minPriceInput,
+                                            priceRange[1],
+                                        ]);
+                                    }}
+                                    className="w-20 text-gray-600 border border-gray-300 rounded px-2 py-1"
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            e.target.blur();
+                                        }
+                                    }}
+                                />
+                            ) : (
+                                <span
+                                    className="ml-4 text-gray-600 cursor-pointer"
+                                    onClick={() => setIsEditingMin(true)}
+                                >
+                                    {priceRange[0]} €
+                                </span>
+                            )}
+                            <span className="mx-2 text-gray-600">-</span>
+                            {isEditingMax ? (
+                                <input
+                                    type="number"
+                                    value={maxPriceInput}
+                                    onChange={handleMaxPriceChange}
+                                    onBlur={() => {
+                                        setIsEditingMax(false);
+                                        handlePriceRangeChange([
+                                            priceRange[0],
+                                            maxPriceInput,
+                                        ]);
+                                    }}
+                                    className="w-20 text-gray-600 border border-gray-300 rounded px-2 py-1"
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            e.target.blur();
+                                        }
+                                    }}
+                                />
+                            ) : (
+                                <span
+                                    className="text-gray-600 cursor-pointer"
+                                    onClick={() => setIsEditingMax(true)}
+                                >
+                                    {priceRange[1]} €
+                                </span>
+                            )}
                         </div>
                     </div>
                 )}
