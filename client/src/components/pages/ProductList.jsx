@@ -21,14 +21,14 @@ const ProductList = () => {
         brands: [],
         colors: [],
         sizes: [],
-        priceRange: [0, 1000],
+        priceRange: [0, 0],
         weightRange: [0, 50],
     });
 
     const [availableFilterBrands, setAvailableBrands] = useState([]);
     const [availableFilterColors, setAvailableColors] = useState([]);
     const [availableFilterSizes, setAvailableSizes] = useState([]);
-    const [maxPrice, setMaxPrice] = useState(1000);
+    const [maxPrice, setMaxPrice] = useState(0);
     const [maxWeight, setMaxWeight] = useState(50);
 
     const [shouldApplyFilters, setShouldApplyFilters] = useState(false);
@@ -43,7 +43,7 @@ const ProductList = () => {
 
     useEffect(() => {
         if (shouldApplyFilters) {
-            applyFilters();
+            handleApplyFilters();
             setShouldApplyFilters(false);
         }
     }, [filters, products, shouldApplyFilters]);
