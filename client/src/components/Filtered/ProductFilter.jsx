@@ -286,7 +286,7 @@ const ProductFilter = ({
                     className="text-lg font-medium text-gray-700 cursor-pointer flex justify-between items-center"
                     onClick={() => setIsPriceOpen(!isPriceOpen)}
                 >
-                    Fourchette de prix
+                    Prix
                     <span>
                         {isPriceOpen ? (
                             <svg
@@ -397,7 +397,7 @@ const ProductFilter = ({
                     className="text-lg font-medium text-gray-700 cursor-pointer flex justify-between items-center"
                     onClick={() => setIsWeightOpen(!isWeightOpen)}
                 >
-                    Fourchette de poids
+                    Poids
                     <span>
                         {isWeightOpen ? (
                             <svg
