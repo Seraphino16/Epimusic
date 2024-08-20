@@ -252,7 +252,7 @@ const ProductList = () => {
                 Liste des produits de la catégorie sélectionnée
             </h1>
             <div className="flex">
-                <div className="w-1/4 min-w-[300px] h-screen sticky top-0 bg-white p-4 border-r border-gray-300">
+                <div className="w-1/4 min-w-[300px] h-screen sticky top-0 p-4">
                     <ProductFilter
                         brands={availableFilterBrands}
                         colors={availableFilterColors}
