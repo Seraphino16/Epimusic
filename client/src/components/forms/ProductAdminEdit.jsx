@@ -188,7 +188,7 @@ const ProductAdminEdit = () => {
     };
     
     const handlePreviousModel = () => {
-        saveCurrentModelData();
+    
     
         if (currentModelIndex > 0) {
             setCurrentModelIndex(currentModelIndex - 1);
@@ -197,7 +197,7 @@ const ProductAdminEdit = () => {
     };
     
     const handleNextModel = () => {
-        saveCurrentModelData(); 
+      
     
         if (currentModelIndex < models.length - 1) {
             setCurrentModelIndex(currentModelIndex + 1);
@@ -221,6 +221,10 @@ const ProductAdminEdit = () => {
 
     const handleSubmit = async (event) => {
     event.preventDefault();
+    
+
+    console.log("Models avant soumission : ", models);
+ 
 
     if (price <= 0 || stock < 0 || weight < 0) {
         setError("Le prix doit être supérieur à zéro, le stock et le poids ne peuvent pas être négatifs !");
@@ -618,6 +622,9 @@ const ProductAdminEdit = () => {
                         <button
                             type="submit"
                             className="font-semibold leading-none text-white py-4 px-10 bg-blue-700 rounded hover:bg-blue-600 focus:ring-2 focus:ring-offset-2 focus:ring-blue-700 focus:outline-none"
+                            onClick={() => {
+                                saveCurrentModelData();
+                            }}
                         >
                             Mettre à jour le produit
                         </button>

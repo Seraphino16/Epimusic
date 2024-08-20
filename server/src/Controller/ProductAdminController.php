@@ -330,52 +330,54 @@ public function getProducts(EntityManagerInterface $entityManager): JsonResponse
     }
 
     #[Route('/api/admin/products/{id}', name: 'api_product_update', methods: ['PUT'])]
-    public function update(Request $request, Product $product, EntityManagerInterface $entityManager): JsonResponse
-    {
-        $data = json_decode($request->getContent(), true);
+public function update(Request $request, Product $product, EntityManagerInterface $entityManager): JsonResponse
+{
+    $data = json_decode($request->getContent(), true);
 
-        if (!isset($data['category'], $data['name'], $data['description'], $data['models'])) {
-            return new JsonResponse(['error' => 'Invalid data'], 400);
+    if (!isset($data['category'], $data['name'], $data['description'], $data['models'])) {
+        return new JsonResponse(['error' => 'Invalid data'], 400);
+    }
+
+    $category = $entityManager->getRepository(Category::class)->find($data['category']);
+
+    $product->setName($data['name']);
+    $product->setDescription($data['description']);
+    $product->setCategory($category);
+
+    // Assurez-vous d'obtenir tous les modèles existants
+    $existingModels = $product->getModels();
+
+    // Stocker les nouveaux stocks pour éviter les doublons
+    $newStocks = [];
+
+    foreach ($data['models'] as $index => $modelData) {
+        if (!isset($modelData['price']) ||
+            !isset($modelData['stock']) ||
+            !isset($modelData['weight']) ||
+            !isset($modelData['photoPaths']) ||
+            !isset($modelData['mainImageIndex'])) {
+            return new JsonResponse(['error' => 'Invalid model data'], 400);
         }
-    
-        $category = $entityManager->getRepository(Category::class)->find($data['category']);
- 
 
-        $product->setName($data['name']);
-        $product->setDescription($data['description']);
-        $product->setCategory($category);
+        if ($modelData['price'] <= 0 || $modelData['stock'] < 0 || $modelData['weight'] < 0) {
+            return new JsonResponse(['error' => 'Le prix doit être supérieur à zéro, le stock et le poids ne peuvent pas être négatifs !'], 400);
+        }
 
-        foreach ($data['models'] as $index => $modelData) {
-            if (!isset($modelData['price']) ||
-                !isset($modelData['stock']) ||
-                !isset($modelData['weight']) ||
-                !isset($modelData['photoPaths']) ||
-                !isset($modelData['mainImageIndex'])) {
-        
-                return new JsonResponse(['error' => 'Invalid model data'], 400);
-            }
+        // Trouver ou créer le modèle
+        $model = $index < count($existingModels) ? $existingModels[$index] : new Model();
+        if (!$model->getId()) {
+            $product->addModel($model);
+        }
 
-            if ($modelData['price'] <= 0 || $modelData['stock'] < 0 || $modelData['weight'] < 0) {
-                return new JsonResponse(['error' => 'Le prix doit être supérieur à zéro, le stock et le poids ne peuvent pas être négatifs !'], 400);
-            }
+        $color = isset($modelData['color']) ? $entityManager->getRepository(Color::class)->find($modelData['color']) : null;
+        $size = isset($modelData['size']) ? $entityManager->getRepository(Size::class)->find($modelData['size']) : null;
 
-               // Update the model
-                $model = $product->getModels()[$index];
-                if (!$model) {
-                    return new JsonResponse(['error' => 'Model not found'], 404);
-                }
+        $model->setColor($color);
+        $model->setSize($size);
+        $model->setPrice($modelData['price']);
+        $model->setWeight($modelData['weight']);
 
-                $color = isset($modelData['color']) ? $entityManager->getRepository(Color::class)->find($modelData['color']) : null;
-                $size = isset($modelData['size']) ? $entityManager->getRepository(Size::class)->find($modelData['size']) : null;
-
-                $model->setColor($color);
-                $model->setSize($size);
-                $model->setPrice($modelData['price']);
-                $model->setWeight($modelData['weight']);
-            }
-
-
-        // Clear existing images and delete them from the file system
+        // Gestion des images
         foreach ($model->getImage() as $image) {
             if (!in_array($image->getPath(), $modelData['photoPaths'])) {
                 $existingImagePath = $this->getParameter('uploads_directory') . '/' . basename($image->getPath());
@@ -387,13 +389,8 @@ public function getProducts(EntityManagerInterface $entityManager): JsonResponse
             }
         }
 
-        // Handle new photo paths
         foreach ($modelData['photoPaths'] as $index => $path) {
-            // Check if the image already exists in the database
-            $existingImage = $model->getImage()->filter(function ($image) use ($path) {
-                return $image->getPath() === $path;
-            })->first();
-
+            $existingImage = $model->getImage()->filter(fn($image) => $image->getPath() === $path)->first();
             if (!$existingImage) {
                 if (!str_contains($path, '/uploads/')) {
                     $originalFilePath = $this->getParameter('uploads_directory') . '/' . basename($path);
@@ -415,60 +412,84 @@ public function getProducts(EntityManagerInterface $entityManager): JsonResponse
                 $model->addImage($image);
                 $entityManager->persist($image);
             } else {
-                // If the image exists, just update the main flag
                 $existingImage->setMain($index === $modelData['mainImageIndex']);
             }
         }
 
-        // Handle stock
+        // Gérer le stock pour chaque modèle
         $stock = $entityManager->getRepository(Stock::class)->findOneBy([
             'product' => $product,
             'color' => $color,
             'size' => $size
         ]);
+
+        if (!$stock) {
+            $stock = new Stock();
+            $stock->setProduct($product);
+            $stock->setColor($color);
+            $stock->setSize($size);
+        }
+
         $stock->setQuantity($modelData['stock']);
+        $newStocks[] = $stock;
 
-        $entityManager->persist($stock);
-
-        // Update brand
-        foreach ($product->getBrands() as $brand) {
-            $entityManager->remove($brand);
+        // Enregistrer le modèle
+        if (!$model->getId()) {
+            $entityManager->persist($model);
         }
-        if ($data['category'] == 1 && isset($data['brand'])) {
-            $brand = new Brand();
-            $brand->setName($data['brand']);
-            $brand->setProduct($product);
-            $entityManager->persist($brand);
-        }
-
-        // Update tags
-        foreach ($product->getTags() as $tag) {
-            $entityManager->remove($tag);
-        }
-        foreach ($data['tags'] as $tagName) {
-            $tag = new Tag();
-            $tag->setName($tagName);
-            $tag->setProduct($product);
-            $entityManager->persist($tag);
-        }
-
-        // Handle weight
-        $weight = $entityManager->getRepository(Weight::class)->findOneBy(['product' => $product]);
-        if ($weight) {
-            $weight->setValue($data['weight']);
-        } else {
-            $weight = new Weight();
-            $weight->setValue($data['weight']);
-            $weight->setProduct($product);
-            $entityManager->persist($weight);
-        }
-
-        $entityManager->persist($product);
-        $entityManager->persist($model);
-        $entityManager->flush();
-
-        return new JsonResponse(['status' => 'Product updated'], 200);
     }
+
+    // Supprimer les stocks non utilisés
+    $existingStocks = $entityManager->getRepository(Stock::class)->findBy(['product' => $product]);
+    foreach ($existingStocks as $existingStock) {
+        if (!in_array($existingStock, $newStocks, true)) {
+            $entityManager->remove($existingStock);
+        }
+    }
+
+    // Enregistrer tous les stocks mis à jour
+    foreach ($newStocks as $stock) {
+        $entityManager->persist($stock);
+    }
+
+    // Mettre à jour les marques et les tags
+    foreach ($product->getBrands() as $brand) {
+        $entityManager->remove($brand);
+    }
+    if ($data['category'] == 1 && isset($data['brand'])) {
+        $brand = new Brand();
+        $brand->setName($data['brand']);
+        $brand->setProduct($product);
+        $entityManager->persist($brand);
+    }
+
+    foreach ($product->getTags() as $tag) {
+        $entityManager->remove($tag);
+    }
+    foreach ($data['tags'] as $tagName) {
+        $tag = new Tag();
+        $tag->setName($tagName);
+        $tag->setProduct($product);
+        $entityManager->persist($tag);
+    }
+
+    // Gérer le poids
+    $weight = $entityManager->getRepository(Weight::class)->findOneBy(['product' => $product]);
+    if ($weight) {
+        $weight->setValue($data['weight']);
+    } else {
+        $weight = new Weight();
+        $weight->setValue($data['weight']);
+        $weight->setProduct($product);
+        $entityManager->persist($weight);
+    }
+
+    $entityManager->persist($product);
+    $entityManager->flush();
+
+    return new JsonResponse(['status' => 'Product updated'], 200);
+}
+
 
     // New endpoint to rename uploaded files
     #[Route('/rename-upload', name: 'rename_upload', methods: ['POST'])]
