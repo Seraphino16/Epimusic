@@ -89,7 +89,7 @@ const ProductList = () => {
                 product.models.forEach((model) => {
                     if (model.color) colorsSet.add(model.color);
                     if (model.size) sizesSet.add(model.size);
-                    if (model.price > highestPrice) highestPrice = model.price;
+                    if (model.price > highestPrice) highestPrice = model.price + 1;
                     if (model.weight && model.weight > highestWeight)
                         highestWeight = model.weight;
                 });
