@@ -15,14 +15,20 @@ import FilteredArticles from './components/Filtered/FilteredArticles';
 import AdminPanel from './components/pages/AdminPanel';
 import UserProfile from './components/user/UserProfile';
 import CartPage from "./components/pages/Checkout/CartPage";
+import Footer from "./components/footer/Footer";
 import ProductAdminAddModel from './components/forms/ProductAdminAddModel';
 import ProductAdminEdit from './components/forms/ProductAdminEdit';
 
 const App = () => (
     <Router>
         <BackgroundWrapper>
-            <Navbar />
-            <Content />
+            <div className="flex flex-col min-h-screen">
+                <Navbar />
+                <div className="flex-grow">
+                    <Content />
+                </div>
+                <Footer />
+            </div>
         </BackgroundWrapper>
     </Router>
 );
