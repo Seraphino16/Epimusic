@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import "tailwindcss/tailwind.css";
 import { Link, useNavigate } from "react-router-dom";
 import ProductColors from '../ProductDetails/ProductColors';
 import ProductSizes from '../ProductDetails/ProductSizes';
@@ -40,8 +41,9 @@ const ProductAdminList = () => {
     }, [products]);
 
     const fetchProducts = () => {
-        axios.get('http://localhost:8000/api/admin/products')
-            .then(response => {
+        axios
+            .get("http://localhost:8000/api/admin/products")
+            .then((response) => {
                 setProducts(response.data);
                 console.log(response.data);
             })
@@ -51,11 +53,12 @@ const ProductAdminList = () => {
     };
 
     const deleteProduct = (id) => {
-        return axios.delete(`http://localhost:8000/api/admin/products/${id}`)
-            .then(response => {
-                setProducts(products.filter(product => product.id !== id));
-                setMessage('Produit supprimé avec succès !');
-                setError('');
+        return axios
+            .delete(`http://localhost:8000/api/admin/products/${id}`)
+            .then((response) => {
+                setProducts(products.filter((product) => product.id !== id));
+                setMessage("Produit supprimé avec succès !");
+                setError("");
             })
             .catch(error => {
                 setError("Erreur lors de la suppression du produit !");
@@ -84,8 +87,12 @@ const ProductAdminList = () => {
     };
 
     const deleteSelectedProducts = () => {
-        if (window.confirm('Êtes-vous sûr de vouloir supprimer les produits sélectionnés ?')) {
-            Promise.all(selectedProducts.map(id => deleteProduct(id)))
+        if (
+            window.confirm(
+                "Êtes-vous sûr de vouloir supprimer les produits sélectionnés ?"
+            )
+        ) {
+            Promise.all(selectedProducts.map((id) => deleteProduct(id)))
                 .then(() => {
                     setSelectedProducts([]);
                     fetchProducts();

@@ -12,7 +12,7 @@ function SearchBar() {
                 />
                 <button
                     type="submit"
-                    className="absolute right-0 rounded-full bg-transparent"
+                    className="absolute right-4 rounded-full bg-transparent top-2"
                 >
                     <svg
                         className="h-5 w-5 fill-current text-gray-600"
