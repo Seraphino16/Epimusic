@@ -1,10 +1,13 @@
 import React from "react";
 
-const CartSummary = ({ total, quantity }) => {
+const CartSummary = ({ total, quantity, promoReduction }) => {
 
-    const totalTTC = total.toFixed(2);
-    const taxes = (total * (20 / 100)).toFixed(2); // get the value of 20% of total
+    const totalTTC = (total - promoReduction).toFixed(2);
+    const taxes = (total * (20 / 100)).toFixed(2);
     const totalHT = (total - taxes).toFixed(2);
+
+    const finalTotalTTC = total.toFixed(2);
+    
 
     return (
         <div>
@@ -15,6 +18,14 @@ const CartSummary = ({ total, quantity }) => {
                 <div className="w-full flex justify-between text-lg md:text-xl text-slate-500">
                     <p>Total (HT)</p>
                     <p>{totalHT} €</p>
+                </div>
+                <div className="w-full flex justify-between text-lg md:text-xl text-slate-500">
+                    {promoReduction > 0 && (
+                        <div className="w-full flex justify-between text-lg md:text-xl text-slate-500">
+                            <p className="text-red-600">Réduction promo</p>
+                            <p className="text-red-600">- {promoReduction.toFixed(2)} €</p>
+                    </div>
+                    )}
                 </div>
                 <div className="w-full flex justify-between text-lg md:text-xl text-slate-500">
                     <p>TVA (20%)</p>

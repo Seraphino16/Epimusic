@@ -11,6 +11,7 @@ const CartPage = () => {
     const [cartToken, setCartToken] = useState();
     const [total, setTotal] = useState(0);
     const [quantity, setQuantity] = useState();
+    const [promotionReduction, setPromotionReduction] = useState(0);
     const [alert, setAlert] = useState({ message: '', type: 'error' });
 
     useEffect(() => {
@@ -48,16 +49,26 @@ const CartPage = () => {
 
         let t = 0;
         let q = 0;
+        let promoReduction = 0;
+
         items.forEach(item => {
-            t += parseFloat(item.total);
+            const itemTotal = parseFloat(item.total);
+            t += itemTotal;
             q += parseInt(item.quantity);
+
+            if (item.promo_price) {
+                promoReduction += item.quantity * (item.price - item.promo_price);
+            }
         });
 
         setTotal(t);
-        setQuantity(q)
+        setQuantity(q);
+        setPromotionReduction(promoReduction);
 
         localStorage.setItem('cart_price', t);
         localStorage.setItem('cart_quantity', q);
+        localStorage.setItem('cart_promo_total', promoReduction);
+
     }, [items]);
 
     const handleQuantityChange = (id, newQuantity, newTotal) => {
@@ -124,7 +135,7 @@ const CartPage = () => {
                         onDeleteItem={handleDeleteItem}    
                         />
                         <div className="w-full lg:w-1/2 xl:w-1/3 md:p-4 mb-4">
-                            <CartSummary total={total} quantity={quantity} />
+                            <CartSummary total={total} quantity={quantity} promoReduction={promotionReduction} />
                             <CartButton 
                                 text="Valider mon panier"
                                 handleClick={getShippingCost}
