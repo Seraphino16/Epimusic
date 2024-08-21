@@ -25,7 +25,7 @@ class CartItem
     private Product $product;
 
     #[ORM\ManyToOne(targetEntity: Model::class)]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false,  onDelete: "CASCADE")]
     private Model $model;
 
     #[ORM\Column(type: 'integer')]

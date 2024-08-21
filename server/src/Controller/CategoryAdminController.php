@@ -8,8 +8,10 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class CategoryAdminController extends AbstractController
 {
@@ -164,5 +166,23 @@ class CategoryAdminController extends AbstractController
         }
 
         return new JsonResponse(['status' => 'File renamed'], 200);
+    }
+
+    #[Route('/api/admin/get/catergoryId', name:'api_category_id_by_name', methods: ['GET'])]
+    public function getCategoryIdByName(Request $request, EntityManagerInterface $entityManager): JsonResponse {
+
+        $name = $request->query->get('name');
+
+        if (!$name) {
+            return new JsonResponse(['error' => 'Requete invalide'], Response::HTTP_NOT_FOUND);
+        }
+
+        $category = $entityManager->getRepository(Category::class)->findOneBy(['name' => $name]);
+
+        if (!$category) {
+            return new JsonResponse(['error', 'Impossible de retrouver la catégorie']);
+        }
+
+        return new JsonResponse(['id' => $category->getId()]);
     }
 }

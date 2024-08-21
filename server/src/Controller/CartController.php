@@ -7,6 +7,7 @@ use App\Entity\CartItem;
 use App\Entity\Product;
 use App\Entity\Model;
 use App\Entity\Stock;
+use App\Entity\Promotion;
 use App\Entity\AnonymousCart;
 use App\Repository\CartRepository;
 use App\Repository\ProductRepository;
@@ -91,6 +92,18 @@ class CartController extends AbstractController
             return new JsonResponse(['error' => 'La quantité dépasse le stock disponible'], Response::HTTP_BAD_REQUEST);
         }
 
+        $price = $model->getPrice();
+    $now = new \DateTime();
+    $promotions = $this->entityManager->getRepository(Promotion::class)
+        ->createQueryBuilder('p')
+        ->where('p.product = :product')
+        ->andWhere('p.start_date <= :now')
+        ->andWhere('p.end_date >= :now')
+        ->setParameter('product', $product)
+        ->setParameter('now', $now)
+        ->getQuery()
+        ->getResult();
+
         if ($userId) {
 
             $user = $this->userRepository->find($userId);
@@ -136,7 +149,7 @@ class CartController extends AbstractController
 
             return new JsonResponse([
                 'message' => 'Article ajouté au panier',
-                'token' => $token,
+                'token' => $token ?? null,
                 'cart_total' => $cart->getTotal()
             ], Response::HTTP_OK);
         }
@@ -158,11 +171,22 @@ class CartController extends AbstractController
             }
             $cartItem->setQuantity($newQuantity);
         } else {
+
+            $price = $model->getPrice();
+            if (!empty($promotions)) {
+                foreach ($promotions as $promotion) {
+                    if ($now >= $promotion->getStartDate() && $now <= $promotion->getEndDate()) {
+                        $price = $promotion->getPromoPrice();
+                        break;
+                    }
+                }
+            }
+
             $cartItem = new CartItem();
             $cartItem->setProduct($product);
             $cartItem->setModel($model);
             $cartItem->setQuantity($quantity);
-            $cartItem->setPrice($model->getPrice());
+            $cartItem->setPrice($price);
 
             if ($cart instanceof Cart) {
                 $cartItem->setCart($cart);
@@ -230,7 +254,7 @@ class CartController extends AbstractController
                 'product_id' => $cartItem->getProduct()->getId(),
                 'quantity' => $cartItem->getQuantity(),
                 'image_path' => $image,
-                'price' => $cartItem->getModel()->getPrice(),
+                'price' => $cartItem->getPrice(),
                 'total' => $formattedTotal
             ];
         }

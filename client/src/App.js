@@ -16,6 +16,8 @@ import AdminPanel from './components/pages/AdminPanel';
 import UserProfile from './components/user/UserProfile';
 import CartPage from "./components/pages/Checkout/CartPage";
 import Footer from "./components/footer/Footer";
+import ProductAdminAddModel from './components/forms/ProductAdminAddModel';
+import ProductAdminEdit from './components/forms/ProductAdminEdit';
 
 const App = () => (
     <Router>
@@ -53,35 +55,68 @@ const BackgroundWrapper = ({ children }) => {
 };
 
 const Content = () => {
-    return (
-        <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/products" element={<ProductCategoriesList />} />
-            <Route path="/products/:category/:categoryId" element={<ProductList />} />
-            <Route
-                path="/admin/*"
-                element={
-                    <ProtectedRoute requiredRole="ROLE_ADMIN">
-                        <AdminPanel />
-                    </ProtectedRoute>
-                }
-            />
-            <Route
+  return (
+    <div>
+      <Routes>
+      <Route path="/" element={<HomePage />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/products" element={<ProductCategoriesList />} />
+        <Route path="/products/:category/:categoryId" element={<ProductList />} />
+        <Route
+                    path="/admin/*"
+                    element={
+                        <ProtectedRoute requiredRole="ROLE_ADMIN">
+                            <AdminPanel />
+                        </ProtectedRoute>
+                    }
+                />
+        
+        <Route
                 path="/profile/*"
-                element={
-                    <ProtectedRoute requiredRole="ROLE_USER">
-                        <UserProfile />
-                    </ProtectedRoute>
-                }
-            />
-            <Route path="/admin/create-product" element={<ProductAdminForm />} />
-            <Route path="/product/:id" element={<ProductDetailsPage />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/filters" element={<FilteredArticles />} />
-        </Routes>
-    );
+                    element={
+                        <ProtectedRoute requiredRole="ROLE_USER">
+                            <UserProfile />
+                        </ProtectedRoute>
+                    }
+        />
+         <Route path="/admin/create-product" element={<ProductAdminForm />} />
+        <Route
+          path="/admin/create-product"
+          element={
+            <ProtectedRoute requiredRole="ROLE_ADMIN">
+              <ProductAdminForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/edit-product/:id"
+          element={
+            <ProtectedRoute requiredRole="ROLE_ADMIN">
+              <ProductAdminEdit />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/admin/product/:category/:id/add-model'
+          element={
+            <ProtectedRoute requiredRole="ROLE_ADMIN">
+              <ProductAdminAddModel />
+            </ProtectedRoute>
+          }
+         />
+        <Route 
+          path="/product/:id"
+          element={<ProductDetailsPage />}
+        />
+        <Route path="/cart" element={<CartPage />} />
+        <Route 
+          path="/filters"
+          element={<FilteredArticles />}
+        />
+      </Routes>
+    </div>
+  );
 };
 
 export default App;

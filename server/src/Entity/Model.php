@@ -43,6 +43,9 @@ class Model
     #[ORM\Column(nullable: true)]
     private ?float $weight = null;
 
+    #[ORM\OneToOne(mappedBy: 'model', cascade: ['persist', 'remove'])]
+    private ?Promotion $promotion = null;
+
     public function __construct()
     {
         $this->image = new ArrayCollection();
@@ -134,6 +137,23 @@ class Model
     public function setWeight(?float $weight): static
     {
         $this->weight = $weight;
+
+        return $this;
+    }
+
+    public function getPromotion(): ?Promotion
+    {
+        return $this->promotion;
+    }
+
+    public function setPromotion(Promotion $promotion): static
+    {
+        // set the owning side of the relation if necessary
+        if ($promotion->getModel() !== $this) {
+            $promotion->setModel($this);
+        }
+
+        $this->promotion = $promotion;
 
         return $this;
     }
