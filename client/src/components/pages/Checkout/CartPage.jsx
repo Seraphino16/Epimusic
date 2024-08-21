@@ -39,6 +39,7 @@ const CartPage = () => {
         })
         .then((data) => {
             setItems(data.items);
+            console.log(data.items)
         })
         .catch((error) => console.log(error));
     }, [userId, cartToken]);

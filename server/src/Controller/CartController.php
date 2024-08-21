@@ -93,16 +93,26 @@ class CartController extends AbstractController
         }
 
         $price = $model->getPrice();
-    $now = new \DateTime();
-    $promotions = $this->entityManager->getRepository(Promotion::class)
-        ->createQueryBuilder('p')
-        ->where('p.product = :product')
-        ->andWhere('p.start_date <= :now')
-        ->andWhere('p.end_date >= :now')
-        ->setParameter('product', $product)
-        ->setParameter('now', $now)
-        ->getQuery()
-        ->getResult();
+        $promoPrice = null;
+        $now = new \DateTime();
+        $promotions = $this->entityManager->getRepository(Promotion::class)
+            ->createQueryBuilder('p')
+            ->where('p.product = :product')
+            ->andWhere('p.start_date <= :now')
+            ->andWhere('p.end_date >= :now')
+            ->setParameter('product', $product)
+            ->setParameter('now', $now)
+            ->getQuery()
+            ->getResult();
+
+            if (!empty($promotions)) {
+            foreach ($promotions as $promotion) {
+                if ($now >= $promotion->getStartDate() && $now <= $promotion->getEndDate()) {
+                    $promoPrice = $promotion->getPromoPrice();
+                    break;
+                }
+            }
+        }
 
         if ($userId) {
 
@@ -172,21 +182,12 @@ class CartController extends AbstractController
             $cartItem->setQuantity($newQuantity);
         } else {
 
-            $price = $model->getPrice();
-            if (!empty($promotions)) {
-                foreach ($promotions as $promotion) {
-                    if ($now >= $promotion->getStartDate() && $now <= $promotion->getEndDate()) {
-                        $price = $promotion->getPromoPrice();
-                        break;
-                    }
-                }
-            }
-
             $cartItem = new CartItem();
             $cartItem->setProduct($product);
             $cartItem->setModel($model);
             $cartItem->setQuantity($quantity);
             $cartItem->setPrice($price);
+            $cartItem->setPromoPrice($promoPrice);
 
             if ($cart instanceof Cart) {
                 $cartItem->setCart($cart);

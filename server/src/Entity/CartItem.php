@@ -34,6 +34,9 @@ class CartItem
     #[ORM\Column(type: 'float')]
     private float $price;
 
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $promoPrice = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -123,6 +126,17 @@ class CartItem
     public function setPrice(float $price): self
     {
         $this->price = $price;
+        return $this;
+    }
+
+    public function getPromoPrice(): ?float {
+
+        return $this->promoPrice;
+    }
+
+    public function setPromoPrice(?float $promoPrice): self {
+
+        $this->promoPrice = $promoPrice;
         return $this;
     }
 }
