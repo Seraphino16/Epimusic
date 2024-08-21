@@ -17,6 +17,7 @@ import UserProfile from './components/user/UserProfile';
 import CartPage from "./components/pages/Checkout/CartPage";
 import ProductAdminAddModel from './components/forms/ProductAdminAddModel';
 import ProductAdminEdit from './components/forms/ProductAdminEdit';
+import ShippingPage from './components/pages/Checkout/ShippingPage';
 
 const App = () => (
     <Router>
@@ -104,10 +105,7 @@ const Content = () => {
           element={<ProductDetailsPage />}
         />
         <Route path="/cart" element={<CartPage />} />
-        <Route 
-          path="/filters"
-          element={<FilteredArticles />}
-        />
+        <Route path='/delivery' element={<ShippingPage />} />
       </Routes>
     </div>
   );
