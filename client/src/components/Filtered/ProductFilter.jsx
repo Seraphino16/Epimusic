@@ -111,59 +111,62 @@ const ProductFilter = ({
                 Filtrer les produits
             </h3>
 
-            <div className="mb-2 border bg-gray-100 shadow rounded-lg px-2 py-4">
-                <h4
-                    className="text-lg font-medium text-gray-700 cursor-pointer flex justify-between items-center"
-                    onClick={() => setIsBrandsOpen(!isBrandsOpen)}
-                >
-                    Marques
-                    <span>
-                        {isBrandsOpen ? (
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                                className="w-5 h-5"
-                            >
-                                <path
-                                    fillRule="evenodd"
-                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                    clipRule="evenodd"
-                                />
-                            </svg>
-                        ) : (
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                                className="w-5 h-5"
-                            >
-                                <path
-                                    fillRule="evenodd"
-                                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                    clipRule="evenodd"
-                                />
-                            </svg>
-                        )}
-                    </span>
-                </h4>
-                {isBrandsOpen && (
-                    <div className="grid grid-cols-2 gap-2 mt-2">
-                        {brands.map((brand, index) => (
-                            <div key={index} className="flex items-center">
-                                <input
-                                    type="checkbox"
-                                    value={brand}
-                                    onChange={() => handleBrandChange(brand)}
-                                    className="mr-2 text-red-600 focus:ring-red-500"
-                                />
-                                <p className="text-gray-600">{brand}</p>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
-
+            {brands.length > 0 && (
+                <div className="mb-2 border bg-gray-100 shadow rounded-lg px-2 py-4">
+                    <h4
+                        className="text-lg font-medium text-gray-700 cursor-pointer flex justify-between items-center"
+                        onClick={() => setIsBrandsOpen(!isBrandsOpen)}
+                    >
+                        Marques
+                        <span>
+                            {isBrandsOpen ? (
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                    className="w-5 h-5"
+                                >
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
+                            ) : (
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                    className="w-5 h-5"
+                                >
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
+                            )}
+                        </span>
+                    </h4>
+                    {isBrandsOpen && (
+                        <div className="grid grid-cols-2 gap-2 mt-2">
+                            {brands.map((brand, index) => (
+                                <div key={index} className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        value={brand}
+                                        onChange={() =>
+                                            handleBrandChange(brand)
+                                        }
+                                        className="mr-2 text-red-600 focus:ring-red-500"
+                                    />
+                                    <p className="text-gray-600">{brand}</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
             {colors.length > 0 && (
                 <div className="mb-2 border bg-gray-100 shadow rounded-lg px-2 py-4">
                     <>
