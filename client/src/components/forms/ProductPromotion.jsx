@@ -28,7 +28,8 @@ const ProductPromotion = ({ productId, onClose }) => {
             setError('');
 
             setTimeout(() => {
-                onClose(); 
+                onClose();
+                window.location.reload(); 
             }, 2000);
         })
         .catch((error) => {
