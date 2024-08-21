@@ -77,7 +77,7 @@ class MusicoinController extends AbstractController
         return new JsonResponse($data);
     }
 
-    #[Route('update-date/user/{id}', name: 'update_musicoin_date', methods: ["PATCH"])]
+    #[Route('/update-date/user/{id}', name: 'update_musicoin_date', methods: ["PATCH"])]
     public function updateMusicoinDate(int $id): JsonResponse
     {
         $musicoin = $this->entityManager->getRepository(Musicoin::class)->findOneBy(["user" => $id]);
@@ -104,7 +104,7 @@ class MusicoinController extends AbstractController
         $musicoin = $this->entityManager
             ->getRepository(Musicoin::class)
             ->findOneBy(['user' => $userId]);
-        
+
         if (!$musicoin) {
             return new JsonResponse(["error" => "Les musicoins n'ont pas pu être trouvés"]);
         }
@@ -115,5 +115,26 @@ class MusicoinController extends AbstractController
         $this->entityManager->flush();
 
         return $this->getMusicoinFromUserId($userId);
+    }
+
+    #[Route('/deduct', name: 'deduct_musicoins', methods: ['POST'])]
+    public function deductMusicoins(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $userId = $data["userId"] ?? null;
+        $amount = $data["amount"] ?? null;
+
+        $musicoin = $this->entityManager
+            ->getRepository(Musicoin::class)
+            ->findOneBy(["user" => $userId]);
+
+        if (!$musicoin) {
+            return new JsonResponse(["error" => "Les musicoins n'ont pas pu être trouvés"], 400);
+        }
+
+        $musicoin->setQuantity($musicoin->getQuantity() - $amount);
+        $this->entityManager->flush();
+        
+        return new JsonResponse(["success" => true]);
     }
 }
