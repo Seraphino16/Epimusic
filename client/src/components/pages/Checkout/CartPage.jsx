@@ -34,13 +34,11 @@ const CartPage = () => {
             }
         })
         .then((response) => {
-            console.log(response.data)
                 return response.data;
               
         })
         .then((data) => {
             setItems(data.items);
-            console.log(data.items)
         })
         .catch((error) => console.log(error));
     }, [userId, cartToken]);

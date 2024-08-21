@@ -33,7 +33,8 @@ const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
         })
         .then((item) => {
             setTotal(item.total);
-            onQuantityChange(item.id, selectedOption.value, item.total);
+            setTotalPromotion(item.total_promotion);
+            onQuantityChange(item.id, selectedOption.value, item.total, item.total_promotion);
         })
         .catch((error) => console.log(error))
     }

@@ -304,13 +304,19 @@ class CartController extends AbstractController
         $total = $newQuantity * $price;
         $formattedTotal = number_format($total, 2, '.', '');
 
+        $promoPrice = $cartItem->getPromoPrice();
+        $totalPromotions = $promoPrice !== null ? $newQuantity * $promoPrice : 0;
+        $formattedTotalPromotion = $promoPrice !== null ? number_format($totalPromotions, 2, '.', '') : null;
+
         $itemData = [
                 'id' => $cartItem->getId(),
                 'product' => $cartItem->getProduct()->getName(),
                 'product_id' => $cartItem->getProduct()->getId(),
                 'quantity' => $cartItem->getQuantity(),
+                'promo_price' => $cartItem->getPromoPrice(),
                 'price' => $cartItem->getModel()->getPrice(),
-                'total' => $formattedTotal
+                'total' => $formattedTotal,
+                'total_promotion' => $formattedTotalPromotion
         ];
 
         $data = [
