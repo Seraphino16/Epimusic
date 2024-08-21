@@ -13,7 +13,14 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api/musicoin')]
 class MusicoinController extends AbstractController
 {
-    #[Route('/', name:'get_musicoin_info', methods:["GET"])]
+    private $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
+
+    #[Route('/', name: 'get_musicoin_info', methods: ["GET"])]
     public function getMusicoin(EntityManagerInterface $entityManager): JsonResponse
     {
         $musicoins = $entityManager->getRepository(Musicoin::class)->findAll();
@@ -30,7 +37,7 @@ class MusicoinController extends AbstractController
             } else {
                 $isPlayedToday = false;
             }
-            
+
 
             $data[] = [
                 "userId" => $musicoin->getUser()->getId(),
@@ -42,17 +49,17 @@ class MusicoinController extends AbstractController
         return new JsonResponse($data);
     }
 
-    #[Route('/user/{id}', name: 'get_musicoin_from_user', methods:["GET"])]
-    public function getMusicoinFromUserId(EntityManagerInterface $entityManager, int $id): JsonResponse
+    #[Route('/user/{id}', name: 'get_musicoin_from_user', methods: ["GET"])]
+    public function getMusicoinFromUserId(int $id): JsonResponse
     {
-        $musicoin = $entityManager->getRepository(Musicoin::class)->findOneBy(["user" => $id]);
+        $musicoin = $this->entityManager->getRepository(Musicoin::class)->findOneBy(["user" => $id]);
 
         if (!$musicoin) {
-            return new JsonResponse(["message" => "Les musicoins n'ont pas pu être trouvés"]);
+            return new JsonResponse(["error" => "Les musicoins n'ont pas pu être trouvés"], 400);
         }
 
         $today = new \DateTime();
-        
+
         $lastGameDate = $musicoin->getLastGameDate();
 
         if ($lastGameDate) {
@@ -68,5 +75,45 @@ class MusicoinController extends AbstractController
         ];
 
         return new JsonResponse($data);
+    }
+
+    #[Route('update-date/user/{id}', name: 'update_musicoin_date', methods: ["PATCH"])]
+    public function updateMusicoinDate(int $id): JsonResponse
+    {
+        $musicoin = $this->entityManager->getRepository(Musicoin::class)->findOneBy(["user" => $id]);
+
+        if (!$musicoin) {
+            return new JsonResponse(["error" => "Les musicoins n'ont pas pu être trouvés"], 400);
+        }
+
+        $date = new \DateTime();
+        $musicoin->setLastGameDate($date);
+
+        $this->entityManager->flush();
+
+        return new JsonResponse(["success" => true]);
+    }
+
+    #[Route('/add', name: 'add_musicoins', methods: ["POST"])]
+    public function addMusicoins(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $userId = $data["userId"] ?? null;
+        $amount = $data["amount"] ?? null;
+
+        $musicoin = $this->entityManager
+            ->getRepository(Musicoin::class)
+            ->findOneBy(['user' => $userId]);
+        
+        if (!$musicoin) {
+            return new JsonResponse(["error" => "Les musicoins n'ont pas pu être trouvés"]);
+        }
+
+        $musicoin->setQuantity($musicoin->getQuantity() + $amount);
+        $musicoin->setLastGameDate(new \DateTime());
+
+        $this->entityManager->flush();
+
+        return $this->getMusicoinFromUserId($userId);
     }
 }
