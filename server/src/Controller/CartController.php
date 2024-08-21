@@ -230,8 +230,6 @@ class CartController extends AbstractController
         $cartItems = $cart->getItems();
 
         
-        
-
         $itemsData = [];
         foreach ($cartItems as $cartItem) {
 
@@ -249,6 +247,10 @@ class CartController extends AbstractController
             $total = $quantity * $price;
             $formattedTotal = number_format($total, 2, '.', '');
 
+            $promoPrice = $cartItem->getPromoPrice();
+            $totalPromotions = $promoPrice !== null ? $quantity * $promoPrice : 0;
+            $formattedTotalPromotion = $promoPrice !== null ? number_format($totalPromotions, 2, '.', '') : null;
+
             $itemsData[] = [
                 'id' => $cartItem->getId(),
                 'product' => $cartItem->getProduct()->getName(),
@@ -256,7 +258,9 @@ class CartController extends AbstractController
                 'quantity' => $cartItem->getQuantity(),
                 'image_path' => $image,
                 'price' => $cartItem->getPrice(),
-                'total' => $formattedTotal
+                'promo_price' => $cartItem->getPromoPrice(),
+                'total' => $formattedTotal,
+                'total_promotion' => $formattedTotalPromotion
             ];
         }
 

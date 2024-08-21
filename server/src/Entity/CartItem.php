@@ -70,14 +70,12 @@ class CartItem
 
     public function setAnonymousCart(?AnonymousCart $anonymousCart): self
     {
-        // Unset current anonymous cart if exists
         if ($this->anonymousCart !== null && $this->anonymousCart !== $anonymousCart) {
             $this->anonymousCart->removeItem($this);
         }
 
         $this->anonymousCart = $anonymousCart;
 
-        // Set this item to the new anonymous cart
         if ($anonymousCart !== null && !$anonymousCart->getItems()->contains($this)) {
             $anonymousCart->addItem($this);
         }

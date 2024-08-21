@@ -34,8 +34,9 @@ const CartPage = () => {
             }
         })
         .then((response) => {
-           
+            console.log(response.data)
                 return response.data;
+              
         })
         .then((data) => {
             setItems(data.items);
