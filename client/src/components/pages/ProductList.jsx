@@ -21,14 +21,14 @@ const ProductList = () => {
         brands: [],
         colors: [],
         sizes: [],
-        priceRange: [0, 0],
+        priceRange: [0, 1150],
         weightRange: [0, 50],
     });
 
     const [availableFilterBrands, setAvailableBrands] = useState([]);
     const [availableFilterColors, setAvailableColors] = useState([]);
     const [availableFilterSizes, setAvailableSizes] = useState([]);
-    const [maxPrice, setMaxPrice] = useState(0);
+    const [maxPrice, setMaxPrice] = useState(1150);
     const [maxWeight, setMaxWeight] = useState(50);
 
     const [shouldApplyFilters, setShouldApplyFilters] = useState(false);
