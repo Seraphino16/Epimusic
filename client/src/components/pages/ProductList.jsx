@@ -389,7 +389,7 @@ const ProductList = () => {
                                                                         }
                                                                     </p>
                                                                     <p className="text-orange-500 font-bold">
-                                                                        Réapprovisionnement
+                                                                        Bientôt épuisé
                                                                     </p>
                                                                 </>
                                                             ) : filteredModel.stock >
