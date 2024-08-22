@@ -33,6 +33,9 @@ class Cart
     #[ORM\Column(type: 'float')]
     private float $total = 0.0;
 
+    #[ORM\Column(type: 'float', options: ['default' => 0])]
+    private float $promoTotal = 0.0;
+
     public function __construct() {
         $this->items = new ArrayCollection();
         $this->createdAt = new \DateTime();
@@ -139,12 +142,29 @@ class Cart
         return $this->total;
     }
 
+    public function getPromoTotal(): float {
+
+        return $this->promoTotal;
+    }
+
+    public function setPromoTotal(float $promoTotal): self {
+
+        $this->promoTotal = $promoTotal;
+        return $this;
+    }
+
     public function calculateTotal(): void
     {
         $total = 0.0;
+        $promoTotal = 0.0;
+
         foreach ($this->items as $item) {
             $total += $item->getPrice() * $item->getQuantity();
+            if ($item->getPromoPrice() !== null) {
+                $promoTotal += $item->getQuantity() * ($item->getPrice() - $item->getPromoPrice());
+            }
         }
         $this->total = $total;
+        $this->promoTotal = $promoTotal;
     }
 }

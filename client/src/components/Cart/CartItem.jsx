@@ -11,6 +11,7 @@ const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
         label: item.quantity
     });
     const [total, setTotal] = useState(item.total);
+    const [totalPromotion, setTotalPromotion] = useState(item.total_promotion);
 
     const options = Array.from({ length: 10}, (v, k) => ({
         value: k + 1,
@@ -32,7 +33,8 @@ const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
         })
         .then((item) => {
             setTotal(item.total);
-            onQuantityChange(item.id, selectedOption.value, item.total);
+            setTotalPromotion(item.total_promotion);
+            onQuantityChange(item.id, selectedOption.value, item.total, item.total_promotion);
         })
         .catch((error) => console.log(error))
     }
@@ -65,7 +67,16 @@ const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
                         />
                         <ButtonDelete id={item.id} onDeleteItem={onDeleteItem}/>
                     </div>
-                    <p className="text-2xl">{total} €</p>
+                    <div className="text-right">
+                        {item.promo_price ? (
+                            <>
+                                <p className="text-xl line-through text-red-500">{total} €</p>
+                                <p className="text-2xl">{totalPromotion} €</p>
+                            </>
+                        ) : (
+                            <p className="text-2xl">{total} €</p>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

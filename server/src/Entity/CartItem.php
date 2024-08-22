@@ -34,6 +34,9 @@ class CartItem
     #[ORM\Column(type: 'float')]
     private float $price;
 
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $promoPrice = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -67,14 +70,12 @@ class CartItem
 
     public function setAnonymousCart(?AnonymousCart $anonymousCart): self
     {
-        // Unset current anonymous cart if exists
         if ($this->anonymousCart !== null && $this->anonymousCart !== $anonymousCart) {
             $this->anonymousCart->removeItem($this);
         }
 
         $this->anonymousCart = $anonymousCart;
 
-        // Set this item to the new anonymous cart
         if ($anonymousCart !== null && !$anonymousCart->getItems()->contains($this)) {
             $anonymousCart->addItem($this);
         }
@@ -123,6 +124,17 @@ class CartItem
     public function setPrice(float $price): self
     {
         $this->price = $price;
+        return $this;
+    }
+
+    public function getPromoPrice(): ?float {
+
+        return $this->promoPrice;
+    }
+
+    public function setPromoPrice(?float $promoPrice): self {
+
+        $this->promoPrice = $promoPrice;
         return $this;
     }
 }
