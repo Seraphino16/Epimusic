@@ -3,11 +3,8 @@ import React from "react";
 const CartSummary = ({ total, quantity, promoReduction }) => {
 
     const totalTTC = (total - promoReduction).toFixed(2);
-    const taxes = (total * (20 / 100)).toFixed(2);
-    const totalHT = (total - taxes).toFixed(2);
-
-    const finalTotalTTC = total.toFixed(2);
-    
+    const taxes = (totalTTC * (20 / 100)).toFixed(2);
+    const totalHT = (totalTTC - taxes).toFixed(2);    
 
     return (
         <div>
