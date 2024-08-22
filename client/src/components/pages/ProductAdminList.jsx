@@ -258,7 +258,7 @@ const ProductAdminList = () => {
                             )}
                             <div className="mt-4 flex gap-2">
                                 <Link to={`/admin/product/${product.category}/${product.id}/add-model`}>
-                                    <button className="add-model-button">Ajouter un modèle</button>
+                                    <button className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Ajouter un modèle</button>
                                 </Link>
                                 <button
                                     className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
