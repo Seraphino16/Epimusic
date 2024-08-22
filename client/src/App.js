@@ -18,6 +18,7 @@ import CartPage from "./components/pages/Checkout/CartPage";
 import Footer from "./components/footer/Footer";
 import ProductAdminAddModel from './components/forms/ProductAdminAddModel';
 import ProductAdminEdit from './components/forms/ProductAdminEdit';
+import RhythmGame from './components/Game/RhythmGame';
 import ShippingPage from './components/pages/Checkout/ShippingPage';
 
 const App = () => (
@@ -56,15 +57,15 @@ const BackgroundWrapper = ({ children }) => {
 };
 
 const Content = () => {
-  return (
-    <div>
-      <Routes>
-      <Route path="/" element={<HomePage />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/products" element={<ProductCategoriesList />} />
-        <Route path="/products/:category/:categoryId" element={<ProductList />} />
-        <Route
+    return (
+        <div>
+            <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/products" element={<ProductCategoriesList />} />
+                <Route path="/products/:category/:categoryId" element={<ProductList />} />
+                <Route
                     path="/admin/*"
                     element={
                         <ProtectedRoute requiredRole="ROLE_ADMIN">
@@ -72,49 +73,53 @@ const Content = () => {
                         </ProtectedRoute>
                     }
                 />
-        
-        <Route
-                path="/profile/*"
+                <Route
+                    path="/profile/*"
                     element={
                         <ProtectedRoute requiredRole="ROLE_USER">
                             <UserProfile />
                         </ProtectedRoute>
                     }
-        />
-         <Route path="/admin/create-product" element={<ProductAdminForm />} />
-        <Route
-          path="/admin/create-product"
-          element={
-            <ProtectedRoute requiredRole="ROLE_ADMIN">
-              <ProductAdminForm />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/edit-product/:id"
-          element={
-            <ProtectedRoute requiredRole="ROLE_ADMIN">
-              <ProductAdminEdit />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path='/admin/product/:category/:id/add-model'
-          element={
-            <ProtectedRoute requiredRole="ROLE_ADMIN">
-              <ProductAdminAddModel />
-            </ProtectedRoute>
-          }
-         />
-        <Route 
-          path="/product/:id"
-          element={<ProductDetailsPage />}
-        />
-        <Route path="/cart" element={<CartPage />} />
-        <Route path='/delivery' element={<ShippingPage />} />
-      </Routes>
-    </div>
-  );
+                />
+                <Route path="/admin/create-product" element={<ProductAdminForm />} />
+                <Route
+                    path="/admin/create-product"
+                    element={
+                        <ProtectedRoute requiredRole="ROLE_ADMIN">
+                            <ProductAdminForm />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/edit-product/:id"
+                    element={
+                        <ProtectedRoute requiredRole="ROLE_ADMIN">
+                            <ProductAdminEdit />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path='/admin/product/:category/:id/add-model'
+                    element={
+                        <ProtectedRoute requiredRole="ROLE_ADMIN">
+                            <ProductAdminAddModel />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/product/:id"
+                    element={<ProductDetailsPage />}
+                />
+                <Route path="/cart" element={<CartPage />} />
+                <Route
+                    path="/filters"
+                    element={<FilteredArticles />}
+                />
+                <Route path='/delivery' element={<ShippingPage />} />
+                <Route path="/rhythm-game" element={<RhythmGame />} />
+            </Routes>
+        </div>
+    );
 };
 
 export default App;
