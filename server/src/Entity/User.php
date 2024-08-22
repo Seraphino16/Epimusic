@@ -42,6 +42,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Address::class, mappedBy: 'user', cascade: ['persist', 'remove'])]
     private Collection $addresses;
 
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?Musicoin $musicoin = null;
+
     public function __construct()
     {
         $this->addresses = new ArrayCollection();
@@ -166,6 +169,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $address->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getMusicoin(): ?Musicoin
+    {
+        return $this->musicoin;
+    }
+
+    public function setMusicoin(Musicoin $musicoin): static
+    {
+        // set the owning side of the relation if necessary
+        if ($musicoin->getUser() !== $this) {
+            $musicoin->setUser($this);
+        }
+
+        $this->musicoin = $musicoin;
 
         return $this;
     }
