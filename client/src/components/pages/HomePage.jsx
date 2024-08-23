@@ -36,7 +36,7 @@ const HomePage = () => {
 
     useEffect(() => {
         axios
-            .get("http://localhost:8000/api/admin/categories")
+            .get("/api/admin/categories") //localhost
             .then((response) => {
                 setCategories(response.data);
             })
@@ -64,7 +64,7 @@ const HomePage = () => {
                 {categories.map((category) => (
                     <CategoryCard
                         key={category.id}
-                        imageSrc={`http://localhost:8000${category.imagePath}`}
+                        imageSrc={`${category.imagePath}`} //localhost
                         categoryName={category.name}
                         categoryId={category.id}
                     />

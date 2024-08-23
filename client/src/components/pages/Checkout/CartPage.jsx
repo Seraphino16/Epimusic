@@ -28,7 +28,7 @@ const CartPage = () => {
         if (!userId && !cartToken) {
             return;
         }
-        axios.get("http://localhost:8000/api/cart", {
+        axios.get("/api/cart", { //localhost
             params: {
                 userId: userId,
                 token: cartToken
@@ -97,7 +97,7 @@ const CartPage = () => {
             return;
         }
 
-        axios.get("http://localhost:8000/api/shipping/cost", {
+        axios.get("/api/shipping/cost", { //localhost
             params: {
                 userId: userId,
                 token: cartToken

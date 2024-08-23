@@ -70,7 +70,7 @@ const ProductList = () => {
     const fetchProducts = async () => {
         try {
             const response = await axios.get(
-                `http://localhost:8000/api/products/category/${categoryId}`
+                `/api/products/category/${categoryId}` //localhost
             );
             const uniqueProducts = Array.from(
                 new Set(response.data.map((product) => product.id))
@@ -221,7 +221,7 @@ const ProductList = () => {
         }
 
         axios
-            .post(`http://localhost:8000/api/cart/add/${product.id}`, data)
+            .post(`/api/cart/add/${product.id}`, data) //localhost
             .then((response) => {
                 setAlert("Produit ajouté au panier !");
                 if (response.data.token) {
@@ -316,7 +316,7 @@ const ProductList = () => {
                                                 filteredModel.images.length >
                                                     0 ? (
                                                     <img
-                                                        src={`http://localhost:8000${
+                                                        src={`${ //localhost
                                                             filteredModel.images.find(
                                                                 (img) =>
                                                                     img.is_main
