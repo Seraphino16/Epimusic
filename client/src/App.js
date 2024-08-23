@@ -20,6 +20,7 @@ import ProductAdminAddModel from './components/forms/ProductAdminAddModel';
 import ProductAdminEdit from './components/forms/ProductAdminEdit';
 import RhythmGame from './components/Game/RhythmGame';
 import ShippingPage from './components/pages/Checkout/ShippingPage';
+import PaymentPage from './components/pages/Checkout/PaymentPage';
 
 const App = () => (
     <Router>
@@ -116,6 +117,7 @@ const Content = () => {
                     element={<FilteredArticles />}
                 />
                 <Route path='/delivery' element={<ShippingPage />} />
+                <Route path='/checkout/payment' element={<PaymentPage />} />
                 <Route path="/rhythm-game" element={<RhythmGame />} />
             </Routes>
         </div>
