@@ -10,7 +10,6 @@ const ProductAdminUpdateModel = ({ isOpen, onClose, modelId, productCategoryId, 
         color: '',
         size: '',
         price: '',
-        weight: '',
         stock: '',
         images: []
     });
@@ -41,7 +40,6 @@ const ProductAdminUpdateModel = ({ isOpen, onClose, modelId, productCategoryId, 
                     color: data.color ? data.color.id : '',
                     size: data.size ? data.size.id : '',
                     price: data.price || '',
-                    weight: data.weight || '',
                     stock: data.stock || '',
                     images: data.images || []
                 });
@@ -160,7 +158,6 @@ const ProductAdminUpdateModel = ({ isOpen, onClose, modelId, productCategoryId, 
                 color: formData.color,
                 size: formData.size,
                 price: parseFloat(formData.price),
-                weight: parseFloat(formData.weight),
                 stock: parseInt(formData.stock, 10),
                 photoPaths: formData.images.map(img => img.path),
                 mainImageIndex: formData.images.length === 0 ? 0 : mainImageIndex,
@@ -248,19 +245,6 @@ const ProductAdminUpdateModel = ({ isOpen, onClose, modelId, productCategoryId, 
                             step="0.01"
                             min="0"
                             required
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 mb-2" htmlFor="weight">Poids :</label>
-                        <input
-                            type="number"
-                            id="weight"
-                            name="weight"
-                            value={formData.weight || ''}
-                            onChange={handleChange}
-                            className="block w-full border border-gray-300 rounded p-2"
-                            step="0.01"
-                            min="0"
                         />
                     </div>
                     <div className="mb-4">
