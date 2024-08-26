@@ -132,7 +132,6 @@ class ProductController extends AbstractController
                 'size' => $model->getSize() ? $model->getSize()->getValue() : null,
                 'price' => $model->getPrice(),
                 'images' => $images,
-                'weight' => $model->getWeight(),
                 'stock' => $quantity
             ];
         
@@ -156,6 +155,7 @@ class ProductController extends AbstractController
             'name' => $product->getName(),
             'description' => $product->getDescription(),
             'category' => $categoryData,
+            'weight' => $product->getWeights()->first()?->getValue() ?? 0,
             'models' => $models,
             'reviews' => $reviews,
             'promotions' => $promoDetails,
@@ -289,6 +289,7 @@ public function productsByCategory(EntityManagerInterface $entityManager, Reques
             'models' => $models,
             'brands' => $brands,
             'tags' => $tags,
+            'weight' => $product->getWeights()->first()?->getValue() ?? 0,
             'promotions' => $promoDetails,
         ];
     }

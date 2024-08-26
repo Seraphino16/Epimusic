@@ -72,11 +72,10 @@ const ProductList = () => {
             const response = await axios.get(
                 `http://localhost:8000/api/products/category/${categoryId}`
             );
-            const uniqueProducts = Array.from(
-                new Set(response.data.map((product) => product.id))
-            ).map((id) => response.data.find((product) => product.id === id));
-            setProducts(uniqueProducts);
+          
+            setProducts(response.data);
             console.log(products);
+
 
             const brandsSet = new Set();
             const colorsSet = new Set();
@@ -84,7 +83,7 @@ const ProductList = () => {
             let highestPrice = 0;
             let highestWeight = 0;
 
-            uniqueProducts.forEach((product) => {
+            response.data.forEach((product) => {
                 product.brands.forEach((brand) => brandsSet.add(brand));
                 product.models.forEach((model) => {
                     if (model.color) colorsSet.add(model.color);
@@ -342,7 +341,9 @@ const ProductList = () => {
                                             <p className="line-clamp-3 mb-2">
                                                 {product.description}
                                             </p>
-
+                                            <p className="line-clamp-3 mb-2">
+                                               Poids : {product.weight}
+                                            </p>
                                             <div className="flex items-center justify-between">
                                                 <div className="flex-1">
                                                     <ProductColors
