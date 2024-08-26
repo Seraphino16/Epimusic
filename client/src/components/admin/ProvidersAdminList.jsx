@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Alert from '../Alerts/Alert';
+import ProviderCreateModal from '../forms/ProviderCreate';
 
 const ProvidersAdminList = () => {
     const [providers, setProviders] = useState([]);
     const [alert, setAlert] = useState({ type: '', message: '' });
+    const [isProviderCreateModalOpen, setIsProviderCreateModalOpen] = useState(false);
 
     const fetchProviders = async () => {
         try {
@@ -58,6 +60,12 @@ const ProvidersAdminList = () => {
     return (
         <div className="container mx-auto px-4">
             <h2 className="text-2xl font-bold my-4">Liste des Prestataires</h2>
+            <button
+                onClick={() => setIsProviderCreateModalOpen(true)}
+                className="mb-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+            >
+                Ajouter un Prestataire
+            </button>
             {alert.message && <Alert message={alert.message} type={alert.type} />}
             <div className="overflow-x-auto">
                 <table className="min-w-full bg-white border border-gray-200">
@@ -98,6 +106,10 @@ const ProvidersAdminList = () => {
                     </tbody>
                 </table>
             </div>
+            <ProviderCreateModal
+                isOpen={isProviderCreateModalOpen}
+                onClose={() => setIsProviderCreateModalOpen(false)}
+            />
         </div>
     );
 };
