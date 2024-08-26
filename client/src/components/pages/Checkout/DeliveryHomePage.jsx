@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Alert from "../../Alerts/Alert";
-import { FaShippingFast } from "react-icons/fa";
+import { FaRegCreditCard, FaShippingFast } from "react-icons/fa";
 import CartButton from "../../Buttons/CartButton";
 
 const DeliveryHomePage = () => {
     const [alert, setAlert] = useState({ message: "", type: "error" });
     const [cartPrice, setCartPrice] = useState();
-    const [shipppingCosts, setShippingCosts] = useState();
+    const [shippingCosts, setShippingCosts] = useState();
     const [cartQuantity, setCartQuantity] = useState();
     const [total, setTotal] = useState();
     const [name, setName] = useState("");
@@ -26,19 +26,19 @@ const DeliveryHomePage = () => {
     useEffect(() => {
         const cartPrice = localStorage.getItem("cart_price");
         setCartPrice(parseFloat(cartPrice));
-        const shipppingCosts = localStorage.getItem("cart_shipping_costs");
-        setShippingCosts(parseFloat(shipppingCosts));
+        const shippingCosts = localStorage.getItem("cart_shipping_costs");
+        setShippingCosts(parseFloat(shippingCosts));
         const cartQuantity = localStorage.getItem("cart_quantity");
         setCartQuantity(parseInt(cartQuantity));
     }, []);
 
     useEffect(() => {
-        if (!cartPrice || !shipppingCosts) {
+        if (!cartPrice || !shippingCosts) {
             return;
         }
-        const total = (cartPrice + shipppingCosts).toFixed(2);
+        const total = (cartPrice + shippingCosts).toFixed(2);
         setTotal(total);
-    }, [cartPrice, shipppingCosts]);
+    }, [cartPrice, shippingCosts]);
 
     return (
         <div className="w-9/12 m-auto">
@@ -55,7 +55,6 @@ const DeliveryHomePage = () => {
                         </p>
                         {message && <p className="success">{message}</p>}
                         {error && <p className="error">{error}</p>}
-                        {/* Ne pas oublier de mettre onSubmit={handleSubmit} */}
                         <form>
                             <div className="md:flex items-center mt-4">
                                 <div className="w-full flex flex-col">
@@ -200,6 +199,33 @@ const DeliveryHomePage = () => {
                                         className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-2 bg-gray-100 border rounded border-gray-200"
                                     />
                                 </div>
+                            </div>
+
+                            <div className="max-w-5xl mx-auto px-6 sm:px-6 lg:px-8 mt-8 mb-8">
+                                <div className="bg-white w-full shadow rounded p-8 sm:p-12">
+                                    <p className="text-3xl font-bold leading-7 text-center text-black">
+                                        Méthode de paiement
+                                    </p>
+                                    <div className="flex items-center mb-4 mt-6">
+                                        <FaRegCreditCard className="text-4xl mr-4" />
+                                        <input
+                                            type="radio"
+                                            name="paymentMethod"
+                                            className="h-4 w-4 border-gray-300 focus:ring-2 focus:ring-blue-300"
+                                        />
+                                        <p className="text-lg font-medium text-gray-900 ml-2 block">
+                                            Carte de crédit
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex justify-center">
+                                <CartButton
+                                    type="submit"
+                                    isSubmitting={isSubmitting}
+                                >
+                                    Confirmer la commande
+                                </CartButton>
                             </div>
                         </form>
                     </div>
