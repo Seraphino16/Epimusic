@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Alert from "../../Alerts/Alert";
-import { FaRegCreditCard, FaShippingFast } from "react-icons/fa";
+import { FaRegCreditCard } from "react-icons/fa";
 import CartButton from "../../Buttons/CartButton";
 
 const DeliveryHomePage = () => {
@@ -10,7 +10,9 @@ const DeliveryHomePage = () => {
     const [shippingCosts, setShippingCosts] = useState();
     const [cartQuantity, setCartQuantity] = useState();
     const [total, setTotal] = useState();
-    const [name, setName] = useState("");
+    const [lastname, setLastname] = useState("");
+    const [firstname, setFirstname] = useState("");
+    const [email, setEmail] = useState("");
     const [telephone, setTelephone] = useState("");
     const [address, setAddress] = useState("");
     const [complement, setComplement] = useState("");
@@ -42,7 +44,6 @@ const DeliveryHomePage = () => {
 
     return (
         <div className="w-9/12 m-auto">
-            <div></div>
             <Alert message={alert.message} type={alert.type} />
             <h1 className="text-center text-4xl font-bold my-4">
                 Livraison à domicile
@@ -56,21 +57,39 @@ const DeliveryHomePage = () => {
                         {message && <p className="success">{message}</p>}
                         {error && <p className="error">{error}</p>}
                         <form>
-                            <div className="md:flex items-center mt-4">
-                                <div className="w-full flex flex-col">
+                        <div className="md:flex items-center mt-4">
+                                <div className="w-full flex flex-col md:w-1/2">
                                     <label
-                                        htmlFor="name"
+                                        htmlFor="lastname"
                                         className="text-gray-700"
                                     >
                                         Nom
                                     </label>
                                     <input
                                         type="text"
-                                        id="name"
-                                        placeholder="Entrez le nom"
-                                        value={name}
+                                        placeholder="Entrez votre nom"
+                                        value={lastname}
                                         onChange={(e) =>
-                                            setName(e.target.value)
+                                            setLastname(e.target.value)
+                                        }
+                                        required
+                                        className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-2 bg-gray-100 border rounded border-gray-200"
+                                    />
+                                </div>
+                                <div className="w-full flex flex-col md:w-1/2 md:ml-6 md:mt-0 mt-4">
+                                    <label
+                                        htmlFor="firstname"
+                                        className="text-gray-700"
+                                    >
+                                        Prénom
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="city"
+                                        placeholder="Entrez votre prénom"
+                                        value={firstname}
+                                        onChange={(e) =>
+                                            setFirstname(e.target.value)
                                         }
                                         required
                                         className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-2 bg-gray-100 border rounded border-gray-200"
@@ -92,6 +111,26 @@ const DeliveryHomePage = () => {
                                         value={telephone}
                                         onChange={(e) =>
                                             setTelephone(e.target.value)
+                                        }
+                                        required
+                                        className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-2 bg-gray-100 border rounded border-gray-200"
+                                    />
+                                </div>
+                            </div><div className="md:flex items-center mt-4">
+                                <div className="w-full flex flex-col">
+                                    <label
+                                        htmlFor="telephone"
+                                        className="text-gray-700"
+                                    >
+                                        Adresse e-mail
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="email"
+                                        placeholder="Entrez votre adresse e-mail"
+                                        value={email}
+                                        onChange={(e) =>
+                                            setEmail(e.target.value)
                                         }
                                         required
                                         className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-2 bg-gray-100 border rounded border-gray-200"
@@ -125,12 +164,12 @@ const DeliveryHomePage = () => {
                                         htmlFor="complement"
                                         className="text-gray-700"
                                     >
-                                        Complément (facultatif)
+                                        Complément d'adresse
                                     </label>
                                     <input
                                         type="text"
                                         id="complement"
-                                        placeholder="Entrez le complément (facultatif)"
+                                        placeholder="Entrez le complément d'adresse"
                                         value={complement}
                                         onChange={(e) =>
                                             setComplement(e.target.value)
@@ -201,7 +240,7 @@ const DeliveryHomePage = () => {
                                 </div>
                             </div>
 
-                            <div className="max-w-5xl mx-auto px-6 sm:px-6 lg:px-8 mt-8 mb-8">
+                            <div className="max-w-5xl mx-auto px-6 sm:px-6 lg:px-8 mt-12 mb-8">
                                 <div className="bg-white w-full shadow rounded p-8 sm:p-12">
                                     <p className="text-3xl font-bold leading-7 text-center text-black">
                                         Méthode de paiement
@@ -219,14 +258,9 @@ const DeliveryHomePage = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex justify-center">
-                                <CartButton
-                                    type="submit"
-                                    isSubmitting={isSubmitting}
-                                >
-                                    Confirmer la commande
-                                </CartButton>
-                            </div>
+                            <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500 mt-4">
+                                Valider et passer à la suite
+                            </button>
                         </form>
                     </div>
                 </div>
