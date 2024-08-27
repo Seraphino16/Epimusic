@@ -12,6 +12,8 @@
     "@heroicons/vue": "^2.1.5",
     "@iconify/icons-heroicons-solid": "^1.2.6",
     "@react-icons/all-files": "^4.1.0",
+    "@stripe/react-stripe-js": "^2.8.0",
+    "@stripe/stripe-js": "^4.3.0",
     "@tailwindcss/line-clamp": "^0.4.4",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
