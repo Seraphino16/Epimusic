@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Alert from "../../Alerts/Alert";
 import { FaRegCreditCard } from "react-icons/fa";
 import CartButton from "../../Buttons/CartButton";
-import axios from "axios"; // Don't forget to import axios!
+import axios from "axios";
 
 const DeliveryHomePage = () => {
     const [alert, setAlert] = useState({ message: "", type: "error" });
@@ -104,33 +104,35 @@ const DeliveryHomePage = () => {
                         {message && <p className="success">{message}</p>}
                         {error && <p className="error">{error}</p>}
 
-                        <div className="md:flex items-center mt-4">
-                            <div className="w-full flex flex-col">
-                                <label
-                                    htmlFor="address-select"
-                                    className="text-gray-700"
-                                >
-                                    Sélectionnez une adresse
-                                </label>
-                                <select
-                                    id="address-select"
-                                    onChange={handleAddressChange}
-                                    className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-2 bg-gray-100 border rounded border-gray-200"
-                                >
-                                    <option value="">
-                                        Sélectionnez une adresse
-                                    </option>
-                                    {addresses.map((address) => (
-                                        <option
-                                            key={address.id}
-                                            value={address.id}
-                                        >
-                                            {address.name}
+                        {localStorage.getItem("user") && (
+                            <div className="md:flex items-center mt-4">
+                                <div className="w-full flex flex-col">
+                                    <label
+                                        htmlFor="address-select"
+                                        className="text-gray-700"
+                                    >
+                                        Carnet d'adresses
+                                    </label>
+                                    <select
+                                        id="address-select"
+                                        onChange={handleAddressChange}
+                                        className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-2 bg-gray-100 border rounded border-gray-200"
+                                    >
+                                        <option value="">
+                                            Sélectionnez une adresse
                                         </option>
-                                    ))}
-                                </select>
+                                        {addresses.map((address) => (
+                                            <option
+                                                key={address.id}
+                                                value={address.id}
+                                            >
+                                                {address.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         <form>
                             <div className="md:flex items-center mt-4">
@@ -320,7 +322,7 @@ const DeliveryHomePage = () => {
                             <div className="max-w-5xl mx-auto px-6 sm:px-6 lg:px-8 mt-12 mb-8">
                                 <div className="bg-white w-full shadow rounded p-8 sm:p-12">
                                     <p className="text-3xl font-bold leading-7 text-center text-black">
-                                        Méthode de paiement
+                                        Méthodes de paiements
                                     </p>
                                     <div className="flex items-center mb-4 mt-6">
                                         <FaRegCreditCard className="text-4xl mr-4" />
@@ -336,7 +338,7 @@ const DeliveryHomePage = () => {
                                 </div>
                             </div>
                             <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500 mt-4">
-                                Valider et passer à la suite
+                                Valider et passer au payement
                             </button>
                         </form>
                     </div>
