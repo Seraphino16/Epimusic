@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import Alert from '../Alerts/Alert';
-import ProviderCreateModal from '../forms/ProviderCreate';
+import ProviderCreateModal from '../forms/ProviderCreateModal';
+import ProviderEditModal from '../forms/ProviderEditModal';
 
 const ProvidersAdminList = () => {
     const [providers, setProviders] = useState([]);
     const [alert, setAlert] = useState({ type: '', message: '' });
     const [isProviderCreateModalOpen, setIsProviderCreateModalOpen] = useState(false);
+    const [isProviderEditModalOpen, setIsProviderEditModalOpen] = useState(false);
+    const [selectedProviderId, setSelectedProviderId] = useState(null);
 
     const fetchProviders = async () => {
         try {
@@ -94,13 +97,24 @@ const ProvidersAdminList = () => {
                                 <td className="px-4 py-2 border border-gray-200">{provider.price}</td>
                                 <td className="px-4 py-2 border border-gray-200">{provider.MaxWeight}</td>
                                 <td className="px-4 py-2 border border-gray-200">
-                                    <button
-                                        onClick={() => handleDelete(provider.id)}
-                                        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-                                    >
-                                        Supprimer
-                                    </button>
-                                </td>
+                                    <div className="flex space-x-2">
+                                        <button
+                                            onClick={() => handleDelete(provider.id)}
+                                            className="w-1/2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                                        >
+                                            Supprimer
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setSelectedProviderId(provider.id);
+                                                setIsProviderEditModalOpen(true);
+                                            }}
+                                            className="w-1/2 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                                        >
+                                            Modifier
+                                        </button>
+                                    </div>
+                                </td>                            
                             </tr>
                         ))}
                     </tbody>
@@ -109,6 +123,11 @@ const ProvidersAdminList = () => {
             <ProviderCreateModal
                 isOpen={isProviderCreateModalOpen}
                 onClose={() => setIsProviderCreateModalOpen(false)}
+            />
+            <ProviderEditModal
+                isOpen={isProviderEditModalOpen}
+                onClose={() => setIsProviderEditModalOpen(false)}
+                providerId={selectedProviderId}
             />
         </div>
     );

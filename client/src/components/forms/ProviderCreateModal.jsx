@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Alert from '../Alerts/Alert';
 
-const ProviderCreateModal = ({ isOpen, onClose, onSubmit }) => {
+const ProviderCreateModal = ({ isOpen, onClose }) => {
     const [alert, setAlert] = useState({ type: '', message: '' });
     const [formData, setFormData] = useState({
         name: '',
@@ -12,6 +12,7 @@ const ProviderCreateModal = ({ isOpen, onClose, onSubmit }) => {
         price: '',
         MaxWeight: ''
     });
+    
     if (!isOpen) return null;
 
     const handleChange = (e) => {
@@ -65,9 +66,9 @@ const ProviderCreateModal = ({ isOpen, onClose, onSubmit }) => {
     return (
         <div className="fixed inset-0 flex items-center justify-center z-50">
             <div className="fixed inset-0 bg-black opacity-50" onClick={onClose}></div>
-            {alert.message && <Alert message={alert.message} type={alert.type} />}
             <div className="bg-white p-6 rounded-lg z-10 w-full max-w-lg">
                 <h2 className="text-xl font-bold mb-4">Ajouter un Prestataire</h2>
+                {alert.message && <Alert message={alert.message} type={alert.type} />}
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
                         <label className="block text-sm font-medium mb-1" htmlFor="name">Nom</label>
@@ -90,7 +91,7 @@ const ProviderCreateModal = ({ isOpen, onClose, onSubmit }) => {
                             value={formData.EAN}
                             onChange={handleChange}
                             required
-                            className="w-full px-3 py-2 border border-gray-300 rounded"
+                            className="w-full px"
                         />
                     </div>
                     <div className="mb-4">
