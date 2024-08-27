@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\Product;
+use App\Entity\Weight;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -95,43 +97,75 @@ class ProvidersController extends AbstractController
 
     }
 
-    #[Route('/provider/{id}', name: 'api_update_provider', methods: ['PUT'])]
-    public function updateProvider(Request $request, int $id): Response {
+    #[Route('/provider/{id}/products', name: 'api_provider_products', methods:['GET'])]
+    public function getProductsForProvider(int $id): Response
+    {
 
-        $data = json_decode($request->getContent(), true);
-
-        $provider = $this->providerRepository->find($id);
-
-        if (!$provider) {
+        $transportProvider = $this->entityManager->getRepository(TransportProvider::class)->find($id);
+    
+        if (!$transportProvider) {
             return new JsonResponse(['error' => 'Transporteur non trouvé'], JsonResponse::HTTP_NOT_FOUND);
         }
-
-        $provider->setName($data['name']);
-        $provider->setEAN($data['EAN']);
-        $provider->setLength($data['length']);
-        $provider->setWidth($data['width']);
-        $provider->setHeight($data['height']);
-        $provider->setPrice($data['price']);
-        $provider->setMaxWeight($data['MaxWeight']);
-
-        $this->entityManager->persist($provider);
-        $this->entityManager->flush();
-
-        return new JsonResponse(['message' => 'Transporteur mis à jour avec succès'], JsonResponse::HTTP_OK);
-    }
-
-    #[Route('/provider/{id}', name: 'api_delete_provider', methods: ['DELETE'])]
-    public function deleteProvider(int $id): Response {
-
-        $provider = $this->providerRepository->find($id);
-
-        if (!$provider) {
-            return new JsonResponse(['error' => 'Transporteur non trouvé'], JsonResponse::HTTP_NOT_FOUND);
+    
+        $maxWeightForProvider = $transportProvider->getMaxWeight();
+    
+        $transportProviders = $this->entityManager->getRepository(TransportProvider::class)->findAll();
+        $weightRanges = [];
+    
+        foreach ($transportProviders as $provider) {
+            $weightRanges[$provider->getId()] = $provider->getMaxWeight();
         }
+    
+        asort($weightRanges);
+    
+        $products = $this->entityManager->getRepository(Product::class)
+            ->createQueryBuilder('p')
+            ->leftJoin('p.weights', 'w')
+            ->addSelect('w')
+            ->getQuery()
+            ->getResult();
+    
+        $data = [];
+    
+        foreach ($products as $product) {
+            $weights = $product->getWeights();
+            $productWeights = [];
 
-        $this->entityManager->remove($provider);
-        $this->entityManager->flush();
+            foreach ($weights as $weight) {
+                $productWeights[] = $weight->getValue();
+            }
+    
+            $bestMatchProviderId = null;
+            foreach ($weightRanges as $providerId => $maxWeight) {
+                foreach ($productWeights as $productWeight) {
+                    if ($productWeight <= $maxWeight) {
+                        $bestMatchProviderId = $providerId;
+                        break 2;
+                    }
+                }
+            }
+    
+            if ($bestMatchProviderId === $id) {
+                $data[] = [
+                    'id' => $product->getId(),
+                    'name' => $product->getName(),
+                    'weights' => array_map(function($weight) {
+                        return $weight->getValue();
+                    }, $product->getWeights()->toArray()),
+                ];
+            }
+        }
+    
 
-        return new JsonResponse(['message' => 'Transporteur supprimé avec succès'], JsonResponse::HTTP_OK);
+        return new JsonResponse($data);
     }
+    
+    
+
+    
+    
+    
+
+
+
 }
