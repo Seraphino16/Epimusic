@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Alert from "../../Alerts/Alert";
 import { FaRegCreditCard } from "react-icons/fa";
 import CartButton from "../../Buttons/CartButton";
+import axios from "axios"; // Don't forget to import axios!
 
 const DeliveryHomePage = () => {
     const [alert, setAlert] = useState({ message: "", type: "error" });
@@ -19,11 +20,34 @@ const DeliveryHomePage = () => {
     const [postalCode, setPostalCode] = useState("");
     const [city, setCity] = useState("");
     const [country, setCountry] = useState("");
+    const [addresses, setAddresses] = useState([]);
     const [isPrimary, setIsPrimary] = useState(false);
     const [error, setError] = useState("");
     const [message, setMessage] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchAddresses = async () => {
+            const user = JSON.parse(localStorage.getItem("user"));
+            const userId = user.id;
+
+            try {
+                const response = await axios.get(
+                    `http://localhost:8000/api/user/${userId}/addresses`
+                );
+                setAddresses(response.data);
+            } catch (error) {
+                console.error(
+                    "Erreur lors de la récupération des adresses : ",
+                    error
+                );
+                setError("Erreur lors de la récupération des adresses.");
+            }
+        };
+
+        fetchAddresses();
+    }, []);
 
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem("user"));
@@ -51,6 +75,20 @@ const DeliveryHomePage = () => {
         setTotal(total);
     }, [cartPrice, shippingCosts]);
 
+    const handleAddressChange = (e) => {
+        const selectedAddress = addresses.find(
+            (address) => address.id === parseInt(e.target.value)
+        );
+        if (selectedAddress) {
+            setTelephone(selectedAddress.telephone);
+            setAddress(selectedAddress.address);
+            setComplement(selectedAddress.complement);
+            setPostalCode(selectedAddress.postalCode);
+            setCity(selectedAddress.city);
+            setCountry(selectedAddress.country);
+        }
+    };
+
     return (
         <div className="w-9/12 m-auto">
             <Alert message={alert.message} type={alert.type} />
@@ -65,6 +103,35 @@ const DeliveryHomePage = () => {
                         </p>
                         {message && <p className="success">{message}</p>}
                         {error && <p className="error">{error}</p>}
+
+                        <div className="md:flex items-center mt-4">
+                            <div className="w-full flex flex-col">
+                                <label
+                                    htmlFor="address-select"
+                                    className="text-gray-700"
+                                >
+                                    Sélectionnez une adresse
+                                </label>
+                                <select
+                                    id="address-select"
+                                    onChange={handleAddressChange}
+                                    className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-2 bg-gray-100 border rounded border-gray-200"
+                                >
+                                    <option value="">
+                                        Sélectionnez une adresse
+                                    </option>
+                                    {addresses.map((address) => (
+                                        <option
+                                            key={address.id}
+                                            value={address.id}
+                                        >
+                                            {address.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
                         <form>
                             <div className="md:flex items-center mt-4">
                                 <div className="w-full flex flex-col md:w-1/2">
