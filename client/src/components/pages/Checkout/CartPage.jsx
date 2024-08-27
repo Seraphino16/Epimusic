@@ -65,7 +65,7 @@ const CartPage = () => {
         setQuantity(q);
         setPromotionReduction(promoReduction);
 
-        localStorage.setItem('cart_price', t);
+        localStorage.setItem('cart_price', t - promoReduction);
         localStorage.setItem('cart_quantity', q);
         localStorage.setItem('cart_promo_total', promoReduction);
 
