@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useLocation } from "react-router-dom";
 import "tailwindcss/tailwind.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
@@ -10,6 +10,7 @@ import ProductFilter from "../Filtered/ProductFilter";
 
 const ProductList = () => {
     const { categoryId } = useParams();
+    const location = useLocation();
     const [products, setProducts] = useState([]);
     const [selectedColors, setSelectedColors] = useState({});
     const [selectedSizes, setSelectedSizes] = useState({});
@@ -34,12 +35,21 @@ const ProductList = () => {
     const [shouldApplyFilters, setShouldApplyFilters] = useState(false);
 
     useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const query = queryParams.get("query") || "";
+        setFilters((prevFilters) => ({
+            ...prevFilters,
+            search: query
+        }));
+    }, [location.search]);
+
+    useEffect(() => {
         applyFilters();
     }, [filters, products]);
 
     useEffect(() => {
         fetchProducts();
-    }, [categoryId]);
+    }, [categoryId, filters.search]);
 
     useEffect(() => {
         if (shouldApplyFilters) {
@@ -69,13 +79,15 @@ const ProductList = () => {
 
     const fetchProducts = async () => {
         try {
+            const queryParams = new URLSearchParams();
+            if (filters.search) {
+                queryParams.append('search', filters.search);  
+            }
             const response = await axios.get(
-                `http://localhost:8000/api/products/category/${categoryId}`
+                `http://localhost:8000/api/products/category/${categoryId}?${queryParams.toString()}`
             );
-          
-            setProducts(response.data);
-            console.log(products);
 
+            setProducts(response.data);
 
             const brandsSet = new Set();
             const colorsSet = new Set();
