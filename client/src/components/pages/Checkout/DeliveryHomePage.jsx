@@ -26,6 +26,16 @@ const DeliveryHomePage = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        // Récupérer les données de l'utilisateur depuis le localStorage
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (user) {
+            setFirstname(user.firstname);
+            setLastname(user.lastname);
+            setEmail(user.email);
+        }
+    }, []);
+
+    useEffect(() => {
         const cartPrice = localStorage.getItem("cart_price");
         setCartPrice(parseFloat(cartPrice));
         const shippingCosts = localStorage.getItem("cart_shipping_costs");
@@ -57,7 +67,7 @@ const DeliveryHomePage = () => {
                         {message && <p className="success">{message}</p>}
                         {error && <p className="error">{error}</p>}
                         <form>
-                        <div className="md:flex items-center mt-4">
+                            <div className="md:flex items-center mt-4">
                                 <div className="w-full flex flex-col md:w-1/2">
                                     <label
                                         htmlFor="lastname"
@@ -116,10 +126,11 @@ const DeliveryHomePage = () => {
                                         className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-2 bg-gray-100 border rounded border-gray-200"
                                     />
                                 </div>
-                            </div><div className="md:flex items-center mt-4">
+                            </div>
+                            <div className="md:flex items-center mt-4">
                                 <div className="w-full flex flex-col">
                                     <label
-                                        htmlFor="telephone"
+                                        htmlFor="email"
                                         className="text-gray-700"
                                     >
                                         Adresse e-mail
@@ -239,31 +250,40 @@ const DeliveryHomePage = () => {
                                     />
                                 </div>
                             </div>
-
-                            <div className="max-w-5xl mx-auto px-6 sm:px-6 lg:px-8 mt-12 mb-8">
-                                <div className="bg-white w-full shadow rounded p-8 sm:p-12">
-                                    <p className="text-3xl font-bold leading-7 text-center text-black">
-                                        Méthode de paiement
-                                    </p>
-                                    <div className="flex items-center mb-4 mt-6">
-                                        <FaRegCreditCard className="text-4xl mr-4" />
-                                        <input
-                                            type="radio"
-                                            name="paymentMethod"
-                                            className="h-4 w-4 border-gray-300 focus:ring-2 focus:ring-blue-300"
-                                        />
-                                        <p className="text-lg font-medium text-gray-900 ml-2 block">
-                                            Carte de crédit
-                                        </p>
-                                    </div>
-                                </div>
+                            <div className="md:flex items-center mt-4">
+                                <label className="text-gray-700 flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        checked={isPrimary}
+                                        onChange={(e) =>
+                                            setIsPrimary(e.target.checked)
+                                        }
+                                        className="form-checkbox h-4 w-4 text-blue-600"
+                                    />
+                                    <span className="ml-2">
+                                        Définir comme adresse principale
+                                    </span>
+                                </label>
                             </div>
-                            <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500 mt-4">
-                                Valider et passer à la suite
-                            </button>
+                            <div className="flex items-center justify-center w-full">
+                                <button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    className="mt-4 focus:outline-none transition duration-150 ease-in-out bg-blue-600 hover:bg-blue-700 rounded text-white px-8 py-2 text-sm"
+                                >
+                                    {isSubmitting ? "En cours..." : "Payer"}
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>
+            </div>
+            <div className="w-full flex justify-end">
+                <CartButton
+                    icon={<FaRegCreditCard />}
+                    price={total}
+                    label="Payer"
+                />
             </div>
         </div>
     );
