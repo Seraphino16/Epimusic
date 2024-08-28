@@ -20,9 +20,11 @@ import ProductAdminAddModel from './components/forms/ProductAdminAddModel';
 import ProductAdminEdit from './components/forms/ProductAdminEdit';
 import RhythmGame from './components/Game/RhythmGame';
 import ShippingPage from './components/pages/Checkout/ShippingPage';
+import { SearchProvider } from './context/SearchContext'; 
 
 const App = () => (
     <Router>
+        <SearchProvider>
         <BackgroundWrapper>
             <div className="flex flex-col min-h-screen">
                 <Navbar />
@@ -32,7 +34,9 @@ const App = () => (
                 <Footer />
             </div>
         </BackgroundWrapper>
+        </SearchProvider>
     </Router>
+    
 );
 
 const BackgroundWrapper = ({ children }) => {
@@ -65,6 +69,8 @@ const Content = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/products" element={<ProductCategoriesList />} />
                 <Route path="/products/:category/:categoryId" element={<ProductList />} />
+                <Route path="/products/:category/:categoryId/search" element={<ProductList />} />
+                <Route path="/products/search" element={<ProductList />} />
                 <Route
                     path="/admin/*"
                     element={

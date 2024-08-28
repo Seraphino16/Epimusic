@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useLocation } from "react-router-dom";
 import "tailwindcss/tailwind.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
@@ -10,6 +10,7 @@ import ProductFilter from "../Filtered/ProductFilter";
 
 const ProductList = () => {
     const { categoryId } = useParams();
+    const location = useLocation();
     const [products, setProducts] = useState([]);
     const [selectedColors, setSelectedColors] = useState({});
     const [selectedSizes, setSelectedSizes] = useState({});
@@ -34,12 +35,21 @@ const ProductList = () => {
     const [shouldApplyFilters, setShouldApplyFilters] = useState(false);
 
     useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const query = queryParams.get("query") || "";
+        setFilters((prevFilters) => ({
+            ...prevFilters,
+            search: query
+        }));
+    }, [location.search]);
+
+    useEffect(() => {
         applyFilters();
     }, [filters, products]);
 
     useEffect(() => {
         fetchProducts();
-    }, [categoryId]);
+    }, [categoryId, filters.search]);
 
     useEffect(() => {
         if (shouldApplyFilters) {
@@ -69,14 +79,15 @@ const ProductList = () => {
 
     const fetchProducts = async () => {
         try {
+            const queryParams = new URLSearchParams();
+            if (filters.search) {
+                queryParams.append('search', filters.search);  
+            }
             const response = await axios.get(
-                `http://localhost:8000/api/products/category/${categoryId}`
+                `http://localhost:8000/api/products/category/${categoryId}?${queryParams.toString()}`
             );
-            const uniqueProducts = Array.from(
-                new Set(response.data.map((product) => product.id))
-            ).map((id) => response.data.find((product) => product.id === id));
-            setProducts(uniqueProducts);
-            console.log(products);
+
+            setProducts(response.data);
 
             const brandsSet = new Set();
             const colorsSet = new Set();
@@ -84,7 +95,7 @@ const ProductList = () => {
             let highestPrice = 0;
             let highestWeight = 0;
 
-            uniqueProducts.forEach((product) => {
+            response.data.forEach((product) => {
                 product.brands.forEach((brand) => brandsSet.add(brand));
                 product.models.forEach((model) => {
                     if (model.color) colorsSet.add(model.color);
@@ -342,7 +353,9 @@ const ProductList = () => {
                                             <p className="line-clamp-3 mb-2">
                                                 {product.description}
                                             </p>
-
+                                            <p className="line-clamp-3 mb-2">
+                                               Poids : {product.weight}
+                                            </p>
                                             <div className="flex items-center justify-between">
                                                 <div className="flex-1">
                                                     <ProductColors

@@ -217,7 +217,7 @@ const ProductDetailsPage = () => {
                             color={filteredModel?.color}
                             size={`${filteredModel?.size || ''}`}
                             price={`${filteredModel?.price || ''}`}
-                            weight={`${filteredModel?.weight || ''}`}
+                            weight={`${product.weight || ''}`}
                             promotion={promotion}
                         />
                         <ProductColors

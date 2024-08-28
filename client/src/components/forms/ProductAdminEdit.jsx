@@ -51,7 +51,7 @@ const ProductAdminEdit = () => {
                 setBrand(productData.brand || "");
                 setTags(productData.tags || []);
                 setModels(productData.models || []);
-                setPhotoPaths(productData.photoPaths || []);
+                setWeight(productData.weight || "");
 
                 if (productData.models.length > 0) {
                     const firstModel = productData.models[0];
@@ -60,7 +60,6 @@ const ProductAdminEdit = () => {
                     setMainImageIndex(firstModel.images.findIndex((img) => img.is_main) || 0);
                     setColor(firstModel.color_id);
                     setSize(firstModel.size_id);
-                    setWeight(firstModel.weight || "");
                     setStock(firstModel.stock || 0);
                     setMainImageIndex(firstModel.images.findIndex((img) => img.is_main) || 0);
 
@@ -213,7 +212,6 @@ const ProductAdminEdit = () => {
             setMainImageIndex(model.images.findIndex((img) => img.is_main) || 0);
             setColor(model.color_id || "");
             setSize(model.size_id || "");
-            setWeight(model.weight || "");
             setStock(model.stock || 0);
         }
     };
@@ -257,7 +255,6 @@ const ProductAdminEdit = () => {
             color: model.color_id,
             size: model.size_id,
             stock: model.stock,
-            weight: model.weight,
             photoPaths: model.images.map((img) => img.path),
             mainImageIndex: model.images.findIndex((img) => img.is_main) || 0
         }));
@@ -287,7 +284,7 @@ const ProductAdminEdit = () => {
             }, 2000);
         } else {
             setTimeout(() => {
-                navigate("/admin/");
+                navigate("/admin/products");
             }, 2000);
         }
     } catch (error) {
@@ -429,7 +426,27 @@ const ProductAdminEdit = () => {
                             </div>
                         </div>
                     </div>
-
+                    <div className="md:flex items-center mt-8">
+                        <div className="w-full flex flex-col">
+                            <label
+                                className="font-semibold leading-none text-black"
+                                htmlFor="weight"
+                            >
+                                Poids
+                            </label>
+                            <input
+                                type="number"
+                                id="weight"
+                                placeholder="Entrez le poids du produit en Kg"
+                                value={weight}
+                                onChange={(e) => setWeight(e.target.value)}
+                                min="0"
+                                step="0.01"
+                                required
+                                className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
+                            />
+                        </div>
+                    </div>
                     
                     {models.length > 1 && (
                         <div className="flex items-center justify-center w-full mt-8">
@@ -529,28 +546,6 @@ const ProductAdminEdit = () => {
                                 value={price}
                                 onChange={(e) => setPrice(e.target.value)}
                                 min="0.01"
-                                step="0.01"
-                                required
-                                className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="md:flex items-center mt-8">
-                        <div className="w-full flex flex-col">
-                            <label
-                                className="font-semibold leading-none text-black"
-                                htmlFor="weight"
-                            >
-                                Poids
-                            </label>
-                            <input
-                                type="number"
-                                id="weight"
-                                placeholder="Entrez le poids du produit en Kg"
-                                value={weight}
-                                onChange={(e) => setWeight(e.target.value)}
-                                min="0"
                                 step="0.01"
                                 required
                                 className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
