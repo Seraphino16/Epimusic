@@ -97,6 +97,22 @@ class ProvidersController extends AbstractController
 
     }
 
+    #[Route('/provider/{id}', name: 'api_delete_provider', methods: ['DELETE'])]
+    public function deleteProvider(int $id): Response {
+
+        $provider = $this->providerRepository->find($id);
+
+        if (!$provider) {
+            return new JsonResponse(['error' => 'Transporteur non trouvé'], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        $this->entityManager->remove($provider);
+        $this->entityManager->flush();
+
+        return new JsonResponse(['message' => 'Transporteur supprimé avec succès'], JsonResponse::HTTP_OK);
+    }
+
+
     #[Route('/provider/{id}/products', name: 'api_provider_products', methods:['GET'])]
     public function getProductsForProvider(int $id): Response
     {

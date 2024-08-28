@@ -10,6 +10,7 @@ import ProductFilter from "../Filtered/ProductFilter";
 
 const ProductList = () => {
     const { categoryId } = useParams();
+    const { category } = useParams();
     const location = useLocation();
     const [products, setProducts] = useState([]);
     const [selectedColors, setSelectedColors] = useState({});
@@ -260,9 +261,17 @@ const ProductList = () => {
                     {alert}
                 </p>
             )}
-            <h1 className="text-center text-4xl font-bold my-4">
-                Liste des produits de la catégorie sélectionnée
-            </h1>
+            {category ? (
+                <h1 className="text-center text-4xl font-bold my-4">
+                    {category}
+                </h1>
+
+             ) : (
+                <h1 className="text-center text-4xl font-bold my-4">
+                    Tous les produits
+                </h1>
+             )}
+            
             <div className="flex">
                 <div className="w-1/4 min-w-[300px] h-screen top-0 p-4">
                     <ProductFilter
