@@ -32,9 +32,7 @@ const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
                     },
                 }
             )
-            .then((response) => {
-                return response.data.item;
-            })
+            .then((response) => response.data.item)
             .then((item) => {
                 setTotal(item.total);
                 setTotalPromotion(item.total_promotion);
@@ -47,6 +45,11 @@ const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
             })
             .catch((error) => console.log(error));
     };
+
+    const cartPrice = parseFloat(localStorage.getItem("cart_price")) || 0;
+    const cartPromoTotal =
+        parseFloat(localStorage.getItem("cart_promo_total")) || 0;
+    const priceDifference = cartPrice - cartPromoTotal;
 
     return (
         <div className="max-w-xl bg-white p-4 m-4 rounded-lg flex">
@@ -94,12 +97,14 @@ const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
                         )}
                     </div>
                 </div>
-                <div className="text-right flex items-center mt-3">
-                    <input type="checkbox" name="wrapping" />
-                    <p className="text-sm ml-3 font-medium text-gray-900">
-                        Expédier ce produit dans un emballage cadeau
-                    </p>
-                </div>
+                {item.category !== "Instrument" && priceDifference >= 15 && (
+                    <div className="text-right flex items-center mt-3">
+                        <input type="checkbox" name="wrapping" />
+                        <p className="text-sm ml-3 font-medium text-gray-900">
+                            Expédier ce produit dans un emballage cadeau
+                        </p>
+                    </div>
+                )}
             </div>
         </div>
     );
