@@ -2,12 +2,14 @@ import React, { useState, useEffect } from "react";
 import Alert from '../Alerts/Alert';
 import ProviderCreateModal from '../forms/ProviderCreateModal';
 import ProviderEditModal from '../forms/ProviderEditModal';
+import ProvidersProductsModal from "../Modals/ProvidersProductsModal";
 
 const ProvidersAdminList = () => {
     const [providers, setProviders] = useState([]);
     const [alert, setAlert] = useState({ type: '', message: '' });
     const [isProviderCreateModalOpen, setIsProviderCreateModalOpen] = useState(false);
     const [isProviderEditModalOpen, setIsProviderEditModalOpen] = useState(false);
+    const [isProvidersProductsModalOpen, setIsProvidersProductsModalOpen] = useState(false);
     const [selectedProviderId, setSelectedProviderId] = useState(null);
 
     const fetchProviders = async () => {
@@ -89,7 +91,15 @@ const ProvidersAdminList = () => {
                         {providers.map(provider => (
                             <tr key={provider.id}>
                                 <td className="px-4 py-2 border border-gray-200">{provider.id}</td>
-                                <td className="px-4 py-2 border border-gray-200 hover:underline"><a href="">{provider.name}</a></td>
+                                <td
+                                    className="px-4 py-2 border border-gray-200 hover:underline cursor-pointer"
+                                    onClick={() => {
+                                        setSelectedProviderId(provider.id);
+                                        setIsProvidersProductsModalOpen(true);
+                                    }}
+                                >
+                                    {provider.name}
+                                </td>
                                 <td className="px-4 py-2 border border-gray-200">{provider.EAN}</td>
                                 <td className="px-4 py-2 border border-gray-200">{provider.length}</td>
                                 <td className="px-4 py-2 border border-gray-200">{provider.width}</td>
@@ -127,6 +137,11 @@ const ProvidersAdminList = () => {
             <ProviderEditModal
                 isOpen={isProviderEditModalOpen}
                 onClose={() => setIsProviderEditModalOpen(false)}
+                providerId={selectedProviderId}
+            />
+            <ProvidersProductsModal
+                isOpen={isProvidersProductsModalOpen}
+                onClose={() => setIsProvidersProductsModalOpen(false)}
                 providerId={selectedProviderId}
             />
         </div>
