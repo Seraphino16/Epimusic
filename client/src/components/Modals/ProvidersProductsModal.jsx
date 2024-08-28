@@ -41,22 +41,28 @@ const ProvidersProductsModal = ({ isOpen, onClose, providerId }) => {
             <div className="bg-white p-6 rounded-lg z-10 w-full max-w-lg max-h-[90vh] overflow-y-auto">
                 <h2 className="text-xl font-bold mb-4">Produits éligibles</h2>
                 {alert.message && <Alert message={alert.message} type={alert.type} />}
-                <table className="min-w-full bg-white border border-gray-200">
-                    <thead>
-                        <tr>
-                            <th className="px-4 py-2 border border-gray-200 bg-gray-100">Nom du Produit</th>
-                            <th className="px-4 py-2 border border-gray-200 bg-gray-100">Poids (kg)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {products.map((product) => (
-                            <tr key={product.id}>
-                                <td className="px-4 py-2 border border-gray-200">{product.name}</td>
-                                <td className="px-4 py-2 border border-gray-200">{product.weights}</td>
+                
+                {products.length > 0 ? (
+                    <table className="min-w-full bg-white border border-gray-200">
+                        <thead>
+                            <tr>
+                                <th className="px-4 py-2 border border-gray-200 bg-gray-100">Nom du Produit</th>
+                                <th className="px-4 py-2 border border-gray-200 bg-gray-100">Poids (kg)</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {products.map((product) => (
+                                <tr key={product.id}>
+                                    <td className="px-4 py-2 border border-gray-200">{product.name}</td>
+                                    <td className="px-4 py-2 border border-gray-200">{product.weights}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                ) : (
+                    <p className="text-center text-red-500 font-bold">Aucun produit trouvé</p>
+                )}
+    
                 <div className="flex justify-end mt-4">
                     <button
                         type="button"
@@ -69,6 +75,7 @@ const ProvidersProductsModal = ({ isOpen, onClose, providerId }) => {
             </div>
         </div>
     );
+    
 };
 
 export default ProvidersProductsModal;

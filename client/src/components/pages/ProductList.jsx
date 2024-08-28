@@ -9,8 +9,8 @@ import ProductSizes from "../ProductDetails/ProductSizes";
 import ProductFilter from "../Filtered/ProductFilter";
 
 const ProductList = () => {
-    const { categoryId } = useParams();
-    const { category } = useParams();
+    const { categoryId, category } = useParams();
+    const formattedCategory = formatCategory(category);
     const location = useLocation();
     const [products, setProducts] = useState([]);
     const [selectedColors, setSelectedColors] = useState({});
@@ -25,6 +25,7 @@ const ProductList = () => {
         sizes: [],
         priceRange: [0, 1150],
         weightRange: [0, 50],
+        categories: []
     });
 
     const [availableFilterBrands, setAvailableBrands] = useState([]);
@@ -32,8 +33,27 @@ const ProductList = () => {
     const [availableFilterSizes, setAvailableSizes] = useState([]);
     const [maxPrice, setMaxPrice] = useState(1150);
     const [maxWeight, setMaxWeight] = useState(50);
+    const [availableFilterCategories, setAvailableCategories] = useState([]);
 
     const [shouldApplyFilters, setShouldApplyFilters] = useState(false);
+
+    function formatCategory(category) {
+        if (!category) {
+            return '';
+        }
+    
+        let formatted = category.toLowerCase().trim();
+    
+        if (formatted.length > 0) {
+            formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+        }
+    
+        if (!formatted.endsWith('s')) {
+            formatted += 's';
+        }
+    
+        return formatted;
+    }
 
     useEffect(() => {
         const queryParams = new URLSearchParams(location.search);
@@ -93,12 +113,15 @@ const ProductList = () => {
             const brandsSet = new Set();
             const colorsSet = new Set();
             const sizesSet = new Set();
+            const categoriesSet = new Set();
             let highestPrice = 0;
             let highestWeight = 0;
 
             response.data.forEach((product) => {
                 product.brands.forEach((brand) => brandsSet.add(brand));
+                categoriesSet.add(product.category);
                 product.models.forEach((model) => {
+                    if (model.size) sizesSet.add(model.size);
                     if (model.color) colorsSet.add(model.color);
                     if (model.size) sizesSet.add(model.size);
                     if (model.price > highestPrice)
@@ -111,6 +134,7 @@ const ProductList = () => {
             setAvailableBrands(Array.from(brandsSet));
             setAvailableColors(Array.from(colorsSet));
             setAvailableSizes(Array.from(sizesSet));
+            setAvailableCategories(Array.from(categoriesSet));
             setMaxPrice(highestPrice);
             setMaxWeight(highestWeight);
 
@@ -130,7 +154,7 @@ const ProductList = () => {
 
     const applyFilters = () => {
         let filtered = products;
-
+     
         if (filters.brands.length > 0) {
             filtered = filtered.filter((product) =>
                 filters.brands.some((brand) => product.brands.includes(brand))
@@ -173,7 +197,36 @@ const ProductList = () => {
             );
         }
 
+        if (filters.categories.length > 0) {
+            filtered = filtered.filter((product) => 
+                filters.categories.includes(product.category)
+            );
+        }
+
+        if (category === undefined) {
+            updateAvailableFilters(filtered);
+        }
+        
+
         setFilteredProducts(filtered);
+    };
+
+    const updateAvailableFilters = (filteredProducts) => {
+        const brandsSet = new Set();
+        const colorsSet = new Set();
+        const sizesSet = new Set();
+    
+        filteredProducts.forEach((product) => {
+            product.brands.forEach((brand) => brandsSet.add(brand));
+            product.models.forEach((model) => {
+                if (model.size) sizesSet.add(model.size);
+                if (model.color) colorsSet.add(model.color);
+            });
+        });
+    
+        setAvailableBrands(Array.from(brandsSet));
+        setAvailableColors(Array.from(colorsSet));
+        setAvailableSizes(Array.from(sizesSet));
     };
 
     const handleColorSelect = (productId, color) => {
@@ -261,9 +314,9 @@ const ProductList = () => {
                     {alert}
                 </p>
             )}
-            {category ? (
+            {formattedCategory ? (
                 <h1 className="text-center text-4xl font-bold my-4">
-                    {category}
+                    {formattedCategory}
                 </h1>
 
              ) : (
@@ -275,6 +328,7 @@ const ProductList = () => {
             <div className="flex">
                 <div className="w-1/4 min-w-[300px] h-screen top-0 p-4">
                     <ProductFilter
+                        categories={availableFilterCategories}
                         brands={availableFilterBrands}
                         colors={availableFilterColors}
                         sizes={availableFilterSizes}
@@ -359,6 +413,11 @@ const ProductList = () => {
                                             <h2 className="text-lg font-bold mb-2 line-clamp-1">
                                                 {product.name}
                                             </h2>
+                                            {!formattedCategory && (
+                                                <p className="line-clamp-3 mb-2">
+                                                    Catégorie : {product.category}
+                                                </p>
+                                            )}
                                             <p className="line-clamp-3 mb-2">
                                                 {product.description}
                                             </p>

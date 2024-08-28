@@ -114,9 +114,6 @@ const ProvidersAdminList = () => {
                     <thead>
                         <tr>
                             <th className="px-4 py-2 border border-gray-200 bg-gray-100">
-                                ID
-                            </th>
-                            <th className="px-4 py-2 border border-gray-200 bg-gray-100">
                                 Nom
                             </th>
                             <th className="px-4 py-2 border border-gray-200 bg-gray-100">
@@ -145,9 +142,6 @@ const ProvidersAdminList = () => {
                     <tbody>
                         {providers.map((provider) => (
                             <tr key={provider.id}>
-                                <td className="px-4 py-2 border border-gray-200">
-                                    {provider.id}
-                                </td>
                                 <td
                                     className="px-4 py-2 border border-gray-200 hover:underline cursor-pointer"
                                     onClick={() => {
