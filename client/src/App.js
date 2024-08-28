@@ -20,6 +20,7 @@ import ProductAdminAddModel from './components/forms/ProductAdminAddModel';
 import ProductAdminEdit from './components/forms/ProductAdminEdit';
 import RhythmGame from './components/Game/RhythmGame';
 import ShippingPage from './components/pages/Checkout/ShippingPage';
+import StockManagementPage from './components/pages/StockManagementPage';
 import { SearchProvider } from './context/SearchContext'; 
 
 const App = () => (
@@ -117,7 +118,8 @@ const Content = () => {
                     element={<ProductDetailsPage />}
                 />
                 <Route path="/cart" element={<CartPage />} />
-                <Route
+                {/* <Route path="/admin/stock-management" element={<StockManagementPage />} /> */}
+        <Route
                     path="/filters"
                     element={<FilteredArticles />}
                 />

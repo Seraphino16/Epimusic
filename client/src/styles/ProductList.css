@@ -12,3 +12,12 @@
     position: absolute;
     max-width: none;
 }
+
+/* client/src/styles/ProductList.css */
+.out-of-stock-bar {
+    background-color: red;
+}
+
+.restocking-bar {
+    background-color: yellow;
+}

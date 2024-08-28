@@ -9,6 +9,7 @@ const AdminTabs = () => {
         { name: "Produits", path: "/admin/products" },
         { name: "Livraison", path: "/admin/orders" },
         { name: "Catégories", path: "/admin/categories" },
+        { name: "Réapprovisionnement", path: "/admin/stock-management" }
         { name: "Prestataires", path: "/admin/providers" }
     ];
 

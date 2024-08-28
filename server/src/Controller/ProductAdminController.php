@@ -767,5 +767,42 @@ public function update(Request $request, Product $product, EntityManagerInterfac
     }
     
 
+#[Route('/api/admin/products/replenish', name: 'api_replenish_products', methods: ['POST'])]
+public function replenishProducts(Request $request, EntityManagerInterface $entityManager): JsonResponse
+{
+    $data = json_decode($request->getContent(), true);
+    
+    if (!isset($data['products']) || !is_array($data['products'])) {
+        return new JsonResponse(['error' => 'Invalid data'], 400);
+    }
+    
+    foreach ($data['products'] as $productData) {
+        $product = $entityManager->getRepository(Product::class)->find($productData['id']);
+        if (!$product) {
+            continue; 
+        }
+        
+        foreach ($productData['models'] as $modelData) {
+            $model = $entityManager->getRepository(Model::class)->find($modelData['model_id']);
+            if ($model) {
+                $stock = $entityManager->getRepository(Stock::class)->findOneBy([
+                    'product' => $product,
+                    'color' => $model->getColor(),
+                    'size' => $model->getSize()
+                ]);
+                if ($stock) {
+                    $stock->setQuantity($modelData['stock']);
+                    $entityManager->persist($stock);
+                }
+            }
+        }
+    }
+    
+    $entityManager->flush();
+
+    return new JsonResponse(['status' => 'Stock updated successfully'], 200);
+}
+
+
 
 }
