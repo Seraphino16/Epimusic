@@ -62,7 +62,7 @@ const ProvidersAdminList = () => {
 
     return (
         <div className="container mx-auto px-4">
-            <h2 className="text-2xl font-bold my-4">Liste des Prestataires</h2>
+            <h2 className="text-2xl font-bold my-4">Liste des Prestataires (Cliquez sur les noms des prestataires pour voir les produits éligibles)</h2>
             <button
                 onClick={() => setIsProviderCreateModalOpen(true)}
                 className="mb-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
@@ -89,7 +89,7 @@ const ProvidersAdminList = () => {
                         {providers.map(provider => (
                             <tr key={provider.id}>
                                 <td className="px-4 py-2 border border-gray-200">{provider.id}</td>
-                                <td className="px-4 py-2 border border-gray-200">{provider.name}</td>
+                                <td className="px-4 py-2 border border-gray-200 hover:underline"><a href="">{provider.name}</a></td>
                                 <td className="px-4 py-2 border border-gray-200">{provider.EAN}</td>
                                 <td className="px-4 py-2 border border-gray-200">{provider.length}</td>
                                 <td className="px-4 py-2 border border-gray-200">{provider.width}</td>
