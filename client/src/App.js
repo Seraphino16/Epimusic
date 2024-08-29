@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import './App.css';
 import HomePage from './components/pages/HomePage';
 import ProductAdminForm from './components/forms/ProductAdminForm';
 import Register from './components/AuthForms/Register';
@@ -10,7 +11,6 @@ import ProductDetailsPage from './components/pages/ProductDetailsPage';
 import ProductCategoriesList from "./components/pages/ProductCategoriesList";
 import ProductList from "./components/pages/ProductList";
 import bgAuth from "./assets/bg-auth.png";
-import './App.css';
 import FilteredArticles from './components/Filtered/FilteredArticles';
 import AdminPanel from './components/pages/AdminPanel';
 import UserProfile from './components/user/UserProfile';
@@ -119,7 +119,7 @@ const Content = () => {
                     element={<ProductDetailsPage />}
                 />
                 <Route path="/cart" element={<CartPage />} />
-                <Route path="/admin/stock-management" element={<StockManagementPage />} />
+                {/* <Route path="/admin/stock-management" element={<StockManagementPage />} /> */}
                 <Route
                     path="/filters"
                     element={<FilteredArticles />}
