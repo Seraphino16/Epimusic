@@ -96,27 +96,34 @@ const CartPage = () => {
             console.log('Pas de user ou de token');
             return;
         }
+        
+        axios.post("/api/order/", {
+            userId: userId,
+            token: cartToken
+        })
+        .then(response => console.log(response.data))
+        .catch(error => console.log(error.message));
 
-        axios.get("/api/shipping/cost", { //localhost
-            params: {
-                userId: userId,
-                token: cartToken
-            }
-        })
-        .then((response) => {
-            return response.data;
-        })
-        .then((data) => {
-            console.log(data.shippingCosts);
-            localStorage.setItem("cart_shipping_costs", data.shippingCosts);
-            window.location.href = "/delivery";
-        })
-        .catch((error) => {
-            if (error.response) {
-                console.log(error.response.data.message);
-                setAlert({ message: error.response.data.message, type: "error" })
-            }
-        })        
+        // axios.get("/api/shipping/cost", { //localhost
+        //     params: {
+        //         userId: userId,
+        //         token: cartToken
+        //     }
+        // })
+        // .then((response) => {
+        //     return response.data;
+        // })
+        // .then((data) => {
+        //     console.log(data.shippingCosts);
+        //     localStorage.setItem("cart_shipping_costs", data.shippingCosts);
+        //     // window.location.href = "/delivery";
+        // })
+        // .catch((error) => {
+        //     if (error.response) {
+        //         console.log(error.response.data.message);
+        //         setAlert({ message: error.response.data.message, type: "error" })
+        //     }
+        // })        
     }
 
     return (

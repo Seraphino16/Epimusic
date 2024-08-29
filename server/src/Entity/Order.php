@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\OrderRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
 #[ORM\Table(name: '`order`')]
@@ -17,7 +19,7 @@ class Order
     #[ORM\Column(type: 'float')]
     private $totalPrice;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $paymentMethod;
 
     #[ORM\Column(type: 'string', length: 255)]
@@ -32,10 +34,10 @@ class Order
     #[ORM\Column(type: 'datetime')]
     private $updatedAt;
 
-    #[ORM\OneToMany(mappedBy: 'order', targetEntity: OrderItems::class)]
+    #[ORM\OneToMany(mappedBy: 'order', targetEntity: OrderItems::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private $orderItems;
 
-    #[ORM\OneToOne(mappedBy: 'order', targetEntity: OrderAddress::class)]
+    #[ORM\OneToOne(mappedBy: 'order', targetEntity: OrderAddress::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private $orderAddress;
 
     public function getId(): ?int
