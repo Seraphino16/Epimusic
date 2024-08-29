@@ -3,7 +3,7 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import NavbarItem from "./NavbarItem";
 import SearchBar from "./SearchBar";
 import logo from "../../assets/logo.png";
-import { FaUserTie, FaUser, FaShoppingCart } from "react-icons/fa";
+import { FaUserTie, FaUser, FaShoppingCart, FaGamepad } from "react-icons/fa";
 import { IoLogInOutline } from "react-icons/io5";
 
 const Navbar = () => {
@@ -40,6 +40,11 @@ const Navbar = () => {
                     <img src={logo} alt="Logo" className="w-16 h-16 mr-2" />
                 </Link>
             </div>
+            {userRole === "ROLE_USER" && (
+                <div className="pt-2 ml-4 pl-4">
+                    <NavbarItem icon={<FaGamepad size={24} />} text="Jouer au jeu de rythme" href="/rhythm-game" />
+                </div>
+            )}
             <div className="block lg:hidden">
                 <button
                     onClick={() => setIsOpen(!isOpen)}
@@ -66,7 +71,7 @@ const Navbar = () => {
                         <NavbarItem text="Produits" href="/products" />
                     </div>
                     {userRole === "ROLE_ADMIN" && (
-                        <NavbarItem icon={<FaUserTie size={24} />} href="/admin/user-card" />
+                        <NavbarItem icon={<FaUserTie size={24}/>} href="/admin/user-card" />
                     )}
                     {userRole === "ROLE_USER" && (
                         <NavbarItem icon={<FaUser size={24} />} href="/profile/user-card" />

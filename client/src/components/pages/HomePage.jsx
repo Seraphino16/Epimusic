@@ -54,21 +54,8 @@ const HomePage = () => {
             {message && <p className="success">{message}</p>}
             {error && <p className="error">{error}</p>}
             <HomeCarousel images={imagesToDisplay}/>
-            <Link to="/rhythm-game">
-                <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500 mt-4">
-                    Jouer au jeu de rythme
-                </button>
-            </Link>
             <div className="flex flex-wrap justify-center">
                 {error && <p className="text-red-500">{error}</p>}
-                {categories.map((category) => (
-                    <CategoryCard
-                        key={category.id}
-                        imageSrc={`http://localhost:8000${category.imagePath}`}
-                        categoryName={category.name}
-                        categoryId={category.id}
-                    />
-                ))}
             </div>
         </div>
     );
