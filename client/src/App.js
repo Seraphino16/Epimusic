@@ -20,6 +20,7 @@ import ProductAdminAddModel from './components/forms/ProductAdminAddModel';
 import ProductAdminEdit from './components/forms/ProductAdminEdit';
 import RhythmGame from './components/Game/RhythmGame';
 import ShippingPage from './components/pages/Checkout/ShippingPage';
+import DeliveryHomePage from './components/pages/Checkout/DeliveryHomePage';
 import StockManagementPage from './components/pages/StockManagementPage';
 import { SearchProvider } from './context/SearchContext'; 
 
@@ -124,6 +125,7 @@ const Content = () => {
                     element={<FilteredArticles />}
                 />
                 <Route path='/delivery' element={<ShippingPage />} />
+                <Route path='/delivery/home-delivery' element={<DeliveryHomePage />} />
                 <Route path="/rhythm-game" element={<RhythmGame />} />
             </Routes>
         </div>
