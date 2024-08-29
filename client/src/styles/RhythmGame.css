@@ -114,7 +114,7 @@
         transform: translateY(600px);
     }
     to {
-        transform: translateY(15px);
+        transform: translateY(-50px);
     }
 }
 
@@ -126,6 +126,36 @@
     font-size: 1.5rem;
 }
 
+@keyframes successMessage {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+@keyframes missMessage {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
 .validation-message {
     position: absolute;
     top: 30%;
@@ -134,12 +164,58 @@
     font-size: 2rem;
     font-weight: bold;
     z-index: 10;
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
 }
 
 .validation-message.success {
     color: green; /* Vert pour les succès */
+    animation-name: successMessage;
 }
 
 .validation-message.miss {
     color: red; /* Rouge pour les échecs */
+    animation-name: missMessage;
+}
+
+.transparent {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.start-button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    margin: 15px 0;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.start-button:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+}
+
+.start-button:active {
+    background-color: #3e8e41;
+    transform: scale(1);
+}
+
+.countdown {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 5rem;
+    font-weight: bold;
+    color: #f31717;
+    z-index: 20;
+    animation: countdownAnimation 1s ease-out forwards;
 }

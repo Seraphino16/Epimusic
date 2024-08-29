@@ -85,7 +85,6 @@ public function getProducts(EntityManagerInterface $entityManager): JsonResponse
                 'price' => $model->getPrice(),
                 'promo_price' => $promoPrice,
                 'images' => $images,
-                'weight' => $model->getWeight(),
                 'stock' => $quantity,
             ];
         }
@@ -161,7 +160,6 @@ public function getProducts(EntityManagerInterface $entityManager): JsonResponse
         if ($color) $model->setColor($color);
         if ($size) $model->setSize($size);
         $model->setPrice($data['price']);
-        $model->setWeight($data['weight']);
 
         $entityManager->persist($model);
 
@@ -311,7 +309,6 @@ public function getProducts(EntityManagerInterface $entityManager): JsonResponse
                 'size_id' => $model->getSize() ? $model->getSize()->getId() : null,
                 'price' => $model->getPrice(),
                 'images' => $images,
-                'weight' => $model->getWeight(),
                 'stock' => $quantity
             ];
         
@@ -322,6 +319,7 @@ public function getProducts(EntityManagerInterface $entityManager): JsonResponse
             'name' => $product->getName(),
             'description' => $product->getDescription(),
             'category' => $categoryData,
+            'weight' => $product->getWeights()->first()?->getValue() ?? 0,
             'models' => $models,
             'promotions' => $promoDetails,
         ];
@@ -343,6 +341,19 @@ public function update(Request $request, Product $product, EntityManagerInterfac
     $product->setName($data['name']);
     $product->setDescription($data['description']);
     $product->setCategory($category);
+    if ($data['weight'] < 0) {
+        return new JsonResponse(['error' => 'Le poids ne peut pas être négatifs !'], 400);
+    }
+
+    $weight = $entityManager->getRepository(Weight::class)->findOneBy(['product' => $product]);
+    if ($weight) {
+        $weight->setValue($data['weight']);
+    } else {
+        $weight = new Weight();
+        $weight->setValue($data['weight']);
+        $weight->setProduct($product);
+        $entityManager->persist($weight);
+    }
 
     // Assurez-vous d'obtenir tous les modèles existants
     $existingModels = $product->getModels();
@@ -353,14 +364,13 @@ public function update(Request $request, Product $product, EntityManagerInterfac
     foreach ($data['models'] as $index => $modelData) {
         if (!isset($modelData['price']) ||
             !isset($modelData['stock']) ||
-            !isset($modelData['weight']) ||
             !isset($modelData['photoPaths']) ||
             !isset($modelData['mainImageIndex'])) {
             return new JsonResponse(['error' => 'Invalid model data'], 400);
         }
 
-        if ($modelData['price'] <= 0 || $modelData['stock'] < 0 || $modelData['weight'] < 0) {
-            return new JsonResponse(['error' => 'Le prix doit être supérieur à zéro, le stock et le poids ne peuvent pas être négatifs !'], 400);
+        if ($modelData['price'] <= 0 || $modelData['stock'] < 0) {
+            return new JsonResponse(['error' => 'Le prix doit être supérieur à zéro et le stock ne peut pas être négatifs !'], 400);
         }
 
         // Trouver ou créer le modèle
@@ -375,7 +385,6 @@ public function update(Request $request, Product $product, EntityManagerInterfac
         $model->setColor($color);
         $model->setSize($size);
         $model->setPrice($modelData['price']);
-        $model->setWeight($modelData['weight']);
 
         // Gestion des images
         foreach ($model->getImage() as $image) {
@@ -474,15 +483,7 @@ public function update(Request $request, Product $product, EntityManagerInterfac
     }
 
     // Gérer le poids
-    $weight = $entityManager->getRepository(Weight::class)->findOneBy(['product' => $product]);
-    if ($weight) {
-        $weight->setValue($data['weight']);
-    } else {
-        $weight = new Weight();
-        $weight->setValue($data['weight']);
-        $weight->setProduct($product);
-        $entityManager->persist($weight);
-    }
+
 
     $entityManager->persist($product);
     $entityManager->flush();
@@ -528,7 +529,7 @@ public function update(Request $request, Product $product, EntityManagerInterfac
             }
 
             if ($data['price'] <= 0 || $data['stock'] < 0) {
-                return new JsonResponse(['error' => 'Le prix doit être supérieur à zéro, le stock et le poids ne peuvent pas être négatifs !'], Response::HTTP_BAD_REQUEST);
+                return new JsonResponse(['error' => 'Le prix doit être supérieur à zéro et le stock ne peut pas être négatifs !'], Response::HTTP_BAD_REQUEST);
             }
 
             $productId = $data['productId'];
@@ -563,7 +564,6 @@ public function update(Request $request, Product $product, EntityManagerInterfac
             if ($color) $model->setColor($color);
             if ($size) $model->setSize($size);
             $model->setPrice($data['price']);
-            $model->setWeight($data['weight']);
 
             $product->addModel($model);
             $entityManager->persist($model);
@@ -766,6 +766,43 @@ public function update(Request $request, Product $product, EntityManagerInterfac
         ]);
     }
     
+
+#[Route('/api/admin/products/replenish', name: 'api_replenish_products', methods: ['POST'])]
+public function replenishProducts(Request $request, EntityManagerInterface $entityManager): JsonResponse
+{
+    $data = json_decode($request->getContent(), true);
+    
+    if (!isset($data['products']) || !is_array($data['products'])) {
+        return new JsonResponse(['error' => 'Invalid data'], 400);
+    }
+    
+    foreach ($data['products'] as $productData) {
+        $product = $entityManager->getRepository(Product::class)->find($productData['id']);
+        if (!$product) {
+            continue; 
+        }
+        
+        foreach ($productData['models'] as $modelData) {
+            $model = $entityManager->getRepository(Model::class)->find($modelData['model_id']);
+            if ($model) {
+                $stock = $entityManager->getRepository(Stock::class)->findOneBy([
+                    'product' => $product,
+                    'color' => $model->getColor(),
+                    'size' => $model->getSize()
+                ]);
+                if ($stock) {
+                    $stock->setQuantity($modelData['stock']);
+                    $entityManager->persist($stock);
+                }
+            }
+        }
+    }
+    
+    $entityManager->flush();
+
+    return new JsonResponse(['status' => 'Stock updated successfully'], 200);
+}
+
 
 
 }

@@ -225,7 +225,7 @@ const ProductAdminList = () => {
                                     {filteredModel.stock > 0 && filteredModel.stock <= 5 ? (
                                         <>
                                             <p>Stock : {filteredModel.stock}</p>
-                                            <p className="text-yellow-500">Réapprovisionnement</p>
+                                            <p className="text-yellow-500">Bientôt épuisé</p>
                                         </>
                                     ) : filteredModel.stock > 5 ? (
                                         <>

@@ -12,7 +12,6 @@ const ProductAdminAddModel = () => {
     const [size, setSize] = useState("");
     const [price, setPrice] = useState("");
     const [stock, setStock] = useState("");
-    const [weight, setWeight] = useState("");
     const [photoFiles, setPhotoFiles] = useState([]);
     const [mainImageIndex, setMainImageIndex] = useState(0);
     const [colors, setColors] = useState([]);
@@ -137,7 +136,6 @@ const ProductAdminAddModel = () => {
                 size,
                 price: parseFloat(price.replace(",", ".")),
                 stock: parseInt(stock, 10),
-                weight: parseFloat(weight.replace(",", ".")),
                 mainImageIndex,
                 photoPaths: uploadedPhotos,
             };
@@ -282,25 +280,6 @@ const ProductAdminAddModel = () => {
                                     value={stock}
                                     onChange={(e) => setStock(e.target.value)}
                                     min="0"
-                                    required
-                                    className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
-                                />
-                            </div>
-                        </div>
-                        <div className="md:flex items-center mt-8">
-                            <div className="w-full flex flex-col">
-                                <label
-                                    className="font-semibold leading-none text-black"
-                                    htmlFor="weight"
-                                >
-                                    Poids
-                                </label>
-                                <input
-                                    type="text"
-                                    id="weight"
-                                    placeholder="Entrez le poids du produit"
-                                    value={weight}
-                                    onChange={(e) => setWeight(e.target.value)}
                                     required
                                     className="leading-none text-gray-900 p-3 focus:outline-none focus:border-blue-700 mt-4 bg-gray-100 border rounded border-gray-200"
                                 />

@@ -132,7 +132,6 @@ class ProductController extends AbstractController
                 'size' => $model->getSize() ? $model->getSize()->getValue() : null,
                 'price' => $model->getPrice(),
                 'images' => $images,
-                'weight' => $model->getWeight(),
                 'stock' => $quantity
             ];
         
@@ -156,6 +155,7 @@ class ProductController extends AbstractController
             'name' => $product->getName(),
             'description' => $product->getDescription(),
             'category' => $categoryData,
+            'weight' => $product->getWeights()->first()?->getValue() ?? 0,
             'models' => $models,
             'reviews' => $reviews,
             'promotions' => $promoDetails,
@@ -179,10 +179,13 @@ public function productsByCategory(EntityManagerInterface $entityManager, Reques
         ->from(Product::class, 'p')
         ->leftJoin('p.models', 'm')
         ->leftJoin('m.color', 'c')
-        ->leftJoin('m.size', 's')
-        ->where('p.category = :category')
-        ->setParameter('category', $categoryId);
+        ->leftJoin('m.size', 's');
         
+    if ($categoryId !== null && $categoryId !== '' && $categoryId !== 'undefined') {
+        $queryBuilder->where('p.category = :category')
+                    ->setParameter('category', $categoryId);
+    }
+
     if ($filters['search']) {
         $queryBuilder->andWhere('p.name LIKE :search')
             ->setParameter('search', '%' . $filters['search'] . '%');
@@ -289,6 +292,7 @@ public function productsByCategory(EntityManagerInterface $entityManager, Reques
             'models' => $models,
             'brands' => $brands,
             'tags' => $tags,
+            'weight' => $product->getWeights()->first()?->getValue() ?? 0,
             'promotions' => $promoDetails,
         ];
     }

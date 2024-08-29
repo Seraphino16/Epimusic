@@ -42,12 +42,11 @@ class TransportController extends AbstractController
     }
 
     public function calculatePackageCost($model)
-    {
+    {   
+        $product = $model["model"]->getProduct();
         $size = $model["model"]->getSize();
         
-        if (!$size) {
-            return false;
-        }
+        if ($size) {
 
         $modelDimensions = $size->getDimension();
         $quantity = $model["quantity"];
@@ -69,6 +68,26 @@ class TransportController extends AbstractController
                     $permutation["height"] <= $provider->getHeight()
                 ) {
                     $total = $provider->getPrice() * $quantity;
+                    $formattedTotal = number_format((float)$total, 2, '.', '');
+                    return $formattedTotal;
+                }
+            }
+        }
+
+        } else {
+            $weights = $product->getWeights();
+
+            if ($weights->count() > 0) {
+                $weight = $weights->first();
+                $quantity = $model['quantity'];
+                $totalWeight = $weight->getValue();
+
+                $providers = $this->providerRepository->findAllProviders();
+
+                foreach ($providers as $provider) {
+
+                    $costPerKg = $provider->getPrice();
+                    $total = $totalWeight * $quantity * $costPerKg;
                     $formattedTotal = number_format((float)$total, 2, '.', '');
                     return $formattedTotal;
                 }

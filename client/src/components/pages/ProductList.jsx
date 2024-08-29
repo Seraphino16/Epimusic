@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useLocation } from "react-router-dom";
 import "tailwindcss/tailwind.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
@@ -9,7 +9,9 @@ import ProductSizes from "../ProductDetails/ProductSizes";
 import ProductFilter from "../Filtered/ProductFilter";
 
 const ProductList = () => {
-    const { categoryId } = useParams();
+    const { categoryId, category } = useParams();
+    const formattedCategory = formatCategory(category);
+    const location = useLocation();
     const [products, setProducts] = useState([]);
     const [selectedColors, setSelectedColors] = useState({});
     const [selectedSizes, setSelectedSizes] = useState({});
@@ -23,6 +25,7 @@ const ProductList = () => {
         sizes: [],
         priceRange: [0, 1150],
         weightRange: [0, 50],
+        categories: []
     });
 
     const [availableFilterBrands, setAvailableBrands] = useState([]);
@@ -30,8 +33,36 @@ const ProductList = () => {
     const [availableFilterSizes, setAvailableSizes] = useState([]);
     const [maxPrice, setMaxPrice] = useState(1150);
     const [maxWeight, setMaxWeight] = useState(50);
+    const [availableFilterCategories, setAvailableCategories] = useState([]);
 
     const [shouldApplyFilters, setShouldApplyFilters] = useState(false);
+
+    function formatCategory(category) {
+        if (!category) {
+            return '';
+        }
+    
+        let formatted = category.toLowerCase().trim();
+    
+        if (formatted.length > 0) {
+            formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+        }
+    
+        if (!formatted.endsWith('s')) {
+            formatted += 's';
+        }
+    
+        return formatted;
+    }
+
+    useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const query = queryParams.get("query") || "";
+        setFilters((prevFilters) => ({
+            ...prevFilters,
+            search: query
+        }));
+    }, [location.search]);
 
     useEffect(() => {
         applyFilters();
@@ -39,7 +70,7 @@ const ProductList = () => {
 
     useEffect(() => {
         fetchProducts();
-    }, [categoryId]);
+    }, [categoryId, filters.search]);
 
     useEffect(() => {
         if (shouldApplyFilters) {
@@ -69,24 +100,28 @@ const ProductList = () => {
 
     const fetchProducts = async () => {
         try {
+            const queryParams = new URLSearchParams();
+            if (filters.search) {
+                queryParams.append('search', filters.search);  
+            }
             const response = await axios.get(
-                `http://localhost:8000/api/products/category/${categoryId}`
+                `http://localhost:8000/api/products/category/${categoryId}?${queryParams.toString()}`
             );
-            const uniqueProducts = Array.from(
-                new Set(response.data.map((product) => product.id))
-            ).map((id) => response.data.find((product) => product.id === id));
-            setProducts(uniqueProducts);
-            console.log(products);
+
+            setProducts(response.data);
 
             const brandsSet = new Set();
             const colorsSet = new Set();
             const sizesSet = new Set();
+            const categoriesSet = new Set();
             let highestPrice = 0;
             let highestWeight = 0;
 
-            uniqueProducts.forEach((product) => {
+            response.data.forEach((product) => {
                 product.brands.forEach((brand) => brandsSet.add(brand));
+                categoriesSet.add(product.category);
                 product.models.forEach((model) => {
+                    if (model.size) sizesSet.add(model.size);
                     if (model.color) colorsSet.add(model.color);
                     if (model.size) sizesSet.add(model.size);
                     if (model.price > highestPrice)
@@ -99,6 +134,7 @@ const ProductList = () => {
             setAvailableBrands(Array.from(brandsSet));
             setAvailableColors(Array.from(colorsSet));
             setAvailableSizes(Array.from(sizesSet));
+            setAvailableCategories(Array.from(categoriesSet));
             setMaxPrice(highestPrice);
             setMaxWeight(highestWeight);
 
@@ -118,7 +154,7 @@ const ProductList = () => {
 
     const applyFilters = () => {
         let filtered = products;
-
+     
         if (filters.brands.length > 0) {
             filtered = filtered.filter((product) =>
                 filters.brands.some((brand) => product.brands.includes(brand))
@@ -161,7 +197,36 @@ const ProductList = () => {
             );
         }
 
+        if (filters.categories.length > 0) {
+            filtered = filtered.filter((product) => 
+                filters.categories.includes(product.category)
+            );
+        }
+
+        if (category === undefined) {
+            updateAvailableFilters(filtered);
+        }
+        
+
         setFilteredProducts(filtered);
+    };
+
+    const updateAvailableFilters = (filteredProducts) => {
+        const brandsSet = new Set();
+        const colorsSet = new Set();
+        const sizesSet = new Set();
+    
+        filteredProducts.forEach((product) => {
+            product.brands.forEach((brand) => brandsSet.add(brand));
+            product.models.forEach((model) => {
+                if (model.size) sizesSet.add(model.size);
+                if (model.color) colorsSet.add(model.color);
+            });
+        });
+    
+        setAvailableBrands(Array.from(brandsSet));
+        setAvailableColors(Array.from(colorsSet));
+        setAvailableSizes(Array.from(sizesSet));
     };
 
     const handleColorSelect = (productId, color) => {
@@ -249,12 +314,21 @@ const ProductList = () => {
                     {alert}
                 </p>
             )}
-            <h1 className="text-center text-4xl font-bold my-4">
-                Liste des produits de la catégorie sélectionnée
-            </h1>
+            {formattedCategory ? (
+                <h1 className="text-center text-4xl font-bold my-4">
+                    {formattedCategory}
+                </h1>
+
+             ) : (
+                <h1 className="text-center text-4xl font-bold my-4">
+                    Tous les produits
+                </h1>
+             )}
+            
             <div className="flex">
                 <div className="w-1/4 min-w-[300px] h-screen top-0 p-4">
                     <ProductFilter
+                        categories={availableFilterCategories}
                         brands={availableFilterBrands}
                         colors={availableFilterColors}
                         sizes={availableFilterSizes}
@@ -339,10 +413,17 @@ const ProductList = () => {
                                             <h2 className="text-lg font-bold mb-2 line-clamp-1">
                                                 {product.name}
                                             </h2>
+                                            {!formattedCategory && (
+                                                <p className="line-clamp-3 mb-2">
+                                                    Catégorie : {product.category}
+                                                </p>
+                                            )}
                                             <p className="line-clamp-3 mb-2">
                                                 {product.description}
                                             </p>
-
+                                            <p className="line-clamp-3 mb-2">
+                                               Poids : {product.weight}
+                                            </p>
                                             <div className="flex items-center justify-between">
                                                 <div className="flex-1">
                                                     <ProductColors
