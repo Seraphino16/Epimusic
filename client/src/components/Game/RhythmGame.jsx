@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import '../../styles/RhythmGame.css';
 import arrowUp from '../../assets/Game/arrow-up.png';
 import arrowDown from '../../assets/Game/arrow-down.png';
@@ -10,24 +10,68 @@ const RhythmGame = () => {
     const [currentStep, setCurrentStep] = useState(0);
     const [score, setScore] = useState(0);
     const [validationMessage, setValidationMessage] = useState(null);
-    const [validatedSteps, setValidatedSteps] = useState(new Set()); // Nouvel état pour stocker les étapes validées
+    const [validatedSteps, setValidatedSteps] = useState(new Set());
     const [isSuccess, setIsSuccess] = useState(false);
+    const [transparentArrows, setTransparentArrows] = useState(new Set());
+    const [audio, setAudio] = useState(null);
+    const [isGameStarted, setIsGameStarted] = useState(false);
+    const [messagePosition, setMessagePosition] = useState({ top: '50%', left: '50%' });
+    const [countdown, setCountdown] = useState(null);
+    const gameAreaRef = useRef(null);
 
-    const playerName = "Joueur 1"; // Remplacez par le nom du joueur (userID)
+    const playerName = "Joueur 1";
 
     useEffect(() => {
-        const generatedSequence = generateSequence(10);
-        setSequence(generatedSequence);
+        fetch('http://localhost:8000/api/random-track')
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.filePath) {
+                    const audioFile = new Audio(`http://localhost:8000${data.filePath}`);
+                    setAudio(audioFile);
+                } else {
+                    console.error('Erreur : aucun fichier audio trouvé.');
+                }
+            })
+            .catch(error => console.error('Erreur lors du chargement de la musique:', error));
+    }, []);
 
-        const interval = setInterval(() => {
-            if (currentStep < generatedSequence.length) {
-                setCurrentStep(prevStep => prevStep + 1);
+    const startGameAndMusic = () => {
+        let countdownValue = 3;
+        setCountdown(countdownValue);
+
+        const countdownInterval = setInterval(() => {
+            countdownValue -= 1;
+            setCountdown(countdownValue);
+
+            if (countdownValue === 0) {
+                clearInterval(countdownInterval);
+                setCountdown(null);
+                if (audio) {
+                    audio.play().then(() => {
+                        setIsGameStarted(true);
+                        const generatedSequence = generateSequence(5);
+                        setSequence(generatedSequence);
+
+                        const interval = setInterval(() => {
+                            setCurrentStep((prevStep) => {
+                                if (prevStep < generatedSequence.length) {
+                                    return prevStep + 1;
+                                } else {
+                                    clearInterval(interval);
+                                    if (audio) {
+                                        audio.pause();
+                                        audio.currentTime = 0;
+                                    }
+                                    return prevStep;
+                                }
+                            });
+                        }, 2000);
+                    }).catch(error => console.error('Erreur lors de la lecture de la musique:', error));
+                }
             }
-        }, 2000);
-
-        return () => clearInterval(interval);
-    }, [currentStep]);
-
+        }, 1000);
+    };
+  
     const generateSequence = (length) => {
         const directions = ['up', 'down', 'left', 'right'];
         const sequence = [];
@@ -38,8 +82,26 @@ const RhythmGame = () => {
         return sequence;
     };
 
+    const getRandomPosition = () => {
+        const gameArea = gameAreaRef.current;
+        const messageWidth = 200;
+        const messageHeight = 50;
+
+        if (gameArea) {
+            const maxTop = gameArea.clientHeight - messageHeight;
+            const maxLeft = gameArea.clientWidth - messageWidth;
+
+            const top = Math.floor(Math.random() * maxTop);
+            const left = Math.floor(Math.random() * maxLeft);
+
+            return { top: `${top}px`, left: `${left}px` };
+        }
+
+        return { top: '50%', left: '50%' };
+    };
+
     const handleKeyPress = (key) => {
-        if (validatedSteps.has(currentStep)) return; // Ne fait rien si l'étape actuelle est déjà validée
+        if (validatedSteps.has(currentStep)) return;
 
         const expectedKey = sequence[currentStep - 1];
         const arrowElement = document.querySelector(`.arrow-${expectedKey}`);
@@ -49,21 +111,26 @@ const RhythmGame = () => {
             if (isArrowInZone(arrowElement, targetElement)) {
                 setScore(score + 1);
                 setIsSuccess(true);
-                setValidationMessage('PERFECT!'); // Affichez le message "PERFECT!"
-                setValidatedSteps(new Set(validatedSteps).add(currentStep)); // Marque cette étape comme validée
-                setTimeout(() => setValidationMessage(null), 1000); // Cachez le message après 1 seconde
+                setValidationMessage('PERFECT!');
+                setMessagePosition(getRandomPosition());
+                setValidatedSteps(new Set(validatedSteps).add(currentStep));
+                setTransparentArrows(new Set(transparentArrows).add(currentStep - 1));
             } else {
                 setIsSuccess(false);
-                setValidationMessage('MISS'); // Affichez le message "MISS"
-                setValidatedSteps(new Set(validatedSteps).add(currentStep)); // Marque cette étape comme validée
-                setTimeout(() => setValidationMessage(null), 1000); // Cachez le message après 1 seconde
+                setValidationMessage('MISS');
+                setMessagePosition(getRandomPosition());
+                setValidatedSteps(new Set(validatedSteps).add(currentStep));
+                setTransparentArrows(new Set(transparentArrows).add(currentStep - 1));
             }
         } else {
             setIsSuccess(false);
-            setValidationMessage('MISS'); // Affichez le message "MISS"
-            setValidatedSteps(new Set(validatedSteps).add(currentStep)); // Marque cette étape comme validée
-            setTimeout(() => setValidationMessage(null), 1000); // Cachez le message après 1 seconde
+            setValidationMessage('MISS');
+            setMessagePosition(getRandomPosition());
+            setValidatedSteps(new Set(validatedSteps).add(currentStep));
+            setTransparentArrows(new Set(transparentArrows).add(currentStep - 1));
         }
+
+        setTimeout(() => setValidationMessage(null), 1000);
     };
 
     const isArrowInZone = (arrow, zone) => {
@@ -85,7 +152,7 @@ const RhythmGame = () => {
                 case 'ArrowDown':
                 case 'ArrowLeft':
                 case 'ArrowRight':
-                    e.preventDefault(); // Empêche le comportement par défaut de la page
+                    e.preventDefault();
                     handleKeyPress(e.key.replace('Arrow', '').toLowerCase());
                     break;
                 default:
@@ -97,18 +164,27 @@ const RhythmGame = () => {
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
         };
-    }, [currentStep, sequence, validatedSteps]); // Ajoutez validatedSteps comme dépendance
+    }, [currentStep, sequence, validatedSteps]);
 
     return (
         <div className="game-container">
             <h1>EpiGame</h1>
+            {!isGameStarted && (
+                <button onClick={startGameAndMusic} className="start-button">Jouez</button>
+            )}
             <div className="game-content">
                 <div className="player-info-container">
                     <div className="player-name">{playerName}</div>
                 </div>
-                <div className="game-area">
+                <div className="game-area" ref={gameAreaRef}>
+                    {countdown !== null && (
+                        <div className="countdown">{countdown}</div>
+                    )}
                     {validationMessage && (
-                        <div className={`validation-message ${isSuccess ? 'success' : 'miss'}`}>
+                        <div
+                            className={`validation-message ${isSuccess ? 'success' : 'miss'}`}
+                            style={{ top: messagePosition.top, left: messagePosition.left }}
+                        >
                             {validationMessage}
                         </div>
                     )}
@@ -132,19 +208,20 @@ const RhythmGame = () => {
                     </div>
                     <div className="arrows">
                         {sequence[currentStep - 1] && (
-                            <Arrow key={currentStep - 1} direction={sequence[currentStep - 1]} />
+                            <Arrow key={currentStep - 1} direction={sequence[currentStep - 1]}
+                                   isTransparent={transparentArrows.has(currentStep - 1)}/>
                         )}
                     </div>
                 </div>
                 <div className="score-container">
-                    <div className="score">Score: {score}</div>
+                    <div className="score">Score : {score}</div>
                 </div>
             </div>
         </div>
     );
 };
 
-const Arrow = ({ direction }) => {
+const Arrow = ({ direction, isTransparent }) => {
     const arrowMap = {
         up: arrowUp,
         down: arrowDown,
@@ -153,7 +230,7 @@ const Arrow = ({ direction }) => {
     };
 
     return (
-        <div className={`arrow arrow-${direction}`}>
+        <div className={`arrow arrow-${direction} ${isTransparent ? 'transparent' : ''}`}>
             <img src={arrowMap[direction]} alt={`${direction} arrow`} />
         </div>
     );
