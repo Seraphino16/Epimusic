@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import { useParams } from "react-router-dom";
 
 const ProductFilter = ({
+    categories,
     brands,
     colors,
     sizes,
@@ -11,6 +13,7 @@ const ProductFilter = ({
     const [selectedBrands, setSelectedBrands] = useState([]);
     const [selectedColors, setSelectedColors] = useState([]);
     const [selectedSizes, setSelectedSizes] = useState([]);
+    const [selectedCategories, setSelectedCategories] = useState([]);
     const [priceRange, setPriceRange] = useState([0, maxPrice]);
     const [weightRange, setWeightRange] = useState([0, maxWeight]);
     const [isPriceOpen, setIsPriceOpen] = useState(false);
@@ -21,7 +24,26 @@ const ProductFilter = ({
     const [isBrandsOpen, setIsBrandsOpen] = useState(true);
     const [isColorsOpen, setIsColorsOpen] = useState(true);
     const [isSizesOpen, setIsSizesOpen] = useState(true);
+    const [isCategoriesOpen, setIsCategoriesOpen] = useState(true);
     const [isWeightOpen, setIsWeightOpen] = useState(true);
+
+    const { category } = useParams();
+
+    const handleCategoryChange = (category) => {
+        const updatedCategories = selectedCategories.includes(category)
+            ? selectedCategories.filter((c) => c !== category)
+            : [...selectedCategories, category];
+
+        setSelectedCategories(updatedCategories);
+        onFiltersChange({
+            brands: selectedBrands,
+            colors: selectedColors,
+            sizes: selectedSizes,
+            categories: updatedCategories,
+            priceRange,
+            weightRange,
+        });
+    };
 
     const handleBrandChange = (brand) => {
         const updatedBrands = selectedBrands.includes(brand)
@@ -33,6 +55,7 @@ const ProductFilter = ({
             brands: updatedBrands,
             colors: selectedColors,
             sizes: selectedSizes,
+            categories: selectedCategories,
             priceRange,
             weightRange,
         });
@@ -63,6 +86,7 @@ const ProductFilter = ({
             brands: selectedBrands,
             colors: updatedColors,
             sizes: selectedSizes,
+            categories: selectedCategories,
             priceRange,
             weightRange,
         });
@@ -78,6 +102,7 @@ const ProductFilter = ({
             brands: selectedBrands,
             colors: selectedColors,
             sizes: updatedSizes,
+            categories: selectedCategories,
             priceRange,
             weightRange,
         });
@@ -89,6 +114,7 @@ const ProductFilter = ({
             brands: selectedBrands,
             colors: selectedColors,
             sizes: selectedSizes,
+            categories: selectedCategories,
             priceRange: range,
             weightRange,
         });
@@ -100,6 +126,7 @@ const ProductFilter = ({
             brands: selectedBrands,
             colors: selectedColors,
             sizes: selectedSizes,
+            categories: selectedCategories,
             priceRange,
             weightRange: range,
         });
@@ -110,6 +137,63 @@ const ProductFilter = ({
             <h3 className="text-2xl font-semibold mb-2 text-gray-800 border bg-gray-100 shadow rounded-lg px-2 py-4">
                 Filtrer les produits
             </h3>
+
+            {categories.length > 0 && category === undefined && (
+                <div className="mb-2 border bg-gray-100 shadow rounded-lg px-2 py-4">
+                    <h4
+                        className="text-lg font-medium text-gray-700 cursor-pointer flex justify-between items-center"
+                        onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
+                    >
+                        Catégories
+                        <span>
+                            {isCategoriesOpen ? (
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                    className="w-5 h-5"
+                                >
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
+                            ) : (
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                    className="w-5 h-5"
+                                >
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
+                            )}
+                        </span>
+                    </h4>
+                    {isCategoriesOpen && (
+                        <div className="grid grid-cols-2 gap-2 mt-2">
+                            {categories.map((category, index) => (
+                                <div key={index} className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        value={category}
+                                        onChange={() =>
+                                            handleCategoryChange(category)
+                                        }
+                                        className="mr-2 text-red-600 focus:ring-red-500"
+                                    />
+                                    <p className="text-gray-600">{category}</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
 
             {brands.length > 0 && (
                 <div className="mb-2 border bg-gray-100 shadow rounded-lg px-2 py-4">
@@ -167,65 +251,61 @@ const ProductFilter = ({
                     )}
                 </div>
             )}
+
             {colors.length > 0 && (
                 <div className="mb-2 border bg-gray-100 shadow rounded-lg px-2 py-4">
-                    <>
-                        <h4
-                            className="text-lg font-medium text-gray-700 cursor-pointer flex justify-between items-center"
-                            onClick={() => setIsColorsOpen(!isColorsOpen)}
-                        >
-                            Couleurs
-                            <span>
-                                {isColorsOpen ? (
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 20 20"
-                                        fill="currentColor"
-                                        className="w-5 h-5"
-                                    >
-                                        <path
-                                            fillRule="evenodd"
-                                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                            clipRule="evenodd"
-                                        />
-                                    </svg>
-                                ) : (
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 20 20"
-                                        fill="currentColor"
-                                        className="w-5 h-5"
-                                    >
-                                        <path
-                                            fillRule="evenodd"
-                                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                            clipRule="evenodd"
-                                        />
-                                    </svg>
-                                )}
-                            </span>
-                        </h4>
-                        {isColorsOpen && (
-                            <div className="grid grid-cols-2 gap-2 mt-2">
-                                {colors.map((color, index) => (
-                                    <div
-                                        key={index}
-                                        className="flex items-center"
-                                    >
-                                        <input
-                                            type="checkbox"
-                                            value={color}
-                                            onChange={() =>
-                                                handleColorChange(color)
-                                            }
-                                            className="mr-2 text-red-600 focus:ring-red-500"
-                                        />
-                                        <p className="text-gray-600">{color}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </>
+                    <h4
+                        className="text-lg font-medium text-gray-700 cursor-pointer flex justify-between items-center"
+                        onClick={() => setIsColorsOpen(!isColorsOpen)}
+                    >
+                        Couleurs
+                        <span>
+                            {isColorsOpen ? (
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                    className="w-5 h-5"
+                                >
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
+                            ) : (
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                    className="w-5 h-5"
+                                >
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
+                            )}
+                        </span>
+                    </h4>
+                    {isColorsOpen && (
+                        <div className="grid grid-cols-2 gap-2 mt-2">
+                            {colors.map((color, index) => (
+                                <div key={index} className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        value={color}
+                                        onChange={() =>
+                                            handleColorChange(color)
+                                        }
+                                        className="mr-2 text-red-600 focus:ring-red-500"
+                                    />
+                                    <p className="text-gray-600">{color}</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -449,6 +529,7 @@ const ProductFilter = ({
                     </div>
                 )}
             </div>
+
         </div>
     );
 };

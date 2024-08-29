@@ -16,10 +16,14 @@ function SearchBar() {
         setSearchTerm(value);
 
         if (value.trim() === '') {
+         
             navigate(`/products`);
-        } else {
-            navigate(`/products/${categoryName}/${categoryId}/search?query=${value}`);
+        } else if (!categoryName || !categoryId) {
             
+            navigate(`/products/search?query=${value}`);
+        } else {
+           
+            navigate(`/products/${categoryName}/${categoryId}/search?query=${value}`);
         }
     };
 

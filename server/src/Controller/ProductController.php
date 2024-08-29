@@ -179,10 +179,13 @@ public function productsByCategory(EntityManagerInterface $entityManager, Reques
         ->from(Product::class, 'p')
         ->leftJoin('p.models', 'm')
         ->leftJoin('m.color', 'c')
-        ->leftJoin('m.size', 's')
-        ->where('p.category = :category')
-        ->setParameter('category', $categoryId);
+        ->leftJoin('m.size', 's');
         
+    if ($categoryId !== null && $categoryId !== '' && $categoryId !== 'undefined') {
+        $queryBuilder->where('p.category = :category')
+                    ->setParameter('category', $categoryId);
+    }
+
     if ($filters['search']) {
         $queryBuilder->andWhere('p.name LIKE :search')
             ->setParameter('search', '%' . $filters['search'] . '%');
