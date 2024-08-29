@@ -1,6 +1,33 @@
-import React from "react";
+import React, { useContext } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { SearchContext } from '../../context/SearchContext';
 
 function SearchBar() {
+    const { searchTerm, setSearchTerm } = useContext(SearchContext);
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const pathSegments = location.pathname.split('/');
+    const categoryName = pathSegments[2] || '';
+    const categoryId = pathSegments[3] || ''; 
+
+    const handleSearchChange = (event) => {
+        const value = event.target.value;
+        setSearchTerm(value);
+
+        if (value.trim() === '') {
+         
+            navigate(`/products`);
+        } else if (!categoryName || !categoryId) {
+            
+            navigate(`/products/search?query=${value}`);
+        } else {
+           
+            navigate(`/products/${categoryName}/${categoryId}/search?query=${value}`);
+        }
+    };
+
+
     return (
         <div className="pt-2 flex flex-row relative mx-auto text-gray-600 w-1/2">
             <div className="relative w-full">
@@ -8,11 +35,13 @@ function SearchBar() {
                     className="border-2 border-gray-300 bg-white h-10 pl-5 pr-10 rounded-full text-sm focus:outline-none w-full"
                     type="search"
                     name="search"
+                    value={searchTerm}
+                    onChange={handleSearchChange}
                     placeholder="Rechercher un article..."
                 />
                 <button
                     type="submit"
-                    className="absolute right-0 rounded-full bg-transparent"
+                    className="absolute right-4 rounded-full bg-transparent top-2"
                 >
                     <svg
                         className="h-5 w-5 fill-current text-gray-600"

@@ -105,6 +105,7 @@ class ProductRepository extends ServiceEntityRepository
             ->leftJoin('p.stocks', 'st')
             ->leftJoin('m.image', 'i')
             ->leftJoin('p.reviews', 'r')
+            ->leftJoin('p.weights', 'w')
             ->leftJoin('r.user', 'u')
             ->leftJoin('p.weights', 'w')
             ->where('p.id = :id')
@@ -161,26 +162,62 @@ class ProductRepository extends ServiceEntityRepository
     }
 
     public function findProductsByCategory($categoryId, $filters) {
+       
         $queryBuilder = $this->createQueryBuilder('p')
-            ->select('p.id', 'p.name', 'p.description', 'c.name as category',
-                     'm.id as model_id', 'm.price', 'm.weight',
-                     'col.name as color', 's.value as size_value', 
+            ->select('p.id', 'p.name', 'p.description', 'c.name as category', 
+                     'm.id as model_id', 'm.price',
+                     'col.name as color', 's.value as size_value', 's.unit as size_unit', 
                      'st.quantity as stock_quantity',
-                     'i.path as image_url', 'i.is_main as is_main')
+                     'w.value as weight',
+                     'i.path as image_url', 'i.is_main as isMain')
             ->leftJoin('p.category', 'c')
             ->leftJoin('p.models', 'm')
             ->leftJoin('m.color', 'col')
             ->leftJoin('m.size', 's')
-            ->leftJoin('m.image', 'i')
             ->leftJoin('p.stocks', 'st')
+            ->leftJoin('m.image', 'i')
+            ->leftJoin('p.weights', 'w')
             ->where('c.id = :categoryId')
-            ->andWhere('i.is_main = :isMain')
-            ->setParameter('isMain', true)
             ->setParameter('categoryId', $categoryId);
-
+      
         $this->addFilters($queryBuilder, $filters);
-
-        return $queryBuilder->getQuery()
-                            ->getArrayResult();
+    
+        $results = $queryBuilder->getQuery()->getArrayResult();
+    
+        $productsData = [];
+        
+        foreach ($results as $result) {
+            $productId = $result['id'];
+    
+            if (!isset($productsData[$productId])) {
+                $productsData[$productId] = [
+                    'id' => $productId,
+                    'name' => $result['name'],
+                    'description' => $result['description'],
+                    'category' => $result['category'],
+                    'models' => [],
+                ];
+            }
+    
+            if (isset($result['model_id'])) {
+                $productsData[$productId]['models'][] = [
+                    'model_id' => $result['model_id'],
+                    'price' => $result['price'],
+                    'color' => $result['color'],
+                    'size' => $result['size_value'],
+                    'stock_quantity' => $result['stock_quantity'] ?? 0,
+                    'weight' => $result['weight'] ?? 0
+                ];
+            }
+    
+            if ($result['isMain']) {
+                $productsData[$productId]['images']['main'][] = $result['image_url'];
+            } else {
+                $productsData[$productId]['images']['secondary'][] = $result['image_url'];
+            }
+        }
+    
+        return array_values($productsData);
     }
+    
 }

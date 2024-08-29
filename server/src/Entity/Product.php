@@ -38,7 +38,7 @@ class Product
      * @var Collection<int, Review>
      */
     #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'product')]
-    private Collection $reviews;
+    private Collection $reviews; 
 
     #[ORM\OneToMany(targetEntity: Brand::class, mappedBy: 'product', orphanRemoval: true)]
     private Collection $brands;
@@ -49,6 +49,12 @@ class Product
     #[ORM\OneToMany(targetEntity: Weight::class, mappedBy: 'product', orphanRemoval: true)]
     private Collection $weights;
 
+    /**
+     * @var Collection<int, Promotion>
+     */
+    #[ORM\OneToMany(targetEntity: Promotion::class, mappedBy: 'product', orphanRemoval: true)]
+    private Collection $promotions;
+
     public function __construct()
     {
         $this->models = new ArrayCollection();
@@ -57,6 +63,7 @@ class Product
         $this->brands = new ArrayCollection();
         $this->tags = new ArrayCollection();
         $this->weights = new ArrayCollection();
+        $this->promotions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -267,6 +274,36 @@ class Product
             if ($weight->getProduct() === $this) {
                 $weight->setProduct(null);
 
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Promotion>
+     */
+    public function getPromotions(): Collection
+    {
+        return $this->promotions;
+    }
+
+    public function addPromotion(Promotion $promotion): static
+    {
+        if (!$this->promotions->contains($promotion)) {
+            $this->promotions->add($promotion);
+            $promotion->setProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removePromotion(Promotion $promotion): static
+    {
+        if ($this->promotions->removeElement($promotion)) {
+            // set the owning side to null (unless already changed)
+            if ($promotion->getProduct() === $this) {
+                $promotion->setProduct(null);
             }
         }
 

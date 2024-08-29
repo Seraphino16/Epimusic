@@ -7,6 +7,7 @@ use App\Entity\CartItem;
 use App\Entity\Product;
 use App\Entity\Model;
 use App\Entity\Stock;
+use App\Entity\Promotion;
 use App\Entity\AnonymousCart;
 use App\Repository\CartRepository;
 use App\Repository\ProductRepository;
@@ -91,6 +92,28 @@ class CartController extends AbstractController
             return new JsonResponse(['error' => 'La quantité dépasse le stock disponible'], Response::HTTP_BAD_REQUEST);
         }
 
+        $price = $model->getPrice();
+        $promoPrice = null;
+        $now = new \DateTime();
+        $promotions = $this->entityManager->getRepository(Promotion::class)
+            ->createQueryBuilder('p')
+            ->where('p.product = :product')
+            ->andWhere('p.start_date <= :now')
+            ->andWhere('p.end_date >= :now')
+            ->setParameter('product', $product)
+            ->setParameter('now', $now)
+            ->getQuery()
+            ->getResult();
+
+            if (!empty($promotions)) {
+            foreach ($promotions as $promotion) {
+                if ($now >= $promotion->getStartDate() && $now <= $promotion->getEndDate()) {
+                    $promoPrice = $promotion->getPromoPrice();
+                    break;
+                }
+            }
+        }
+
         if ($userId) {
 
             $user = $this->userRepository->find($userId);
@@ -136,7 +159,7 @@ class CartController extends AbstractController
 
             return new JsonResponse([
                 'message' => 'Article ajouté au panier',
-                'token' => $token,
+                'token' => $token ?? null,
                 'cart_total' => $cart->getTotal()
             ], Response::HTTP_OK);
         }
@@ -158,11 +181,13 @@ class CartController extends AbstractController
             }
             $cartItem->setQuantity($newQuantity);
         } else {
+
             $cartItem = new CartItem();
             $cartItem->setProduct($product);
             $cartItem->setModel($model);
             $cartItem->setQuantity($quantity);
-            $cartItem->setPrice($model->getPrice());
+            $cartItem->setPrice($price);
+            $cartItem->setPromoPrice($promoPrice);
 
             if ($cart instanceof Cart) {
                 $cartItem->setCart($cart);
@@ -205,8 +230,6 @@ class CartController extends AbstractController
         $cartItems = $cart->getItems();
 
         
-        
-
         $itemsData = [];
         foreach ($cartItems as $cartItem) {
 
@@ -224,14 +247,20 @@ class CartController extends AbstractController
             $total = $quantity * $price;
             $formattedTotal = number_format($total, 2, '.', '');
 
+            $promoPrice = $cartItem->getPromoPrice();
+            $totalPromotions = $promoPrice !== null ? $quantity * $promoPrice : 0;
+            $formattedTotalPromotion = $promoPrice !== null ? number_format($totalPromotions, 2, '.', '') : null;
+
             $itemsData[] = [
                 'id' => $cartItem->getId(),
                 'product' => $cartItem->getProduct()->getName(),
                 'product_id' => $cartItem->getProduct()->getId(),
                 'quantity' => $cartItem->getQuantity(),
                 'image_path' => $image,
-                'price' => $cartItem->getModel()->getPrice(),
-                'total' => $formattedTotal
+                'price' => $cartItem->getPrice(),
+                'promo_price' => $cartItem->getPromoPrice(),
+                'total' => $formattedTotal,
+                'total_promotion' => $formattedTotalPromotion
             ];
         }
 
@@ -275,13 +304,19 @@ class CartController extends AbstractController
         $total = $newQuantity * $price;
         $formattedTotal = number_format($total, 2, '.', '');
 
+        $promoPrice = $cartItem->getPromoPrice();
+        $totalPromotions = $promoPrice !== null ? $newQuantity * $promoPrice : 0;
+        $formattedTotalPromotion = $promoPrice !== null ? number_format($totalPromotions, 2, '.', '') : null;
+
         $itemData = [
                 'id' => $cartItem->getId(),
                 'product' => $cartItem->getProduct()->getName(),
                 'product_id' => $cartItem->getProduct()->getId(),
                 'quantity' => $cartItem->getQuantity(),
+                'promo_price' => $cartItem->getPromoPrice(),
                 'price' => $cartItem->getModel()->getPrice(),
-                'total' => $formattedTotal
+                'total' => $formattedTotal,
+                'total_promotion' => $formattedTotalPromotion
         ];
 
         $data = [

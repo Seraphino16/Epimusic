@@ -5,12 +5,14 @@ import AdminTabs from "../admin/AdminTabs";
 import ProductAdminList from "./ProductAdminList";
 import UsersAdminList from "../admin/UsersAdminList";
 import OrdersAdminList from "../admin/OrdersAdminList";
+import ProvidersAdminList from "../admin/ProvidersAdminList";
 import UserCard from "../Cart/UserCard";
 import ProductAdminForm from "../forms/ProductAdminForm";
 import ProductAdminEdit from "../forms/ProductAdminEdit";
 import CategoriesAdminList from "../admin/CategoriesAdminList";
 import CategoryAdminForm from "../forms/CategoryAdminForm";
 import CategoryAdminEdit from "../forms/CategoryAdminEdit";
+import StockManagementPage from "./StockManagementPage";
 
 const AdminPanel = () => {
     const [user, setUser] = useState(null);
@@ -38,8 +40,11 @@ const AdminPanel = () => {
                 <Route path="users" element={<UsersAdminList />} />
                 <Route path="orders" element={<OrdersAdminList />} />
                 <Route path="categories" element={<CategoriesAdminList />} />
+                <Route path="providers" element={<ProvidersAdminList />} />
                 <Route path="categories/create" element={<CategoryAdminForm />} />
                 <Route path="categories/edit/:id" element={<CategoryAdminEdit />} />
+                <Route path="stock-management" element={<StockManagementPage />} />
+
                 <Route
                     path="user-card"
                     element={

@@ -8,7 +8,9 @@ const AdminTabs = () => {
         { name: "Clients", path: "/admin/users" },
         { name: "Produits", path: "/admin/products" },
         { name: "Livraison", path: "/admin/orders" },
-        { name: "Catégories", path: "/admin/categories" }
+        { name: "Catégories", path: "/admin/categories" },
+        { name: "Réapprovisionnement", path: "/admin/stock-management" },
+        { name: "Prestataires", path: "/admin/providers" }
     ];
 
     return (

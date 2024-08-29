@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, {useEffect, useState} from 'react';
+import { Link } from 'react-router-dom';
 import axios from "axios";
 import "../../styles/ProductList.css";
 import CategoryCard from "../cards/CategoryCard";
@@ -16,17 +17,20 @@ const HomePage = () => {
         {
             src: vinyles,
             title: "Collection de Vinyles",
-            description: "Découvrez notre vaste collection de vinyles vintages et modernes"
+            description: "Découvrez notre vaste collection de vinyles vintages et modernes",
+            link: "/products/vinyle/2"
         },
         {
             src: instruments,
             title: "Instruments de Musique",
-            description: "Trouvez une variété d’instruments de musique pour tous les profils."
+            description: "Trouvez une variété d’instruments de musique pour tous les profils.",
+            link: "/products/instruments/1"
         },
         {
             src: goodies,
             title: "Goodies",
-            description: "Parcourez notre gamme de produits et d’objets de collection EpiMusic."
+            description: "Parcourez notre gamme de produits et d’objets de collection EpiMusic.",
+            link: "/products/goodies/3"
         },
     ];
 
@@ -45,7 +49,6 @@ const HomePage = () => {
             });
     }, []);
 
-
     return (
         <div>
             {message && <p className="success">{message}</p>}
@@ -53,14 +56,6 @@ const HomePage = () => {
             <HomeCarousel images={imagesToDisplay}/>
             <div className="flex flex-wrap justify-center">
                 {error && <p className="text-red-500">{error}</p>}
-                {categories.map((category) => (
-                    <CategoryCard
-                        key={category.id}
-                        imageSrc={`http://localhost:8000${category.imagePath}`}
-                        categoryName={category.name}
-                        categoryId={category.id}
-                    />
-                ))}
             </div>
         </div>
     );

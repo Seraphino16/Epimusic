@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import ProductTitle from '../ProductDetails/ProductTitle';
 import ProductDescription from '../ProductDetails/ProductDescription';
 import ProductImage from '../ProductDetails/ProductImage';
+import ProductColors from '../ProductDetails/ProductColors';
+import ProductSizes from '../ProductDetails/ProductSizes';
 import Alert from '../Alerts/Alert';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -13,6 +15,8 @@ const ProductDetailsPage = () => {
     const [product, setProduct] = useState(null);
     const [alert, setAlert] = useState({ message: '', type: 'error' });
     const [quantity, setQuantity] = useState(1);
+    const [selectedColor, setSelectedColor] = useState(null);
+    const [selectedSize, setSelectedSize] = useState(null);
     const [review, setReview] = useState('');
     const [reviews, setReviews] = useState([]);
     const [editingReview, setEditingReview] = useState(null);
@@ -26,20 +30,25 @@ const ProductDetailsPage = () => {
             try {
                 const response = await fetch(`http://localhost:8000/api/products/${id}`);
                 const data = await response.json();
-                
+
                 if (response.ok) {
                     setProduct(data);
                     console.log(data)
+                    if (data.models.length > 0) {
+                        const firstModel = data.models[0];
+                        setSelectedColor(firstModel.color);
+                        setSelectedSize(firstModel.size);
+                    }
                     const uniqueReviews = Array.from(new Set(data.reviews.map(review => review.review_id)))
                         .map(id => data.reviews.find(review => review.review_id === id));
                     setReviews(uniqueReviews);
-
                     checkIfProductInCartAndReview(uniqueReviews);
                 } else {
-                    setAlert({ message: data.message || 'Une erreur s\'est produite lors de la récupération des articles', type: 'error' });
+                    setAlert({ message: data.message || 'Erreur lors de la récupération du produit', type: 'error' });
                 }
             } catch (error) {
-                setAlert({ message: 'Internal server error', type: 'error' });
+                console.error("Erreur lors de la récupération du produit : ", error);
+                setAlert({ message: 'Erreur interne du serveur', type: 'error' });
             }
         };
 
@@ -49,12 +58,13 @@ const ProductDetailsPage = () => {
     const checkIfProductInCartAndReview = async (productReviews = reviews) => {
         const user = JSON.parse(localStorage.getItem('user'));
         if (!user) return;
+
         try {
-            const response = await axios.get(`http://localhost:8000/api/cart`, { params: { userId: user.id } });
+            const response = await axios.get('http://localhost:8000/api/cart', { params: { userId: user.id } });
             const cartItems = response.data.items;
             const productInCart = cartItems.some(item => item.product_id === parseInt(id));
-
             const existingReview = productReviews.some(review => review.user_id === user.id);
+
             setCanPostReview(productInCart && !existingReview);
             setHasPostedReview(existingReview);
         } catch (error) {
@@ -65,25 +75,30 @@ const ProductDetailsPage = () => {
     const handleAddToCart = () => {
         const user = JSON.parse(localStorage.getItem('user'));
         const token = localStorage.getItem('cart_token');
-        const data = {
-            model_id: product.models[0].model_id,
-            quantity: quantity,
-        };
-
-        if (user) {
-            data.user_id = user.id;
-        } else if (token) {
-            data.token = token;
+        const selectedModel = product.models.find(model => model.color === selectedColor && model.size === selectedSize);
+        
+        if (!selectedModel) {
+            setAlert({ message: "Modèle sélectionné non disponible", type: 'error' });
+            return;
         }
+
+        const data = {
+            model_id: selectedModel.model_id,
+            quantity,
+            ...(user ? { user_id: user.id } : token ? { token } : {}),
+        };
 
         axios.post(`http://localhost:8000/api/cart/add/${product.id}`, data)
             .then(response => {
-                console.log("Produit ajouté au panier : ", response.data);
                 setAlert({ message: "Produit ajouté au panier !", type: 'success' });
                 if (response.data.token) {
                     localStorage.setItem('cart_token', response.data.token);
                 }
                 checkIfProductInCartAndReview();
+
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
             })
             .catch(error => {
                 console.error("Erreur lors de l'ajout du produit au panier : ", error);
@@ -95,20 +110,21 @@ const ProductDetailsPage = () => {
         const user = JSON.parse(localStorage.getItem('user'));
         const data = {
             product_id: product.id,
-            model_id: product.models[0].model_id,
+            model_id: product.models.find(model => model.color === selectedColor && model.size === selectedSize)?.model_id,
             comment: review,
             user_id: user ? user.id : null,
         };
 
+        console.log(data)
+
         axios.post('http://localhost:8000/api/product/add/review', data)
             .then(response => {
-                console.log("Avis ajouté : ", response.data);
                 setAlert({ message: "Avis ajouté avec succès !", type: 'success' });
                 setReviews([response.data.review, ...reviews]);
                 setReview('');
                 setCanPostReview(false);
                 setHasPostedReview(true);
-                setRefresh(!refresh); // Rafraîchir les avis
+                setRefresh(!refresh);
             })
             .catch(error => {
                 console.error("Erreur lors de l'ajout de l'avis : ", error);
@@ -130,12 +146,11 @@ const ProductDetailsPage = () => {
 
         axios.patch(`http://localhost:8000/api/review/update/${editingReview}`, data)
             .then(response => {
-                console.log("Avis mis à jour : ", response.data);
                 setAlert({ message: "Avis mis à jour avec succès !", type: 'success' });
                 setReviews(reviews.map(r => (r.review_id === editingReview ? response.data.review : r)));
                 setEditingReview(null);
                 setEditReviewContent('');
-                setRefresh(!refresh); // Rafraîchir les avis
+                setRefresh(!refresh);
             })
             .catch(error => {
                 console.error("Erreur lors de la mise à jour de l'avis : ", error);
@@ -145,17 +160,14 @@ const ProductDetailsPage = () => {
 
     const handleDeleteReview = (reviewId) => {
         const user = JSON.parse(localStorage.getItem('user'));
-        const data = {
-            user_id: user.id,
-        };
+        const data = { user_id: user.id };
 
         axios.delete(`http://localhost:8000/api/review/delete/${reviewId}`, { data })
             .then(response => {
-                console.log("Avis supprimé : ", response.data);
                 setAlert({ message: "Avis supprimé avec succès !", type: 'success' });
                 setReviews(reviews.filter(r => r.review_id !== reviewId));
                 checkIfProductInCartAndReview();
-                setRefresh(!refresh); // Rafraîchir les avis
+                setRefresh(!refresh);
             })
             .catch(error => {
                 console.error("Erreur lors de la suppression de l'avis : ", error);
@@ -163,112 +175,136 @@ const ProductDetailsPage = () => {
             });
     };
 
+    const handleColorSelect = (color) => {
+        setSelectedColor(color);
+
+        const sizesForColor = product.models
+            .filter(model => model.color === color)
+            .map(model => model.size);
+
+        if (sizesForColor.length > 0) {
+            setSelectedSize(sizesForColor[0]);
+        } else {
+            setSelectedSize(null);
+        }
+    };
+
+    const handleSizeSelect = (size) => {
+        setSelectedSize(size);
+    };
+
+  
+    
+    const uniqueColors = Array.from(new Set(product?.models.map(model => model.color)));
+    const uniqueSizes = Array.from(new Set(product?.models.filter(model => model.color === selectedColor).map(model => model.size)));
+    const filteredModel = product?.models.find(model => model.color === selectedColor && model.size === selectedSize);
+    const promotion = product?.promotions.length > 0 ? product.promotions[0] : null;
+
     return (
         <div className="p-6">
             <Alert message={alert.message} type={alert.type} />
             {product && (
                 <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
                     <div className="space-y-4">
-                        <ProductTitle name={product.name} category={product.category} />
-                        <ProductImage images={product.images} />
+                        <ProductTitle name={product.name} category={product.category.name} />
+                        <ProductImage images={filteredModel?.images || []} />
                     </div>
                     <div className="space-y-4 mt-16 pt-12">
                         <ProductDescription
-                            category={product.category}
+                            category={product.category.name}
                             description={product.description}
-                            stock={product.models[0].stock_quantity}
-                            color={product.models[0]?.color || 'Non spécifié'}
-                            size={`${product.models[0]?.size_value || ''} ${product.models[0]?.size_unit || ''}`}
-                            price={product.models[0].price}
-                            weight={product.models[0].weight}
+                            stock={filteredModel?.stock}
+                            color={filteredModel?.color}
+                            size={`${filteredModel?.size || ''}`}
+                            price={`${filteredModel?.price || ''}`}
+                            weight={`${product.weight || ''}`}
+                            promotion={promotion}
                         />
-                        <div className="flex flex-col space-y-4">
-                            <label htmlFor="quantity">Quantité :</label>
-                            <select
+                        <ProductColors
+                            colors={uniqueColors}
+                            selectedColor={selectedColor}
+                            onColorSelect={handleColorSelect}
+                        />
+                        <ProductSizes
+                            sizes={uniqueSizes}
+                            selectedSize={selectedSize}
+                            onSizeSelect={handleSizeSelect}
+                        />
+                        <div className="space-y-4">
+                            <input
+                                type="number"
                                 id="quantity"
                                 value={quantity}
                                 onChange={(e) => setQuantity(Number(e.target.value))}
-                                className="quantity-select"
-                            >
-                                {[...Array(product.models[0].stock_quantity).keys()].map((x) => (
-                                    <option key={x + 1} value={x + 1}>
-                                        {x + 1}
-                                    </option>
-                                ))}
-                            </select>
+                                min="1"
+                                max={filteredModel?.stock || 1}
+                                className="border border-gray-300 rounded-md p-2"
+                            />
                             <button
-                                className="add-to-cart-button-details"
                                 onClick={handleAddToCart}
+                                className="bg-blue-500 text-white py-2 px-4 rounded"
                             >
-                                <FontAwesomeIcon icon={faShoppingCart} />
+                                Ajouter au panier
                             </button>
-                        </div>
-                        <div className="space-y-4 mt-16 pt-12">
-                            <h3 className="text-xl font-bold">Avis</h3>
-                            {canPostReview ? (
-                                <div>
+                            {canPostReview && (
+                                <div className="space-y-2">
                                     <textarea
                                         value={review}
                                         onChange={(e) => setReview(e.target.value)}
-                                        className="w-full p-2 border border-gray-300 rounded"
                                         placeholder="Écrire un avis"
+                                        className="border border-gray-300 rounded-md p-2 w-full"
                                     />
                                     <button
-                                        className="mt-2 p-2 bg-blue-500 text-white rounded"
                                         onClick={handleAddReview}
+                                        className="bg-green-500 text-white py-2 px-4 rounded"
                                     >
-                                        Écrire un avis
+                                        Ajouter un avis
                                     </button>
                                 </div>
-                            ) : hasPostedReview ? (
-                                <p className="text-red-500">Vous avez déjà posté un avis pour ce produit.</p>
-                            ) : (
-                                <p className="text-red-500">Vous devez ajouter ce produit au panier avant de pouvoir poster un avis.</p>
                             )}
-                            <div className="space-y-4">
-                                {reviews.map((review) => (
-                                    <div key={review.review_id} className="p-4 border bg-white border-gray-300 rounded">
-                                        <p className="font-bold">{review.user_id ? `${review.user_firstname} ${review.user_lastname}` : 'Anonyme'}</p>
-                                        <p className="text-gray-500 text-sm">{new Date(review.created_at).toLocaleDateString()}</p>
-                                        <p>{editingReview === review.review_id ? (
-                                            <textarea
-                                                value={editReviewContent}
-                                                onChange={(e) => setEditReviewContent(e.target.value)}
-                                                className="w-full p-2 border border-gray-300 rounded"
-                                            />
-                                        ) : review.comment}</p>
-                                        {editingReview === review.review_id ? (
-                                            <button
-                                                className="mt-2 p-2 bg-blue-500 text-white rounded"
-                                                onClick={handleUpdateReview}
-                                            >
-                                                Mettre à jour
-                                            </button>
-                                        ) : review.user_id === JSON.parse(localStorage.getItem('user')).id && (
-                                            <div className="flex space-x-2">
-                                                <button
-                                                    className="mt-2 p-2 bg-yellow-500 text-white rounded"
-                                                    onClick={() => handleEditReview(review)}
-                                                >
-                                                    <FontAwesomeIcon icon={faEdit} />
-                                                </button>
-                                                <button
-                                                    className="mt-2 p-2 bg-red-500 text-white rounded"
-                                                    onClick={() => handleDeleteReview(review.review_id)}
-                                                >
-                                                    <FontAwesomeIcon icon={faTrash} />
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
                         </div>
+                        {hasPostedReview && reviews.map(review => (
+                            <div key={review.review_id} className="border border-gray-300 rounded-md p-4 space-y-2">
+                                <p><strong>{review.username}</strong></p>
+                                <p>{review.comment}</p>
+                                {review.user_id === JSON.parse(localStorage.getItem('user'))?.id && (
+                                    <div className="flex space-x-2">
+                                        <button
+                                            onClick={() => handleEditReview(review)}
+                                            className="bg-yellow-500 text-white py-1 px-2 rounded"
+                                        >
+                                            <FontAwesomeIcon icon={faEdit} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteReview(review.review_id)}
+                                            className="bg-red-500 text-white py-1 px-2 rounded"
+                                        >
+                                            <FontAwesomeIcon icon={faTrash} />
+                                        </button>
+                                    </div>
+                                )}
+                                {editingReview === review.review_id && (
+                                    <div className="mt-2">
+                                        <textarea
+                                            value={editReviewContent}
+                                            onChange={(e) => setEditReviewContent(e.target.value)}
+                                            className="border border-gray-300 rounded-md p-2 w-full"
+                                        />
+                                        <button
+                                            onClick={handleUpdateReview}
+                                            className="bg-blue-500 text-white py-2 px-4 rounded mt-2"
+                                        >
+                                            Mettre à jour l'avis
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
                     </div>
                 </div>
             )}
         </div>
     );
-}
+};
 
 export default ProductDetailsPage;
