@@ -14,7 +14,7 @@ const UserAddressBook = () => {
             const userId = user.id;
 
             try {
-                const response = await axios.get(`http://localhost:8000/api/user/${userId}/addresses`);
+                const response = await axios.get(`http://localhost:8000/api/user/${userId}/addresses`); //localhost
                 setAddresses(response.data);
             } catch (error) {
                 console.error("Erreur lors de la récupération des adresses : ", error);
@@ -30,7 +30,7 @@ const UserAddressBook = () => {
         const userId = user.id;
 
         try {
-            await axios.patch(`http://localhost:8000/api/user/${userId}/addresses/${id}/set-primary`);
+            await axios.patch(`http://localhost:8000/api/user/${userId}/addresses/${id}/set-primary`); //localhost
             const updatedAddresses = addresses.map((address) =>
                 address.id === id
                     ? { ...address, isPrimary: true }
@@ -52,7 +52,7 @@ const UserAddressBook = () => {
         const userId = user.id;
 
         try {
-            await axios.delete(`http://localhost:8000/api/user/${userId}/addresses/${id}`);
+            await axios.delete(`http://localhost:8000/api/user/${userId}/addresses/${id}`); //localhost
             setAddresses(addresses.filter((address) => address.id !== id));
         } catch (error) {
             console.error("Erreur lors de la suppression de l'adresse", error);

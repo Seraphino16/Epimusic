@@ -51,7 +51,7 @@ const ProductImage = ({ images }) => {
                     ref={imgRef}
                 >
                     <img
-                        src={`http://localhost:8000${selectedImage}`}
+                        src={`http://localhost:8000${selectedImage}`} //localhost
                         alt="Main"
                         className="w-auto h-auto object-contain"
                         style={{ maxHeight: '500px', maxWidth: '100%' }}
@@ -64,7 +64,7 @@ const ProductImage = ({ images }) => {
                                 display: 'block',
                                 width: '200px',
                                 height: '200px',
-                                backgroundImage: `url(http://localhost:8000${selectedImage})`,
+                                backgroundImage: `url(http://localhost:8000${selectedImage})`, //localhost
                                 backgroundSize: `${imgRef.current ? imgRef.current.width * 2 : 0}px ${imgRef.current ? imgRef.current.height * 2 : 0}px`,
                                 top: `${zoomPosition.top}px`,
                                 left: `${zoomPosition.left}px`,
@@ -79,7 +79,7 @@ const ProductImage = ({ images }) => {
                     {[...mainImages, ...secondaryImages].map((image, index) => (
                         <img
                             key={index}
-                            src={`http://localhost:8000${image.path}`}
+                            src={`http://localhost:8000${image.path}`} //localhost
                             alt={`Image ${index}`}
                             className={`w-24 h-24 object-cover cursor-pointer ${image.is_main ? 'border-2 border-blue-500' : ''}`}
                             onClick={() => setSelectedImage(image.path)}

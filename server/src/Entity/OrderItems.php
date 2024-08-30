@@ -41,6 +41,9 @@ class OrderItems
     #[ORM\JoinColumn(nullable: false)]
     private $order;
 
+    #[ORM\Column(nullable: true)]
+    private ?float $unitPromoPrice = null;
+
 
     public function getId(): ?int
     {
@@ -151,6 +154,18 @@ class OrderItems
     public function setOrder(?Order $order): self
     {
         $this->order = $order;
+
+        return $this;
+    }
+
+    public function getUnitPromoPrice(): ?float
+    {
+        return $this->unitPromoPrice;
+    }
+
+    public function setUnitPromoPrice(?float $unitPromoPrice): static
+    {
+        $this->unitPromoPrice = $unitPromoPrice;
 
         return $this;
     }

@@ -20,42 +20,29 @@ const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
     const handleChangeQuantity = (selectedOption) => {
         setSelectedOption(selectedOption);
 
-        axios
-            .patch(
-                `http://localhost:8000/api/cart/item/${item.id}`,
-                {
-                    quantity: selectedOption.value,
-                },
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                }
-            )
-            .then((response) => response.data.item)
-            .then((item) => {
-                setTotal(item.total);
-                setTotalPromotion(item.total_promotion);
-                onQuantityChange(
-                    item.id,
-                    selectedOption.value,
-                    item.total,
-                    item.total_promotion
-                );
-            })
-            .catch((error) => console.log(error));
-    };
-
-    const cartPrice = parseFloat(localStorage.getItem("cart_price")) || 0;
-    const cartPromoTotal =
-        parseFloat(localStorage.getItem("cart_promo_total")) || 0;
-    const priceDifference = cartPrice - cartPromoTotal;
+        axios.patch(`http://localhost:8000/api/cart/item/${item.id}`, { //localhost
+            quantity: selectedOption.value
+        },  {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then((response) => {
+            return response.data.item;
+        })
+        .then((item) => {
+            setTotal(item.total);
+            setTotalPromotion(item.total_promotion);
+            onQuantityChange(item.id, selectedOption.value, item.total, item.total_promotion);
+        })
+        .catch((error) => console.log(error))
+    }
 
     return (
         <div className="max-w-xl bg-white p-4 m-4 rounded-lg flex">
             <div className="w-32 h-32">
                 <img
-                    src={`http://localhost:8000${item.image_path}`}
+                    src={`http://localhost:8000${item.image_path}`} //localhost
                     alt={`${item.product}`}
                     className="w-full h-full object-contain"
                 />
