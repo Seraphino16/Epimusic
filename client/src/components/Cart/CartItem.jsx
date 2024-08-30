@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Select from "react-select";
 import ButtonDelete from "./ButtonDelete";
+import { useCart } from '../../context/CartContext';
 
 const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
     const [selectedOption, setSelectedOption] = useState({
@@ -11,6 +12,7 @@ const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
     });
     const [total, setTotal] = useState(item.total);
     const [totalPromotion, setTotalPromotion] = useState(item.total_promotion);
+    const { updateItemCount } = useCart();
 
     const options = Array.from({ length: 10 }, (v, k) => ({
         value: k + 1,
@@ -42,6 +44,8 @@ const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
                     item.total,
                     item.total_promotion
                 );
+
+                updateItemCount();
             })
             .catch((error) => console.log(error));
     };
