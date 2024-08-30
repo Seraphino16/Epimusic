@@ -5,6 +5,7 @@ import Select from "react-select";
 import ButtonDelete from "./ButtonDelete";
 
 const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
+    const priceDifference = item.total - item.total_promotion;
     const [selectedOption, setSelectedOption] = useState({
         value: item.quantity,
         label: item.quantity,
