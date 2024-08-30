@@ -61,7 +61,8 @@ class OrderController extends AbstractController
     public function createOrder(Request $request)
     {
         $data = json_decode($request->getContent(), true);
-        $userId = isset($data['user_id']) ? (int)$data['user_id'] : null;
+        $userId = isset($data['userId']) ? (int)$data['userId'] : null;
+
         $token = isset($data['token']) ? $data['token'] : null;
 
         if (!$token && !$userId) {
@@ -87,18 +88,32 @@ class OrderController extends AbstractController
         foreach ($cartItems as $cartItem) {
             $orderItem = new OrderItems();
 
-
             $quantity = $cartItem->getQuantity();
             $unitPrice = $cartItem->getModel()->getPrice();
 
             $totalItem = $quantity * $unitPrice;
 
-            $orderTotal += $totalItem;
+            $unitPromoPrice = $cartItem->getPromoPrice();
+
+            if ($unitPromoPrice) {
+                $totalPromo = $quantity * $unitPromoPrice;
+                $formattedPromoPrice = number_format($totalPromo, 2, '.', '');
+                $orderItem->setUnitPromoPrice($unitPromoPrice);
+                $orderItem->setPromoPrice($formattedPromoPrice);
+                
+                $orderTotal += $totalPromo;
+            } else {
+                $orderTotal += $totalItem;                
+            }
 
             $formattedTotal = number_format($totalItem, 2, '.', '');
 
             $orderItem->setProductName($cartItem->getProduct()->getName());
-            $orderItem->setColor($cartItem->getModel()->getColor());
+
+            $color = $cartItem->getModel()->getColor();
+            if ($color) {
+                $orderItem->setColor($color->getName());
+            }
             $orderItem->setQuantity($quantity);
             $orderItem->setUnitPrice($unitPrice);
             $orderItem->setTotalPrice($formattedTotal);

@@ -4,6 +4,7 @@ import axios from "axios";
 import CartSummary from "../../Cart/CartSummary";
 import Alert from "../../Alerts/Alert";
 import CartButton from "../../Buttons/CartButton";
+import { useNavigate } from "react-router-dom";
 
 const CartPage = () => {
     const [items, setItems] = useState([]);
@@ -12,7 +13,9 @@ const CartPage = () => {
     const [total, setTotal] = useState(0);
     const [quantity, setQuantity] = useState();
     const [promotionReduction, setPromotionReduction] = useState(0);
+    const [orderId, setOrderId] = useState();
     const [alert, setAlert] = useState({ message: '', type: 'error' });
+    const navigate = useNavigate();
 
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem("user"));
@@ -88,7 +91,6 @@ const CartPage = () => {
         } else {
             setAlert({ message: "Une erreur est survenue: l'article n'a pas été retiré de votre panier", type: "error" })
         }
-        
     };
 
     const getShippingCost = () => {
@@ -101,29 +103,34 @@ const CartPage = () => {
             userId: userId,
             token: cartToken
         })
-        .then(response => console.log(response.data))
-        .catch(error => console.log(error.message));
+        .then(response => {
+            console.log(response.data)
+            const orderId = response.data.orderId;
+            setOrderId(orderId);
+            localStorage.setItem("orderId", orderId);
 
-        // axios.get("/api/shipping/cost", { //localhost
-        //     params: {
-        //         userId: userId,
-        //         token: cartToken
-        //     }
-        // })
-        // .then((response) => {
-        //     return response.data;
-        // })
-        // .then((data) => {
-        //     console.log(data.shippingCosts);
-        //     localStorage.setItem("cart_shipping_costs", data.shippingCosts);
-        //     // window.location.href = "/delivery";
-        // })
-        // .catch((error) => {
-        //     if (error.response) {
-        //         console.log(error.response.data.message);
-        //         setAlert({ message: error.response.data.message, type: "error" })
-        //     }
-        // })        
+            return axios.get("/api/shipping/cost", { //localhost
+                params: {
+                    userId: userId,
+                    token: cartToken,
+                    orderId: orderId
+                }
+            });
+        })
+        .then((response) => {
+            const data = response.data;
+            console.log(data.shippingCosts);
+            localStorage.setItem("cart_shipping_costs", data.shippingCosts);
+            navigate('/delivery');
+        })
+        .catch(error => {
+            if (error.response) {
+                console.log(error.response.data.message);
+                setAlert({ message: error.response.data.message, type: "error" });
+            } else {
+                console.log(error.message);
+            }
+        });      
     }
 
     return (

@@ -40,6 +40,9 @@ class Order
     #[ORM\OneToOne(mappedBy: 'order', targetEntity: OrderAddress::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private $orderAddress;
 
+    #[ORM\Column(nullable: true)]
+    private ?float $ShippingCost = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -168,6 +171,18 @@ class Order
         }
 
         $this->orderAddress = $orderAddress;
+
+        return $this;
+    }
+
+    public function getShippingCost(): ?float
+    {
+        return $this->ShippingCost;
+    }
+
+    public function setShippingCost(?float $ShippingCost): static
+    {
+        $this->ShippingCost = $ShippingCost;
 
         return $this;
     }
