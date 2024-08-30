@@ -21,7 +21,7 @@ const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
     const handleChangeQuantity = (selectedOption) => {
         setSelectedOption(selectedOption);
 
-        axios.patch(`/api/cart/item/${item.id}`, { //localhost
+        axios.patch(`http://localhost:8000/api/cart/item/${item.id}`, { //localhost
             quantity: selectedOption.value
         },  {
             headers: {
@@ -43,7 +43,7 @@ const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
         <div className="max-w-xl bg-white p-4 m-4 rounded-lg flex">
             <div className="w-32 h-32">
                 <img
-                    src={`${item.image_path}`} //localhost
+                    src={`http://localhost:8000${item.image_path}`} //localhost
                     alt={`${item.product}`}
                    className="w-full h-full object-contain"
                 />
