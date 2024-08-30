@@ -32,7 +32,7 @@ class OrderItems
     private $totalPrice;
 
     #[ORM\Column(type: 'float', nullable: true)]
-    private $promoPrice;
+    private $totalPromoPrice;
 
     #[ORM\Column(type: 'boolean')]
     private $giftWrap;
@@ -122,14 +122,14 @@ class OrderItems
         return $this;
     }
 
-    public function getPromoPrice(): ?float
+    public function getTotalPromoPrice(): ?float
     {
-        return $this->promoPrice;
+        return $this->totalPromoPrice;
     }
 
-    public function setPromoPrice(?float $promoPrice): self
+    public function setTotalPromoPrice(?float $totalPromoPrice): self
     {
-        $this->promoPrice = $promoPrice;
+        $this->totalPromoPrice = $totalPromoPrice;
 
         return $this;
     }

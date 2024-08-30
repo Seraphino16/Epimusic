@@ -43,6 +43,12 @@ class Order
     #[ORM\Column(nullable: true)]
     private ?float $ShippingCost = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?float $totalWithPromo = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $totalWithShippingCost = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -183,6 +189,30 @@ class Order
     public function setShippingCost(?float $ShippingCost): static
     {
         $this->ShippingCost = $ShippingCost;
+
+        return $this;
+    }
+
+    public function getTotalWithPromo(): ?float
+    {
+        return $this->totalWithPromo;
+    }
+
+    public function setTotalWithPromo(?float $totalWithPromo): static
+    {
+        $this->totalWithPromo = $totalWithPromo;
+
+        return $this;
+    }
+
+    public function getTotalWithShippingCost(): ?float
+    {
+        return $this->totalWithShippingCost;
+    }
+
+    public function setTotalWithShippingCost(?float $totalWithShippingCost): static
+    {
+        $this->totalWithShippingCost = $totalWithShippingCost;
 
         return $this;
     }

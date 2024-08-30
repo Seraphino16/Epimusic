@@ -84,6 +84,7 @@ class OrderController extends AbstractController
         $order->setPaymentStatus('pending');
 
         $orderTotal = 0;
+        $orderTotalWithPromo = 0;
 
         foreach ($cartItems as $cartItem) {
             $orderItem = new OrderItems();
@@ -99,13 +100,14 @@ class OrderController extends AbstractController
                 $totalPromo = $quantity * $unitPromoPrice;
                 $formattedPromoPrice = number_format($totalPromo, 2, '.', '');
                 $orderItem->setUnitPromoPrice($unitPromoPrice);
-                $orderItem->setPromoPrice($formattedPromoPrice);
+                $orderItem->setTotalPromoPrice($formattedPromoPrice);
                 
-                $orderTotal += $totalPromo;
+                $orderTotalWithPromo += $totalPromo;
             } else {
-                $orderTotal += $totalItem;                
+                $orderTotalWithPromo += $totalItem; 
             }
 
+            $orderTotal += $totalItem;    
             $formattedTotal = number_format($totalItem, 2, '.', '');
 
             $orderItem->setProductName($cartItem->getProduct()->getName());
@@ -123,7 +125,9 @@ class OrderController extends AbstractController
         }
 
         $formattedOrderTotal = number_format($orderTotal, 2, '.', '');
+        $formatOrderTotalWithPromo = number_format($orderTotalWithPromo, 2, '.', '');
         $order->setTotalPrice($formattedOrderTotal);
+        $order->setTotalWithPromo($formatOrderTotalWithPromo);
 
         $now = new DateTime();
         $order->setCreatedAt($now);
@@ -133,6 +137,5 @@ class OrderController extends AbstractController
         $this->entityManager->flush();
 
         return new JsonResponse(['message' => 'Commande créée avec succès', 'orderId' => $order->getId()], Response::HTTP_CREATED);
-        // return new JsonResponse(['message' => 'Commande créée avec succès', 'orderId' => 12345], Response::HTTP_CREATED);
     }
 }

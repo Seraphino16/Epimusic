@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\Constraints\Date;
 
 #[Route("/api")]
 class TransportController extends AbstractController
@@ -161,6 +162,11 @@ class TransportController extends AbstractController
                     ->find($orderId);
 
         $order->setShippingCost($shippingCosts);
+
+        $order->setTotalWithShippingCost($order->getTotalWithPromo() + $shippingCosts);
+
+        $now = new \DateTime();
+        $order->setUpdatedAt($now);
         
         $this->entityManager->persist($order);
         $this->entityManager->flush();
