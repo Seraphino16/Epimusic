@@ -29,15 +29,31 @@ const CARD_ELEMENT_OPTIONS = {
   },
 };
 
-const PaymentForm = ({ orderPrice }) => {
+const PaymentForm = ({ orderPrice, orderId }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [clientSecret, setClientSecret] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [cardHolderName, setCardHolderName] = useState("");
   const [paymentSuccess, setPAymentSuccess] = useState(false);
+  const [userId, setUserId] = useState();
+  const [cartToken, setCartToken] = useState();
 
   useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user) {
+      setUserId(user.id);
+    } else {
+      const token = localStorage.getItem("cart_token");
+      setCartToken(token);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!orderPrice) {
+      return;
+    }
+
     axios
       .post(
         "/api/payment/create-intent", //localhost
@@ -81,8 +97,6 @@ const PaymentForm = ({ orderPrice }) => {
       }
     );
 
-    console.log("ok");
-
     if (error) {
       setIsProcessing(false);
       alert(error.message);
@@ -91,6 +105,33 @@ const PaymentForm = ({ orderPrice }) => {
       setPAymentSuccess(true);
     }
   };
+
+  useEffect(() => {
+    if (!paymentSuccess || !orderId) {
+      return;
+    }
+
+    axios
+      .patch(`/api/order/validate/${orderId}`) //localhost
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => console.log(error));
+
+    axios
+      .delete(`/api/cart/`, {    //localhost
+        params: {
+          userId: userId,
+          token: cartToken,
+        },
+      })
+      .then((response) => {
+        if (cartToken) {
+          localStorage.removeItem('cart_token');
+        }
+      })
+      .catch((error) => console.log(error));
+  }, [paymentSuccess]);
 
   return (
     <>
@@ -101,9 +142,7 @@ const PaymentForm = ({ orderPrice }) => {
             className="text-green-500 text-6xl"
           />
           <p className="text-2xl mt-8 mb-4">Paiement réussi</p>
-          <p className="text-2xl">
-            Merci d'avoir commandé chez Epimusic !
-          </p>
+          <p className="text-2xl">Merci d'avoir commandé chez Epimusic !</p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6 max-w-md mx-auto">
