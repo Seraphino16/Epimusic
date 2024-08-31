@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Alert from "../../Alerts/Alert";
 import { FaShippingFast } from "react-icons/fa";
 import CartButton from "../../Buttons/CartButton";
+import { useNavigate } from "react-router-dom";
 
 const ShippingPage = () => {
     const [alert, setAlert] = useState({ message: "", type: "error" });
@@ -9,6 +10,7 @@ const ShippingPage = () => {
     const [shipppingCosts, setShippingCosts] = useState();
     const [cartQuantity, setCartQuantity] = useState();
     const [total, setTotal] = useState();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const cartPrice = localStorage.getItem("cart_price");
@@ -26,6 +28,10 @@ const ShippingPage = () => {
         const total = (cartPrice + shipppingCosts).toFixed(2);
         setTotal(total);
     }, [cartPrice, shipppingCosts]);
+
+    const handlePaymentRedirection = () => {
+        navigate('/checkout/payment');
+    }
 
     return (
         <div className="w-9/12 m-auto">
@@ -63,9 +69,12 @@ const ShippingPage = () => {
                             <p>{total} €</p>
                         </div>
                     </div>
-                    <CartButton text="Valider ma livraison" />
-                </div>
-            </div>
+                    <CartButton 
+                        text="Valider ma livraison" 
+                        handleClick={handlePaymentRedirection}
+                    />
+                </div>  
+           </div> 
         </div>
     );
 };

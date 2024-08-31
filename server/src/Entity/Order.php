@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\OrderRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
 #[ORM\Table(name: '`order`')]
@@ -17,7 +19,7 @@ class Order
     #[ORM\Column(type: 'float')]
     private $totalPrice;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $paymentMethod;
 
     #[ORM\Column(type: 'string', length: 255)]
@@ -32,11 +34,20 @@ class Order
     #[ORM\Column(type: 'datetime')]
     private $updatedAt;
 
-    #[ORM\OneToMany(mappedBy: 'order', targetEntity: OrderItems::class)]
+    #[ORM\OneToMany(mappedBy: 'order', targetEntity: OrderItems::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private $orderItems;
 
-    #[ORM\OneToOne(mappedBy: 'order', targetEntity: OrderAddress::class)]
+    #[ORM\OneToOne(mappedBy: 'order', targetEntity: OrderAddress::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private $orderAddress;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $ShippingCost = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $totalWithPromo = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $totalWithShippingCost = null;
 
     public function getId(): ?int
     {
@@ -166,6 +177,42 @@ class Order
         }
 
         $this->orderAddress = $orderAddress;
+
+        return $this;
+    }
+
+    public function getShippingCost(): ?float
+    {
+        return $this->ShippingCost;
+    }
+
+    public function setShippingCost(?float $ShippingCost): static
+    {
+        $this->ShippingCost = $ShippingCost;
+
+        return $this;
+    }
+
+    public function getTotalWithPromo(): ?float
+    {
+        return $this->totalWithPromo;
+    }
+
+    public function setTotalWithPromo(?float $totalWithPromo): static
+    {
+        $this->totalWithPromo = $totalWithPromo;
+
+        return $this;
+    }
+
+    public function getTotalWithShippingCost(): ?float
+    {
+        return $this->totalWithShippingCost;
+    }
+
+    public function setTotalWithShippingCost(?float $totalWithShippingCost): static
+    {
+        $this->totalWithShippingCost = $totalWithShippingCost;
 
         return $this;
     }

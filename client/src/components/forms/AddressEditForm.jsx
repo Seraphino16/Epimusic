@@ -25,7 +25,7 @@ const EditAddressForm = () => {
                 const userId = user.id;
 
                 // Récupération de l'adresse pour l'utilisateur connecté
-                const response = await axios.get(`http://localhost:8000/api/user/${userId}/addresses/${id}`);
+                const response = await axios.get(`http://localhost:8000/api/user/${userId}/addresses/${id}`); //localhost
                 const addressData = response.data;
 
                 // Mise à jour des états avec les données de l'adresse
@@ -66,7 +66,7 @@ const EditAddressForm = () => {
 
         try {
             // Mise à jour de l'adresse pour l'utilisateur connecté
-            await axios.put(`http://localhost:8000/api/user/${userId}/addresses/${id}`, updatedAddress, {
+            await axios.put(`http://localhost:8000/api/user/${userId}/addresses/${id}`, updatedAddress, { //localhost
                 headers: {
                     "Content-Type": "application/json",
                 },

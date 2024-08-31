@@ -23,6 +23,7 @@ import ShippingPage from './components/pages/Checkout/ShippingPage';
 import DeliveryHomePage from './components/pages/Checkout/DeliveryHomePage';
 import StockManagementPage from './components/pages/StockManagementPage';
 import { SearchProvider } from './context/SearchContext'; 
+import PaymentPage from './components/pages/Checkout/PaymentPage';
 
 const App = () => (
     <Router>
@@ -126,6 +127,7 @@ const Content = () => {
                 />
                 <Route path='/delivery' element={<ShippingPage />} />
                 <Route path='/delivery/home-delivery' element={<DeliveryHomePage />} />
+                <Route path='/checkout/payment' element={<PaymentPage />} />
                 <Route path="/rhythm-game" element={<RhythmGame />} />
             </Routes>
         </div>
