@@ -22,11 +22,11 @@ const RhythmGame = () => {
     const playerName = "Joueur 1";
 
     useEffect(() => {
-        fetch('http://localhost:8000/api/random-track')
+        fetch('/api/random-track')
             .then(response => response.json())
             .then(data => {
                 if (data && data.filePath) {
-                    const audioFile = new Audio(`http://localhost:8000${data.filePath}`);
+                    const audioFile = new Audio(`${data.filePath}`);
                     setAudio(audioFile);
                 } else {
                     console.error('Erreur : aucun fichier audio trouvé.');

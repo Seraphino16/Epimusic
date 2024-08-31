@@ -40,7 +40,7 @@ const ProductAdminEdit = () => {
     const currentEditIndex = parseInt(searchParams.get('currentEditIndex')) || 0;
 
     useEffect(() => {
-        axios.get(`http://localhost:8000/api/admin/products/${id}`) //localhost
+        axios.get(`/api/admin/products/${id}`) //localhost
             .then((response) => {
                 const productData = response.data;
                 console.log(productData);
@@ -74,7 +74,7 @@ const ProductAdminEdit = () => {
                 // }
 
                 if (productData.category.id === 2 || productData.category.id === 3) {
-                    axios.get(`http://localhost:8000/api/admin/sizes/category/${productData.category.id}`) //localhost
+                    axios.get(`/api/admin/sizes/category/${productData.category.id}`) //localhost
                         .then((response) => {
                             setSizes(response.data);
                         })
@@ -88,7 +88,7 @@ const ProductAdminEdit = () => {
                 setError("Erreur lors de la récupération des données du produit!");
             });
 
-        axios.get("http://localhost:8000/api/admin/categories") //localhost
+        axios.get("/api/admin/categories") //localhost
             .then((response) => {
                 setCategories(response.data);
             })
@@ -97,7 +97,7 @@ const ProductAdminEdit = () => {
                 setError("Erreur lors de la récupération des catégories!");
             });
 
-        axios.get("http://localhost:8000/api/admin/colors") //localhost
+        axios.get("/api/admin/colors") //localhost
             .then((response) => {
                 setColors(response.data);
             })
@@ -114,7 +114,7 @@ const ProductAdminEdit = () => {
         setCategory(value);
 
         if (value === 2 || value === 3) {
-            axios.get(`http://localhost:8000/api/admin/sizes/category/${value}`) //localhost
+            axios.get(`/api/admin/sizes/category/${value}`) //localhost
                 .then((response) => {
                     setSizes(response.data);
                     setSize("");
@@ -240,14 +240,14 @@ const ProductAdminEdit = () => {
         for (let i = 0; i < photoFiles.length; i++) {
             const formData = new FormData();
             formData.append("file", photoFiles[i]);
-            const response = await axios.post("http://localhost:8000/upload", formData, { //localhost
+            const response = await axios.post("/upload", formData, { //localhost
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
             const newFileName = `${id}_${++maxIndex}.${response.data.filePath.split('.').pop()}`;
             uploadedPhotos.push(`/uploads/${newFileName}`);
-            await axios.post("http://localhost:8000/rename-upload", { oldPath: response.data.filePath, newPath: newFileName }); //localhost
+            await axios.post("/rename-upload", { oldPath: response.data.filePath, newPath: newFileName }); //localhost
         }
 
         const updatedModels = models.map((model, index) => ({
@@ -274,7 +274,7 @@ const ProductAdminEdit = () => {
 
         console.log("Données du produit mises à jour : ", updatedProduct);
 
-        await axios.put(`http://localhost:8000/api/admin/products/${id}`, updatedProduct); //localhost
+        await axios.put(`/api/admin/products/${id}`, updatedProduct); //localhost
 
         setMessage("Produit mis à jour avec succès!");
         setError("");

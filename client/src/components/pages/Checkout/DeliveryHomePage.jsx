@@ -35,7 +35,7 @@ const DeliveryHomePage = () => {
 
                 try {
                     const response = await axios.get(
-                        `http://localhost:8000/api/user/${userId}/addresses`
+                        `/api/user/${userId}/addresses` //localhost
                     );
                     setAddresses(response.data);
                 } catch (error) {

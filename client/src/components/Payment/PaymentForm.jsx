@@ -38,7 +38,7 @@ const PaymentForm = () => {
   useEffect(() => {
     axios
       .post(
-        "/api/payment/create-intent",
+        "/api/payment/create-intent", //localhost
         {
           amount: 20000,
         },

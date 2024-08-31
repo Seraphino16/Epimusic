@@ -6,7 +6,7 @@ import axios from "axios";
 const ButtonDelete = ({ id, onDeleteItem }) => {
 
     const handleDelete = () => {
-        axios.delete(`http://localhost:8000/api/cart/item/delete/${id}`) //localhost
+        axios.delete(`/api/cart/item/delete/${id}`) //localhost
             .then((response) => {
                 console.log(response.data.message);
                 onDeleteItem(response.data.message, id)
