@@ -20,6 +20,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api/order')]
 class OrderController extends AbstractController
@@ -140,5 +141,33 @@ class OrderController extends AbstractController
         $this->entityManager->flush();
 
         return new JsonResponse(['message' => 'Commande créée avec succès', 'orderId' => $order->getId()], Response::HTTP_CREATED);
+    }
+
+    #[Route('/{orderId}', name:'get_order_by_id', methods:['GET'])]
+    public function getOrderById(int $orderId, SerializerInterface $serializer): JsonResponse
+    {
+        $order = $this->entityManager->getRepository(Order::class)
+            ->find($orderId);
+        
+        if (!$order) {
+            return new JsonResponse(['error' => 'Order not found', 404]);
+        }
+
+        $orderItems = $order->getOrderItems();
+        $orderItemsCount = 0;
+
+        foreach ($orderItems as $orderItem) {
+            $orderItemsCount += $orderItem->getQuantity();
+        }
+        
+        $data = [
+            'totalPrice' => $order->getTotalPrice(),
+            'shippingCost' => $order->getShippingCost(),
+            'totalWithPromo' => $order->getTotalWithPromo(),
+            'totalWithShippingCost' => $order->getTotalWithShippingCost(),
+            'itemsQuantity' => $orderItemsCount
+        ];
+
+        return new JsonResponse($data);
     }
 }
