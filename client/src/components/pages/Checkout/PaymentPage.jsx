@@ -29,7 +29,7 @@ const PaymentPage = () => {
     return (
         <div className="w-9/12 m-auto">
             <h1 className="text-center text-4xl font-bold my-4">
-                Panier
+                Paiement
             </h1>
             <div className="flex flex-wrap justify-evenly">
                 <div className="w-2/5 max-w-xl bg-white p-8 mt-4 rounded-lg">

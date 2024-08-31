@@ -8,6 +8,8 @@ import {
 } from "@stripe/react-stripe-js";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 
 const CARD_ELEMENT_OPTIONS = {
   style: {
@@ -62,6 +64,11 @@ const PaymentForm = ({ orderPrice }) => {
 
     const cardNumberElement = elements.getElement(CardNumberElement);
 
+    if (!cardNumberElement) {
+      alert("Tous les champs doivent être remplis");
+      return;
+    }
+
     const { error, paymentIntent } = await stripe.confirmCardPayment(
       clientSecret,
       {
@@ -69,79 +76,100 @@ const PaymentForm = ({ orderPrice }) => {
           card: cardNumberElement,
           billing_details: {
             name: cardHolderName,
-          }
+          },
         },
       }
     );
+
+    console.log("ok");
 
     if (error) {
       setIsProcessing(false);
       alert(error.message);
     } else {
-      alert("Paiement réussi");
-      console.log(paymentIntent);
       setIsProcessing(false);
+      setPAymentSuccess(true);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-md mx-auto">
-      <div>
-        <label className="block text-gray-700 mb-2 text-2xl">
-          Titulaire de la carte
-        </label>
-        <div className="p-3 border border-gray-300 rounded-lg shadow-sm">
-          <input
-            type="text"
-            value={cardHolderName}
-            onChange={(e) => setCardHolderName(e.target.value)}
-            placeholder="Nom du titulaire"
-            className="w-full focus:outline-none focus:ring-0 focus:border-transparent border-none p-0 m-0"
-            required
+    <>
+      {paymentSuccess ? (
+        <div className="w-full h-full flex flex-col justify-center items-center text-center">
+          <FontAwesomeIcon
+            icon={faCheckCircle}
+            className="text-green-500 text-6xl"
           />
+          <p className="text-2xl mt-8 mb-4">Paiement réussi</p>
+          <p className="text-2xl">
+            Merci d'avoir commandé chez Epimusic !
+          </p>
         </div>
-      </div>
-      <div>
-        <label className="block text-gray-700 mb-2 text-2xl">
-          Numéro de carte
-        </label>
-        <div className="p-3 border border-gray-300 rounded-lg shadow-sm">
-          <CardNumberElement
-            options={CARD_ELEMENT_OPTIONS}
-            className="w-full focus:outline-none"
-          />
-        </div>
-      </div>
-      <div className="flex justify-between">
-        <div>
-          <label className="block text-gray-700 mb-2 text-2xl">
-            Date d'expiration
-          </label>
-          <div className="p-3 border border-gray-300 rounded-lg shadow-sm">
-            <CardExpiryElement
-              options={CARD_ELEMENT_OPTIONS}
-              className="w-full focus:outline-none"
-            />
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-6 max-w-md mx-auto">
+          <div>
+            <label className="block text-gray-700 mb-2 text-2xl">
+              Titulaire de la carte
+            </label>
+            <div className="p-3 border border-gray-300 rounded-lg shadow-sm">
+              <input
+                type="text"
+                value={cardHolderName}
+                onChange={(e) => setCardHolderName(e.target.value)}
+                placeholder="Nom du titulaire"
+                className="w-full focus:outline-none focus:ring-0 focus:border-transparent border-none p-0 m-0"
+                required
+              />
+            </div>
           </div>
-        </div>
-        <div className="w-1/6 ">
-          <label className="block text-gray-700 mb-2 text-2xl">CVC</label>
-          <div className="p-3 w-full border border-gray-300 rounded-lg shadow-sm">
-            <CardCvcElement
-              options={CARD_ELEMENT_OPTIONS}
-              className="w-full focus:outline-none"
-            />
+          <div>
+            <label className="block text-gray-700 mb-2 text-2xl">
+              Numéro de carte
+            </label>
+            <div className="p-3 border border-gray-300 rounded-lg shadow-sm">
+              <CardNumberElement
+                options={CARD_ELEMENT_OPTIONS}
+                className="w-full focus:outline-none"
+              />
+            </div>
           </div>
-        </div>
-      </div>
-      <button
-        type="submit"
-        disabled={!stripe || isProcessing}
-        className="bg-rose-600 w-full text-2xl rounded-xl mt-8 text-black"
-      >
-        {isProcessing ? "Processing..." : "Payer"}
-      </button>
-    </form>
+          <div className="flex justify-between">
+            <div>
+              <label className="block text-gray-700 mb-2 text-2xl">
+                Date d'expiration
+              </label>
+              <div className="p-3 border border-gray-300 rounded-lg shadow-sm">
+                <CardExpiryElement
+                  options={CARD_ELEMENT_OPTIONS}
+                  className="w-full focus:outline-none"
+                />
+              </div>
+            </div>
+            <div className="w-1/6 ">
+              <label className="block text-gray-700 mb-2 text-2xl">CVC</label>
+              <div className="p-3 w-full border border-gray-300 rounded-lg shadow-sm">
+                <CardCvcElement
+                  options={CARD_ELEMENT_OPTIONS}
+                  className="w-full focus:outline-none"
+                />
+              </div>
+            </div>
+          </div>
+          <button
+            type="submit"
+            disabled={!stripe || isProcessing}
+            className="bg-rose-600 w-full text-2xl rounded-xl mt-8 text-black"
+          >
+            {isProcessing ? "Transaction en cours..." : "Payer"}
+          </button>
+          {isProcessing && (
+            <div className="flex items-center justify-center p-4">
+              <div className="w-16 h-16 border-4 border-t-4 border-blue-500 border-solid rounded-full animate-spin"></div>
+            </div>
+          )}
+        </form>
+      )}
+    </>
   );
 };
 
