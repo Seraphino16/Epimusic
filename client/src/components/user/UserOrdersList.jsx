@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { FaBoxOpen, FaShippingFast, FaCheckCircle, FaTimesCircle, FaDownload, FaTimes } from 'react-icons/fa';
+import { generateOrderPDF } from './pdfUtils';
 
 const UserOrdersList = () => {
     const [orders, setOrders] = useState([]);
@@ -71,9 +72,9 @@ const UserOrdersList = () => {
         setSelectedOrderDetails(null);
     };
 
-    const handleDownload = (orderId) => {
-        // Implémentez ici la logique de téléchargement des détails de la commande
-        console.log(`Téléchargement de la commande ${orderId}`);
+    const handleDownload = () => {
+        if (!selectedOrderDetails) return;
+        generateOrderPDF(selectedOrderDetails);
     };
 
     return (
@@ -104,7 +105,7 @@ const UserOrdersList = () => {
                             <div className="flex mt-4">
                                 <button
                                     className="mt-2 bg-blue-500 text-white p-3 rounded-full"
-                                    onClick={() => handleDownload(order.id)}
+                                    onClick={handleDownload}
                                 >
                                     <FaDownload className="text-base"/>
                                 </button>
@@ -153,7 +154,7 @@ const UserOrdersList = () => {
                         <div className="mt-4 flex justify-end">
                             <button
                                 className="bg-blue-500 text-white p-3 rounded-full"
-                                onClick={() => handleDownload(selectedOrderDetails.id)}
+                                onClick={handleDownload}
                             >
                                 <FaDownload className="text-base"/>
                             </button>

@@ -176,6 +176,9 @@ class OrderController extends AbstractController
             return new JsonResponse(['error' => 'Commande non trouvée'], 404);
         }
 
+        $user = $order->getUser();
+        $orderAddress = $order->getOrderAddress();
+
         $orderItems = $order->getOrderItems();
         $orderItemsData = [];
 
@@ -185,6 +188,7 @@ class OrderController extends AbstractController
                 'color' => $item->getColor(),
                 'size' => $item->getSize(),
                 'quantity' => $item->getQuantity(),
+                'unitPrice' => $item->getUnitPrice(),
             ];
         }
 
@@ -193,6 +197,20 @@ class OrderController extends AbstractController
             'status' => $order->getStatus(),
             'createdAt' => $order->getCreatedAt()->format('d/m/Y'),
             'totalPrice' => $order->getTotalPrice(),
+            'ShippingCost' => $order->getShippingCost(),
+            'totalWithShippingCost' => $order->getTotalWithShippingCost(),
+            'firstName' => $user ? $user->getFirstName() : null,
+            'lastName' => $user ? $user->getLastName() : null,
+            'address' => $orderAddress ? [
+                'name' => $orderAddress->getName(),
+                'telephone' => $orderAddress->getTelephone(),
+                'email' => $orderAddress->getEmail(),
+                'address' => $orderAddress->getAddress(),
+                'complement' => $orderAddress->getComplement(),
+                'postalCode' => $orderAddress->getPostalCode(),
+                'city' => $orderAddress->getCity(),
+                'country' => $orderAddress->getCountry(),
+            ] : null,
             'items' => $orderItemsData,
         ];
 
