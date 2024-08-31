@@ -44,6 +44,7 @@ class OrderController extends AbstractController
         AnonymousCartRepository $anonymousCartRepository,
         CartItemRepository $cartItemRepository,
         UserRepository $userRepository,
+
         RequestStack $requestStack
     ) {
         $this->cartRepository = $cartRepository;
@@ -56,44 +57,45 @@ class OrderController extends AbstractController
         $this->userRepository = $userRepository;
         $this->session = $requestStack->getSession();
     }
-    
+
     #[Route('/', name: 'create_order', methods: ['POST'])]
     public function createOrder(Request $request)
     {
         $data = json_decode($request->getContent(), true);
         $userId = isset($data['userId']) ? (int)$data['userId'] : null;
-
         $token = isset($data['token']) ? $data['token'] : null;
 
         if (!$token && !$userId) {
-            return new JsonResponse(['error' => "Aucune donnéee n'a été trouvée"], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(['error' => "Aucune donnée n'a été trouvée"], Response::HTTP_BAD_REQUEST);
         }
 
+        // Récupérer le panier basé sur le token ou l'utilisateur
         if ($token) {
             $cart = $this->anonymousCartRepository->findOneBy(['token' => $token]);
+        } elseif ($userId) {
+            $user = $this->userRepository->find($userId);
+            if (!$user) {
+                return new JsonResponse(['error' => "Utilisateur non trouvé"], Response::HTTP_NOT_FOUND);
+            }
+            $cart = $this->cartRepository->findOneBy(['user' => $user]);
         }
 
-        if ($userId) {
-            $cart = $this->cartRepository->findOneBy(['user' => $userId]);
+        if (!$cart) {
+            return new JsonResponse(['error' => "Panier non trouvé"], Response::HTTP_NOT_FOUND);
         }
 
         $cartItems = $cart->getItems();
-
         $order = new Order();
         $order->setStatus('pending');
         $order->setPaymentStatus('pending');
-
         $orderTotal = 0;
         $orderTotalWithPromo = 0;
 
         foreach ($cartItems as $cartItem) {
             $orderItem = new OrderItems();
-
             $quantity = $cartItem->getQuantity();
             $unitPrice = $cartItem->getModel()->getPrice();
-
             $totalItem = $quantity * $unitPrice;
-
             $unitPromoPrice = $cartItem->getPromoPrice();
 
             if ($unitPromoPrice) {
@@ -101,15 +103,13 @@ class OrderController extends AbstractController
                 $formattedPromoPrice = number_format($totalPromo, 2, '.', '');
                 $orderItem->setUnitPromoPrice($unitPromoPrice);
                 $orderItem->setTotalPromoPrice($formattedPromoPrice);
-                
                 $orderTotalWithPromo += $totalPromo;
             } else {
-                $orderTotalWithPromo += $totalItem; 
+                $orderTotalWithPromo += $totalItem;
             }
 
-            $orderTotal += $totalItem;    
+            $orderTotal += $totalItem;
             $formattedTotal = number_format($totalItem, 2, '.', '');
-
             $orderItem->setProductName($cartItem->getProduct()->getName());
 
             $color = $cartItem->getModel()->getColor();
@@ -120,7 +120,6 @@ class OrderController extends AbstractController
             $orderItem->setUnitPrice($unitPrice);
             $orderItem->setTotalPrice($formattedTotal);
             $orderItem->setGiftWrap(false);
-
             $order->addOrderItem($orderItem);
         }
 
@@ -132,6 +131,11 @@ class OrderController extends AbstractController
         $now = new DateTime();
         $order->setCreatedAt($now);
         $order->setUpdatedAt($now);
+
+        // Associer l'utilisateur à la commande si l'utilisateur est authentifié
+        if (isset($user)) {
+            $order->setUser($user);
+        }
 
         $this->entityManager->persist($order);
         $this->entityManager->flush();
