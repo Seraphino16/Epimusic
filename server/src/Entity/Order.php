@@ -156,7 +156,7 @@ class Order
     public function removeOrderItem(OrderItems $orderItem): self
     {
         if ($this->orderItems->removeElement($orderItem)) {
-           
+
             if ($orderItem->getOrder() === $this) {
                 $orderItem->setOrder(null);
             }

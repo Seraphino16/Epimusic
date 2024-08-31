@@ -167,4 +167,35 @@ class OrderController extends AbstractController
         return new JsonResponse($data);
     }
 
+    #[Route('/{orderId}/details', name: 'api_order_details', methods: ['GET'])]
+    public function getOrderDetails($orderId, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $order = $entityManager->getRepository(Order::class)->find($orderId);
+
+        if (!$order) {
+            return new JsonResponse(['error' => 'Commande non trouvée'], 404);
+        }
+
+        $orderItems = $order->getOrderItems();
+        $orderItemsData = [];
+
+        foreach ($orderItems as $item) {
+            $orderItemsData[] = [
+                'productName' => $item->getProductName(),
+                'color' => $item->getColor(),
+                'size' => $item->getSize(),
+                'quantity' => $item->getQuantity(),
+            ];
+        }
+
+        $orderData = [
+            'id' => $order->getId(),
+            'status' => $order->getStatus(),
+            'createdAt' => $order->getCreatedAt()->format('d/m/Y'),
+            'totalPrice' => $order->getTotalPrice(),
+            'items' => $orderItemsData,
+        ];
+
+        return new JsonResponse($orderData);
+    }
 }
