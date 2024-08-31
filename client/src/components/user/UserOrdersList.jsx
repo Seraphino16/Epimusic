@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { FaBoxOpen, FaShippingFast, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 
 const UserOrdersList = () => {
     const [orders, setOrders] = useState([]);
@@ -22,6 +23,36 @@ const UserOrdersList = () => {
         fetchOrders();
     }, []);
 
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'In preparation':
+                return 'text-blue-500';
+            case 'In delivery':
+                return 'text-yellow-500';
+            case 'Delivered':
+                return 'text-green-500';
+            case 'Cancelled':
+                return 'text-red-500';
+            default:
+                return 'text-gray-500';
+        }
+    };
+
+    const getStatusIcon = (status) => {
+        switch (status) {
+            case 'In preparation':
+                return <FaBoxOpen className="text-blue-500" />;
+            case 'In delivery':
+                return <FaShippingFast className="text-yellow-500" />;
+            case 'Delivered':
+                return <FaCheckCircle className="text-green-500" />;
+            case 'Cancelled':
+                return <FaTimesCircle className="text-red-500" />;
+            default:
+                return null;
+        }
+    };
+
     return (
         <div className="w-full">
             <div className="flex flex-col items-center mb-4">
@@ -34,7 +65,13 @@ const UserOrdersList = () => {
                         <div key={order.id} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col items-center">
                             <h3 className="text-xl font-bold mb-2">Commande #{order.id}</h3>
                             <p><strong>Date :</strong> {order.createdAt}</p>
-                            <p><strong>Statut :</strong> {order.status}</p>
+                            <p className="flex items-center">
+                                <strong>Statut :</strong>
+                                <span className="ml-2 flex items-center">
+                                    {getStatusIcon(order.status)}
+                                    <span className={`ml-2 ${getStatusColor(order.status)}`}>{order.status}</span>
+                                </span>
+                            </p>
                         </div>
                     ))
                 ) : (
