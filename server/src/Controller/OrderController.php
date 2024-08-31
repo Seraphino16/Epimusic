@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Order;
 use App\Controller\CartController;
 use App\Entity\OrderItems;
+use App\Entity\User;
 use App\Repository\AnonymousCartRepository;
 use App\Repository\CartItemRepository;
 use App\Repository\CartRepository;
@@ -142,4 +143,31 @@ class OrderController extends AbstractController
 
         return new JsonResponse(['message' => 'Commande créée avec succès', 'orderId' => $order->getId()], Response::HTTP_CREATED);
     }
+
+    #[Route('/{userId}/orders', name: 'api_user_orders', methods: ['GET'])]
+    public function getUserOrders($userId, EntityManagerInterface $entityManager): JsonResponse
+    {
+        // Récupérer l'utilisateur par ID
+        $user = $entityManager->getRepository(User::class)->find($userId);
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'Utilisateur non trouvé'], 404);
+        }
+
+        // Récupérer les commandes associées à l'utilisateur
+        $orders = $entityManager->getRepository(Order::class)->findBy(['user' => $user]);
+
+        // Préparer les données de la réponse
+        $data = [];
+        foreach ($orders as $order) {
+            $data[] = [
+                'id' => $order->getId(),
+                'status' => $order->getStatus(),
+                'createdAt' => $order->getCreatedAt()->format('Y-m-d H:i:s'),
+            ];
+        }
+
+        return new JsonResponse($data);
+    }
+
 }
