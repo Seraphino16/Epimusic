@@ -42,7 +42,7 @@ const ProductAdminList = () => {
 
     const fetchProducts = () => {
         axios
-            .get("http://localhost:8000/api/admin/products")
+            .get("http://localhost:8000/api/admin/products") //localhost
             .then((response) => {
                 setProducts(response.data);
                 console.log(response.data);
@@ -54,7 +54,7 @@ const ProductAdminList = () => {
 
     const deleteProduct = (id) => {
         return axios
-            .delete(`http://localhost:8000/api/admin/products/${id}`)
+            .delete(`http://localhost:8000/api/admin/products/${id}`) //localhost
             .then((response) => {
                 setProducts(products.filter((product) => product.id !== id));
                 setMessage("Produit supprimé avec succès !");
@@ -197,7 +197,7 @@ const ProductAdminList = () => {
                                     className="mr-2"
                                 />
                                 <img
-                                    src={`http://localhost:8000${filteredModel?.images?.find(image => image.is_main)?.path || '/default-image.jpg'}`}
+                                    src={`http://localhost:8000${filteredModel?.images?.find(image => image.is_main)?.path || '/default-image.jpg'}`} //localhost
                                     alt={`Image principale du produit ${product.name}`}
                                     className="w-32 h-32 object-cover mb-2 rounded"
                                 />

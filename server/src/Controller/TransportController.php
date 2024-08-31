@@ -2,14 +2,17 @@
 
 namespace App\Controller;
 
+use App\Entity\Order;
 use App\Repository\AnonymousCartRepository;
 use App\Repository\CartRepository;
 use App\Repository\TransportProviderRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\Constraints\Date;
 
 #[Route("/api")]
 class TransportController extends AbstractController
@@ -17,16 +20,19 @@ class TransportController extends AbstractController
     private TransportProviderRepository $providerRepository;
     private CartRepository $cartRepository;
     private AnonymousCartRepository $anonymousCartRepository;
+    private EntityManagerInterface $entityManager;
 
     public function __construct(
         TransportProviderRepository $transportProviderRepository,
         CartRepository $cartRepository,
-        AnonymousCartRepository $anonymousCartRepository
+        AnonymousCartRepository $anonymousCartRepository,
+        EntityManagerInterface $entityManager
     )
     {
         $this->providerRepository = $transportProviderRepository;
         $this->cartRepository = $cartRepository;
         $this->anonymousCartRepository = $anonymousCartRepository;
+        $this->entityManager = $entityManager;
     }
 
     public function generatePermutations(array $dimensions): array
@@ -143,6 +149,26 @@ class TransportController extends AbstractController
             }
         }
 
+        $this->registerShippingCosts($request, $totalCosts);
+
         return new JsonResponse(["shippingCosts" => $totalCosts]);
+    }
+
+    private function registerShippingCosts(Request $request, $shippingCosts)
+    {
+        $orderId = $request->query->get('orderId');
+
+        $order = $this->entityManager->getRepository(Order::class)
+                    ->find($orderId);
+
+        $order->setShippingCost($shippingCosts);
+
+        $order->setTotalWithShippingCost($order->getTotalWithPromo() + $shippingCosts);
+
+        $now = new \DateTime();
+        $order->setUpdatedAt($now);
+        
+        $this->entityManager->persist($order);
+        $this->entityManager->flush();
     }
 }

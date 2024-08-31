@@ -6,6 +6,7 @@ import ButtonDelete from "./ButtonDelete";
 import { useCart } from '../../context/CartContext';
 
 const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
+    const priceDifference = item.total - item.total_promotion;
     const [selectedOption, setSelectedOption] = useState({
         value: item.quantity,
         label: item.quantity,
@@ -59,7 +60,7 @@ const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
         <div className="max-w-xl bg-white p-4 m-4 rounded-lg flex">
             <div className="w-32 h-32">
                 <img
-                    src={`http://localhost:8000${item.image_path}`}
+                    src={`http://localhost:8000${item.image_path}`} //localhost
                     alt={`${item.product}`}
                     className="w-full h-full object-contain"
                 />

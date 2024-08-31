@@ -107,7 +107,7 @@ const ProductList = () => {
                 queryParams.append('search', filters.search);  
             }
             const response = await axios.get(
-                `http://localhost:8000/api/products/category/${categoryId}?${queryParams.toString()}`
+                `http://localhost:8000/api/products/category/${categoryId}?${queryParams.toString()}` //localhost
             );
 
             setProducts(response.data);
@@ -288,7 +288,7 @@ const ProductList = () => {
         }
 
         axios
-            .post(`http://localhost:8000/api/cart/add/${product.id}`, data)
+            .post(`http://localhost:8000/api/cart/add/${product.id}`, data) //localhost
             .then((response) => {
                 setAlert("Produit ajouté au panier !");
                 if (response.data.token) {
@@ -395,7 +395,7 @@ const ProductList = () => {
                                                 filteredModel.images.length >
                                                     0 ? (
                                                     <img
-                                                        src={`http://localhost:8000${
+                                                        src={`http://localhost:8000${ //localhost
                                                             filteredModel.images.find(
                                                                 (img) =>
                                                                     img.is_main

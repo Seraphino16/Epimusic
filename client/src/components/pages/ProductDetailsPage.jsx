@@ -30,7 +30,7 @@ const ProductDetailsPage = () => {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const response = await fetch(`http://localhost:8000/api/products/${id}`);
+                const response = await fetch(`http://localhost:8000/api/products/${id}`); //localhost
                 const data = await response.json();
 
                 if (response.ok) {
@@ -62,7 +62,7 @@ const ProductDetailsPage = () => {
         if (!user) return;
 
         try {
-            const response = await axios.get('http://localhost:8000/api/cart', { params: { userId: user.id } });
+            const response = await axios.get('http://localhost:8000/api/cart', { params: { userId: user.id } }); //localhost
             const cartItems = response.data.items;
             const productInCart = cartItems.some(item => item.product_id === parseInt(id));
             const existingReview = productReviews.some(review => review.user_id === user.id);
@@ -90,7 +90,7 @@ const ProductDetailsPage = () => {
             ...(user ? { user_id: user.id } : token ? { token } : {}),
         };
 
-        axios.post(`http://localhost:8000/api/cart/add/${product.id}`, data)
+        axios.post(`http://localhost:8000/api/cart/add/${product.id}`, data) //localhost
             .then(response => {
                 setAlert({ message: "Produit ajouté au panier !", type: 'success' });
                 if (response.data.token) {
@@ -122,7 +122,7 @@ const ProductDetailsPage = () => {
 
         console.log(data)
 
-        axios.post('http://localhost:8000/api/product/add/review', data)
+        axios.post('http://localhost:8000/api/product/add/review', data) //localhost
             .then(response => {
                 setAlert({ message: "Avis ajouté avec succès !", type: 'success' });
                 setReviews([response.data.review, ...reviews]);
@@ -149,7 +149,7 @@ const ProductDetailsPage = () => {
             comment: editReviewContent,
         };
 
-        axios.patch(`http://localhost:8000/api/review/update/${editingReview}`, data)
+        axios.patch(`http://localhost:8000/api/review/update/${editingReview}`, data) //localhost
             .then(response => {
                 setAlert({ message: "Avis mis à jour avec succès !", type: 'success' });
                 setReviews(reviews.map(r => (r.review_id === editingReview ? response.data.review : r)));
@@ -167,7 +167,7 @@ const ProductDetailsPage = () => {
         const user = JSON.parse(localStorage.getItem('user'));
         const data = { user_id: user.id };
 
-        axios.delete(`http://localhost:8000/api/review/delete/${reviewId}`, { data })
+        axios.delete(`http://localhost:8000/api/review/delete/${reviewId}`, { data }) //localhost
             .then(response => {
                 setAlert({ message: "Avis supprimé avec succès !", type: 'success' });
                 setReviews(reviews.filter(r => r.review_id !== reviewId));

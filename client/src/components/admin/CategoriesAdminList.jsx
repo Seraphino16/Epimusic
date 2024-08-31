@@ -10,7 +10,7 @@ const CategoriesAdminList = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await axios.get("http://localhost:8000/api/admin/categories");
+                const response = await axios.get("http://localhost:8000/api/admin/categories"); //localhost
                 setCategories(response.data);
             } catch (error) {
                 console.error("Erreur lors de la récupération des catégories : ", error);
@@ -27,7 +27,7 @@ const CategoriesAdminList = () => {
 
     const handleDeleteCategory = async (categoryId) => {
         try {
-            await axios.delete(`http://localhost:8000/api/admin/categories/${categoryId}`);
+            await axios.delete(`http://localhost:8000/api/admin/categories/${categoryId}`); //localhost
             setCategories(categories.filter(category => category.id !== categoryId));
         } catch (error) {
             console.error("Erreur lors de la suppression de la catégorie : ", error);
@@ -55,7 +55,7 @@ const CategoriesAdminList = () => {
                          className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col items-center w-64">
                         <div className="mb-4 w-full h-48 image-container">
                             <img
-                                src={`http://localhost:8000${category.imagePath}`}
+                                src={`http://localhost:8000${category.imagePath}`} //localhost
                                 alt={`Category ${category.name}`}
                                 className="w-full h-full object-cover rounded"
                             />

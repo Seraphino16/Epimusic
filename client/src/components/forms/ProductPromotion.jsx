@@ -17,7 +17,7 @@ const ProductPromotion = ({ productId, onClose }) => {
             return;
         }
 
-        axios.post('http://localhost:8000/promotion', {
+        axios.post('http://localhost:8000/promotion', { //localhost
             product_id: productId,
             promo_price: promoPrice,
             start_date: startDate,

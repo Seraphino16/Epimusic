@@ -15,7 +15,7 @@ const CategoryAdminForm = () => {
         formData.append("file", image);
 
         try {
-            const response = await axios.post("http://localhost:8000/upload", formData, {
+            const response = await axios.post("http://localhost:8000/upload", formData, { //localhost
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
@@ -43,7 +43,7 @@ const CategoryAdminForm = () => {
         };
 
         try {
-            await axios.post("http://localhost:8000/api/admin/categories", formData, {
+            await axios.post("http://localhost:8000/api/admin/categories", formData, { //localhost
                 headers: {
                     "Content-Type": "application/json",
                 },

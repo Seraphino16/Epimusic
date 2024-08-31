@@ -105,7 +105,7 @@ class CartController extends AbstractController
             ->getQuery()
             ->getResult();
 
-            if (!empty($promotions)) {
+        if (!empty($promotions)) {
             foreach ($promotions as $promotion) {
                 if ($now >= $promotion->getStartDate() && $now <= $promotion->getEndDate()) {
                     $promoPrice = $promotion->getPromoPrice();
@@ -132,8 +132,10 @@ class CartController extends AbstractController
 
             $anonymousCart = $this->anonymousCartRepository->findOneBy(['token' => $token]);
             if (!$anonymousCart) {
-                return new JsonResponse(['error' => 'Panier anonyme non trouvé'],
-                                            Response::HTTP_NOT_FOUND);
+                return new JsonResponse(
+                    ['error' => 'Panier anonyme non trouvé'],
+                    Response::HTTP_NOT_FOUND
+                );
             }
             $cart = $anonymousCart;
         } else {
@@ -176,8 +178,10 @@ class CartController extends AbstractController
         if ($cartItem) {
             $newQuantity = $cartItem->getQuantity() + $quantity;
             if ($newQuantity > $stock) {
-                return new JsonResponse(['error' => 'La quantité dépasse le stock disponible'],
-                                         Response::HTTP_BAD_REQUEST);
+                return new JsonResponse(
+                    ['error' => 'La quantité dépasse le stock disponible'],
+                    Response::HTTP_BAD_REQUEST
+                );
             }
             $cartItem->setQuantity($newQuantity);
         } else {
@@ -209,8 +213,7 @@ class CartController extends AbstractController
         ], Response::HTTP_OK);
     }
 
-    #[Route('/', name: 'cart_get_items', methods: ["GET"])]
-    public function getCartItems(Request $request): JsonResponse
+    public function getCartItems(Request $request)
     {
         $token = $request->query->get('token');
         $userId = $request->query->get('userId');
@@ -220,7 +223,7 @@ class CartController extends AbstractController
         }
 
         if ($token) {
-            $cart = $this->anonymousCartRepository->findOneBy(['token' => $token]);        
+            $cart = $this->anonymousCartRepository->findOneBy(['token' => $token]);
         }
 
         if ($userId) {
@@ -229,7 +232,30 @@ class CartController extends AbstractController
 
         $cartItems = $cart->getItems();
 
-        
+        return $cartItems;
+    }
+
+    #[Route('/', name: 'cart_get_items', methods: ["GET"])]
+    public function getJsonCartItems(Request $request): JsonResponse
+    {
+        $token = $request->query->get('token');
+        $userId = $request->query->get('userId');
+
+        if (!$token && !$userId) {
+            return new JsonResponse(['error' => "Aucune donnéee n'a été trouvée"], Response::HTTP_BAD_REQUEST);
+        }
+
+        if ($token) {
+            $cart = $this->anonymousCartRepository->findOneBy(['token' => $token]);
+        }
+
+        if ($userId) {
+            $cart = $this->cartRepository->findOneBy(['user' => $userId]);
+        }
+
+        $cartItems = $cart->getItems();
+
+
         $itemsData = [];
         foreach ($cartItems as $cartItem) {
 
@@ -292,9 +318,9 @@ class CartController extends AbstractController
         } else if ($quantity > $stock) {
             return new JsonResponse(['error' => "Il ne reste plus d'autres articles disponibles"], 400);
         }
-        
+
         $cartItem->setQuantity($quantity);
-        
+
         $entityManager->persist($cartItem);
         $entityManager->flush();
 
@@ -309,14 +335,14 @@ class CartController extends AbstractController
         $formattedTotalPromotion = $promoPrice !== null ? number_format($totalPromotions, 2, '.', '') : null;
 
         $itemData = [
-                'id' => $cartItem->getId(),
-                'product' => $cartItem->getProduct()->getName(),
-                'product_id' => $cartItem->getProduct()->getId(),
-                'quantity' => $cartItem->getQuantity(),
-                'promo_price' => $cartItem->getPromoPrice(),
-                'price' => $cartItem->getModel()->getPrice(),
-                'total' => $formattedTotal,
-                'total_promotion' => $formattedTotalPromotion
+            'id' => $cartItem->getId(),
+            'product' => $cartItem->getProduct()->getName(),
+            'product_id' => $cartItem->getProduct()->getId(),
+            'quantity' => $cartItem->getQuantity(),
+            'promo_price' => $cartItem->getPromoPrice(),
+            'price' => $cartItem->getModel()->getPrice(),
+            'total' => $formattedTotal,
+            'total_promotion' => $formattedTotalPromotion
         ];
 
         $data = [
