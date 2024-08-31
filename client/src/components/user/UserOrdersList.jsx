@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { FaBoxOpen, FaShippingFast, FaCheckCircle, FaTimesCircle, FaDownload } from 'react-icons/fa';
+import { FaBoxOpen, FaShippingFast, FaCheckCircle, FaTimesCircle, FaDownload, FaTimes } from 'react-icons/fa';
 
 const UserOrdersList = () => {
     const [orders, setOrders] = useState([]);
@@ -36,7 +36,7 @@ const UserOrdersList = () => {
             case 'Annulé':
                 return 'text-red-500';
             default:
-                return 'text-gray-500';
+                return null;
         }
     };
 
@@ -85,7 +85,8 @@ const UserOrdersList = () => {
             <div className="flex flex-wrap justify-center gap-4">
                 {orders.length > 0 ? (
                     orders.map((order) => (
-                        <div key={order.id} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col items-center">
+                        <div key={order.id}
+                             className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col items-center">
                             <h3
                                 className="text-xl font-bold mb-2 cursor-pointer"
                                 onClick={() => handleOrderClick(order.id)}
@@ -100,13 +101,14 @@ const UserOrdersList = () => {
                                     <span className={`ml-2 ${getStatusColor(order.status)}`}>{order.status}</span>
                                 </span>
                             </p>
-                            {/* Bouton de téléchargement arrondi avec icône uniquement sur la carte */}
-                            <button
-                                className="mt-2 bg-gray-200 text-gray-700 p-2 rounded-full"
-                                onClick={() => handleDownload(order.id)}
-                            >
-                                <FaDownload />
-                            </button>
+                            <div className="flex mt-4">
+                                <button
+                                    className="mt-2 bg-blue-500 text-white p-3 rounded-full"
+                                    onClick={() => handleDownload(order.id)}
+                                >
+                                    <FaDownload className="text-base"/>
+                                </button>
+                            </div>
                         </div>
                     ))
                 ) : (
@@ -117,7 +119,13 @@ const UserOrdersList = () => {
             {/* Modal */}
             {isModalOpen && selectedOrderDetails && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white rounded-lg shadow-lg p-6 w-2/3 max-w-3xl">
+                    <div className="relative bg-white rounded-lg shadow-lg p-6 w-2/3 max-w-3xl">
+                        <button
+                            className="absolute top-4 right-4 p-2 rounded-full"
+                            onClick={closeModal}
+                        >
+                            <FaTimes/>
+                        </button>
                         <h3 className="text-lg font-bold mb-4">Détails de la commande #{selectedOrderDetails.id}</h3>
                         <table className="min-w-full bg-white">
                             <thead>
@@ -142,21 +150,12 @@ const UserOrdersList = () => {
                         <div className="mt-4">
                             <strong>Prix Total :</strong> {selectedOrderDetails.totalPrice} €
                         </div>
-                        {/* Conteneur flex pour les boutons de la modal */}
-                        <div className="mt-4 flex justify-between">
-                            {/* Bouton de fermeture de la modal */}
+                        <div className="mt-4 flex justify-end">
                             <button
-                                className="bg-blue-500 text-white px-4 py-2 rounded"
-                                onClick={closeModal}
-                            >
-                                Fermer
-                            </button>
-                            {/* Bouton de téléchargement arrondi avec icône uniquement dans la modal */}
-                            <button
-                                className="bg-gray-200 text-gray-700 p-2 rounded-full"
+                                className="bg-blue-500 text-white p-3 rounded-full"
                                 onClick={() => handleDownload(selectedOrderDetails.id)}
                             >
-                                <FaDownload />
+                                <FaDownload className="text-base"/>
                             </button>
                         </div>
                     </div>
