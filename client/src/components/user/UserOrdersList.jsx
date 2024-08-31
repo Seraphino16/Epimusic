@@ -25,13 +25,13 @@ const UserOrdersList = () => {
 
     const getStatusColor = (status) => {
         switch (status) {
-            case 'In preparation':
+            case 'En préparation':
                 return 'text-blue-500';
-            case 'In delivery':
+            case 'En cours de livraison':
                 return 'text-yellow-500';
-            case 'Delivered':
+            case 'Livré':
                 return 'text-green-500';
-            case 'Cancelled':
+            case 'Annulé':
                 return 'text-red-500';
             default:
                 return 'text-gray-500';
@@ -40,13 +40,13 @@ const UserOrdersList = () => {
 
     const getStatusIcon = (status) => {
         switch (status) {
-            case 'In preparation':
+            case 'En préparation':
                 return <FaBoxOpen className="text-blue-500" />;
-            case 'In delivery':
+            case 'En cours de livraison':
                 return <FaShippingFast className="text-yellow-500" />;
-            case 'Delivered':
+            case 'Livré':
                 return <FaCheckCircle className="text-green-500" />;
-            case 'Cancelled':
+            case 'Annulé':
                 return <FaTimesCircle className="text-red-500" />;
             default:
                 return null;
