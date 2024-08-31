@@ -49,6 +49,10 @@ class Order
     #[ORM\Column(nullable: true)]
     private ?float $totalWithShippingCost = null;
 
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'orders')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -213,6 +217,18 @@ class Order
     public function setTotalWithShippingCost(?float $totalWithShippingCost): static
     {
         $this->totalWithShippingCost = $totalWithShippingCost;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }
