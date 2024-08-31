@@ -27,7 +27,7 @@ const CARD_ELEMENT_OPTIONS = {
   },
 };
 
-const PaymentForm = () => {
+const PaymentForm = ({ orderPrice }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [clientSecret, setClientSecret] = useState("");
@@ -40,7 +40,7 @@ const PaymentForm = () => {
       .post(
         "/api/payment/create-intent", //localhost
         {
-          amount: 20000,
+          amount: Math.round(orderPrice * 100),
         },
         {
           headers: {
@@ -54,7 +54,7 @@ const PaymentForm = () => {
       .catch((error) => {
         console.log(error);
       });
-  }, []);
+  }, [orderPrice]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -124,9 +124,9 @@ const PaymentForm = () => {
             />
           </div>
         </div>
-        <div>
+        <div className="w-1/6 ">
           <label className="block text-gray-700 mb-2 text-2xl">CVC</label>
-          <div className="p-3 border border-gray-300 rounded-lg shadow-sm">
+          <div className="p-3 w-full border border-gray-300 rounded-lg shadow-sm">
             <CardCvcElement
               options={CARD_ELEMENT_OPTIONS}
               className="w-full focus:outline-none"

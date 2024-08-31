@@ -29,7 +29,7 @@ const ShippingPage = () => {
             return;
         }
 
-        axios.get(`/api/order/${orderId}`)
+        axios.get(`/api/order/${orderId}`) //localhost
             .then(response => {
                 setOrder(response.data);
             })
