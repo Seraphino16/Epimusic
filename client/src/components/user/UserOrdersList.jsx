@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { FaBoxOpen, FaShippingFast, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import { FaBoxOpen, FaShippingFast, FaCheckCircle, FaTimesCircle, FaDownload } from 'react-icons/fa';
 
 const UserOrdersList = () => {
     const [orders, setOrders] = useState([]);
@@ -71,6 +71,11 @@ const UserOrdersList = () => {
         setSelectedOrderDetails(null);
     };
 
+    const handleDownload = (orderId) => {
+        // Implémentez ici la logique de téléchargement des détails de la commande
+        console.log(`Téléchargement de la commande ${orderId}`);
+    };
+
     return (
         <div className="w-full">
             <div className="flex flex-col items-center mb-4">
@@ -95,6 +100,13 @@ const UserOrdersList = () => {
                                     <span className={`ml-2 ${getStatusColor(order.status)}`}>{order.status}</span>
                                 </span>
                             </p>
+                            {/* Bouton de téléchargement arrondi avec icône uniquement sur la carte */}
+                            <button
+                                className="mt-2 bg-gray-200 text-gray-700 p-2 rounded-full"
+                                onClick={() => handleDownload(order.id)}
+                            >
+                                <FaDownload />
+                            </button>
                         </div>
                     ))
                 ) : (
@@ -130,12 +142,23 @@ const UserOrdersList = () => {
                         <div className="mt-4">
                             <strong>Prix Total :</strong> {selectedOrderDetails.totalPrice} €
                         </div>
-                        <button
-                            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
-                            onClick={closeModal}
-                        >
-                            Fermer
-                        </button>
+                        {/* Conteneur flex pour les boutons de la modal */}
+                        <div className="mt-4 flex justify-between">
+                            {/* Bouton de fermeture de la modal */}
+                            <button
+                                className="bg-blue-500 text-white px-4 py-2 rounded"
+                                onClick={closeModal}
+                            >
+                                Fermer
+                            </button>
+                            {/* Bouton de téléchargement arrondi avec icône uniquement dans la modal */}
+                            <button
+                                className="bg-gray-200 text-gray-700 p-2 rounded-full"
+                                onClick={() => handleDownload(selectedOrderDetails.id)}
+                            >
+                                <FaDownload />
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
