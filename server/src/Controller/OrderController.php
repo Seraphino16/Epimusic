@@ -6,6 +6,7 @@ use App\Entity\Order;
 use App\Controller\CartController;
 use App\Entity\OrderItems;
 use App\Entity\Stock;
+use App\Entity\User;
 use App\Repository\AnonymousCartRepository;
 use App\Repository\CartItemRepository;
 use App\Repository\CartRepository;
@@ -47,6 +48,7 @@ class OrderController extends AbstractController
         AnonymousCartRepository $anonymousCartRepository,
         CartItemRepository $cartItemRepository,
         UserRepository $userRepository,
+
         RequestStack $requestStack
     ) {
         $this->cartRepository = $cartRepository;
@@ -219,5 +221,101 @@ class OrderController extends AbstractController
         $this->entityManager->flush();
 
         return new JsonResponse(['success' => true]);
+    }
+
+
+    #[Route('/{userId}/orders', name: 'api_user_orders', methods: ['GET'])]
+    public function getUserOrders($userId, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $entityManager->getRepository(User::class)->find($userId);
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'Utilisateur non trouvé'], 404);
+        }
+
+        $orders = $entityManager->getRepository(Order::class)->findBy(['user' => $user]);
+
+        $data = [];
+        foreach ($orders as $order) {
+            $data[] = [
+                'id' => $order->getId(),
+                'status' => $order->getStatus(),
+                'createdAt' => $order->getCreatedAt()->format('d/m/Y'),
+            ];
+        }
+
+        return new JsonResponse($data);
+    }
+
+    #[Route('/{orderId}/details', name: 'api_order_details', methods: ['GET'])]
+    public function getOrderDetails($orderId): JsonResponse
+    {
+        $order = $this->entityManager->getRepository(Order::class)->find($orderId);
+
+        if (!$order) {
+            return new JsonResponse(['error' => 'Commande non trouvée'], 404);
+        }
+
+        $user = $order->getUser();
+        $primaryBillingAddress = null;
+        $deliveryAddress = $order->getOrderAddress();
+
+        foreach ($user->getAddresses() as $address) {
+            if ($address->isPrimary()) {
+                $primaryBillingAddress = $address;
+                break;
+            }
+        }
+
+        $orderItems = $order->getOrderItems();
+        $orderItemsData = [];
+
+        foreach ($orderItems as $item) {
+            $orderItemsData[] = [
+                'productName' => $item->getProductName(),
+                'color' => $item->getColor(),
+                'size' => $item->getSize(),
+                'quantity' => $item->getQuantity(),
+                'unitPrice' => $item->getUnitPrice(),
+                'totalPrice' => $item->getTotalPrice(),
+                'discount' => $item->getTotalPromoPrice() ? $item->getTotalPromoPrice() : null,
+            ];
+        }
+
+        $orderData = [
+            'id' => $order->getId(),
+            'status' => $order->getStatus(),
+            'createdAt' => $order->getCreatedAt()->format('d/m/Y'),
+            'dueDate' => $order->getCreatedAt()->modify('+30 days')->format('d/m/Y'),
+            'subTotal' => $order->getTotalPrice(),
+            'vatAmount' => $order->getTotalPrice() * 0.2,
+            'ShippingCost' => $order->getShippingCost(),
+            'totalWithShippingCost' => $order->getTotalWithShippingCost(),
+            'totalPrice' => $order->getTotalWithShippingCost(),
+            'firstName' => $user->getFirstName(),
+            'lastName' => $user->getLastName(),
+            'billingAddress' => $primaryBillingAddress ? [
+                'name' => $primaryBillingAddress->getName(),
+                'telephone' => $primaryBillingAddress->getTelephone(),
+                'address' => $primaryBillingAddress->getAddress(),
+                'complement' => $primaryBillingAddress->getComplement(),
+                'postalCode' => $primaryBillingAddress->getPostalCode(),
+                'city' => $primaryBillingAddress->getCity(),
+                'country' => $primaryBillingAddress->getCountry(),
+            ] : null,
+            'deliveryAddress' => $deliveryAddress ? [
+                'name' => $deliveryAddress->getName(),
+                'telephone' => $deliveryAddress->getTelephone(),
+                'email' => $deliveryAddress->getEmail(),
+                'address' => $deliveryAddress->getAddress(),
+                'complement' => $deliveryAddress->getComplement(),
+                'postalCode' => $deliveryAddress->getPostalCode(),
+                'city' => $deliveryAddress->getCity(),
+                'country' => $deliveryAddress->getCountry(),
+            ] : null,
+            'items' => $orderItemsData,
+        ];
+
+        return new JsonResponse($orderData);
     }
 }

@@ -50,6 +50,7 @@ class Order
     private ?float $totalWithShippingCost = null;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'orders')]
+
     #[ORM\JoinColumn(nullable: true)]
     private ?User $user = null;
 
@@ -156,7 +157,7 @@ class Order
     public function removeOrderItem(OrderItems $orderItem): self
     {
         if ($this->orderItems->removeElement($orderItem)) {
-           
+
             if ($orderItem->getOrder() === $this) {
                 $orderItem->setOrder(null);
             }
