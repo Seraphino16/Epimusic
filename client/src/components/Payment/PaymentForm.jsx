@@ -79,7 +79,7 @@ const PaymentForm = () => {
       alert(error.message);
     } else {
       alert("Paiement réussi");
-      console.log(paymentIntent);
+     
       setIsProcessing(false);
     }
   };

@@ -164,7 +164,6 @@ const ProductAdminUpdateModel = ({ isOpen, onClose, modelId, productCategoryId, 
                 deletedPhotos: deletedPhotos
             };
 
-            console.log('Updated Product:', updatedProduct);
 
             const response = await fetch(`http://localhost:8000/api/admin/model/${modelId}`, { //localhost
                 method: 'PUT',

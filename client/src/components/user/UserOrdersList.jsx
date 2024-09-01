@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { FaBoxOpen, FaShippingFast, FaCheckCircle, FaTimesCircle, FaDownload, FaTimes } from 'react-icons/fa';
-import { generateOrderPDF } from './pdfUtils';  // Importez la fonction depuis le fichier pdfUtils
+import { generateOrderPDF } from './pdfUtils'; 
 
 const UserOrdersList = () => {
     const [orders, setOrders] = useState([]);

@@ -35,7 +35,7 @@ const ProductDetailsPage = () => {
 
                 if (response.ok) {
                     setProduct(data);
-                    console.log(data)
+                   
                     if (data.models.length > 0) {
                         const firstModel = data.models[0];
                         setSelectedColor(firstModel.color);
@@ -120,7 +120,6 @@ const ProductDetailsPage = () => {
             user_id: user ? user.id : null,
         };
 
-        console.log(data)
 
         axios.post('http://localhost:8000/api/product/add/review', data) //localhost
             .then(response => {

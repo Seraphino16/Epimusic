@@ -158,7 +158,7 @@ const ProductAdminAddModel = () => {
                     setExistingModelId(data.existingModelId);
                     setShowModal(true);
                     setModalMessage(data.error);
-                    console.log(data);
+                  
                 }
 
                 setAlert({ type: "error", message: data.message });
@@ -170,7 +170,7 @@ const ProductAdminAddModel = () => {
                 navigate(`/admin/products`);
             }
         } catch (error) {
-            console.log("Erreur:", error);
+    
             setAlert({
                 type: "error",
                 message: "Erreur lors de la création du modèle",

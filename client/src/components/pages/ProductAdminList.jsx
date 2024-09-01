@@ -45,7 +45,7 @@ const ProductAdminList = () => {
             .get("http://localhost:8000/api/admin/products")
             .then((response) => {
                 setProducts(response.data);
-                console.log(response.data);
+               
             })
             .catch(error => {
                 setError("Erreur lors de la récupération des produits !");

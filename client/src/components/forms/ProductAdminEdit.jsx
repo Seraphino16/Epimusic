@@ -43,7 +43,7 @@ const ProductAdminEdit = () => {
         axios.get(`http://localhost:8000/api/admin/products/${id}`)
             .then((response) => {
                 const productData = response.data;
-                console.log(productData);
+                
                 setProduct(productData);
                 setName(productData.name);
                 setDescription(productData.description);
@@ -63,15 +63,9 @@ const ProductAdminEdit = () => {
                     setStock(firstModel.stock || 0);
                     setMainImageIndex(firstModel.images.findIndex((img) => img.is_main) || 0);
 
-                    console.log(color)
-                    console.log(size)
+            
                 }
                 
-                // if (productData.stocks.length > 0) {
-                //     setStocks(productData.stocks.quantity);
-
-                   
-                // }
 
                 if (productData.category.id === 2 || productData.category.id === 3) {
                     axios.get(`http://localhost:8000/api/admin/sizes/category/${productData.category.id}`)
@@ -219,10 +213,7 @@ const ProductAdminEdit = () => {
 
     const handleSubmit = async (event) => {
     event.preventDefault();
-    
-
-    console.log("Models avant soumission : ", models);
- 
+     
 
     if (price <= 0 || stock < 0 || weight < 0) {
         setError("Le prix doit être supérieur à zéro, le stock et le poids ne peuvent pas être négatifs !");
@@ -272,7 +263,6 @@ const ProductAdminEdit = () => {
             deletedPhotos: deletedPhotos
         };
 
-        console.log("Données du produit mises à jour : ", updatedProduct);
 
         await axios.put(`http://localhost:8000/api/admin/products/${id}`, updatedProduct);
 
