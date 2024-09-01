@@ -164,7 +164,6 @@ const ProductAdminUpdateModel = ({ isOpen, onClose, modelId, productCategoryId, 
                 deletedPhotos: deletedPhotos
             };
 
-            console.log('Updated Product:', updatedProduct);
 
             const response = await fetch(`http://localhost:8000/api/admin/model/${modelId}`, { //localhost
                 method: 'PUT',
@@ -182,7 +181,7 @@ const ProductAdminUpdateModel = ({ isOpen, onClose, modelId, productCategoryId, 
 
             setAlert({ type: 'success', message: 'Produit mis à jour avec succès.' });
             onClose();
-            navigate(`/admin`);
+            navigate(`/admin/products`);
         } catch (error) {
             console.error('Erreur lors de la mise à jour du produit:', error);
         }

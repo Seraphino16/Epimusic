@@ -42,10 +42,10 @@ const ProductAdminList = () => {
 
     const fetchProducts = () => {
         axios
-            .get("http://localhost:8000/api/admin/products") //localhost
+            .get("http://localhost:8000/api/admin/products")
             .then((response) => {
                 setProducts(response.data);
-                console.log(response.data);
+               
             })
             .catch(error => {
                 setError("Erreur lors de la récupération des produits !");
@@ -54,7 +54,7 @@ const ProductAdminList = () => {
 
     const deleteProduct = (id) => {
         return axios
-            .delete(`http://localhost:8000/api/admin/products/${id}`) //localhost
+            .delete(`http://localhost:8000/api/admin/products/${id}`)
             .then((response) => {
                 setProducts(products.filter((product) => product.id !== id));
                 setMessage("Produit supprimé avec succès !");
@@ -225,7 +225,7 @@ const ProductAdminList = () => {
                                     {filteredModel.stock > 0 && filteredModel.stock <= 5 ? (
                                         <>
                                             <p>Stock : {filteredModel.stock}</p>
-                                            <p className="text-yellow-500">Bientôt épuisé</p>
+                                            <p className="text-yellow-500">Réapprovisionnement</p>
                                         </>
                                     ) : filteredModel.stock > 5 ? (
                                         <>

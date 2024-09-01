@@ -10,12 +10,12 @@ const ButtonDelete = ({ id, onDeleteItem }) => {
     const handleDelete = () => {
         axios.delete(`http://localhost:8000/api/cart/item/delete/${id}`) //localhost
             .then((response) => {
-                console.log(response.data.message);
+        
                 onDeleteItem(response.data.message, id)
                 updateItemCount();
             })
             .catch((error) => {
-                console.log(error.message);
+        
                 onDeleteItem(error.message)
             })
     }

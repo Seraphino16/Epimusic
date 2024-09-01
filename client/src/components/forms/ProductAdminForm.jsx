@@ -100,7 +100,7 @@ const ProductAdminForm = () => {
                 tags: tags
             };
 
-            console.log(newProduct);
+         
             await axios.post("http://localhost:8000/api/admin/products", newProduct); //localhost
 
             setMessage("Produit créé avec succès !");

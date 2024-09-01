@@ -103,6 +103,7 @@ const PaymentForm = ({ orderPrice, orderId }) => {
       setIsProcessing(false);
       alert(error.message);
     } else {
+      alert("Paiement réussi");
       setIsProcessing(false);
       setPAymentSuccess(true);
     }

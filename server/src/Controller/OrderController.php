@@ -222,8 +222,7 @@ class OrderController extends AbstractController
 
         return new JsonResponse(['success' => true]);
     }
-
-
+  
     #[Route('/{userId}/orders', name: 'api_user_orders', methods: ['GET'])]
     public function getUserOrders($userId, EntityManagerInterface $entityManager): JsonResponse
     {

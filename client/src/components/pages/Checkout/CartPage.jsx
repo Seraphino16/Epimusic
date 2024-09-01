@@ -119,13 +119,13 @@ const CartPage = () => {
         })
         .then((response) => {
             const data = response.data;
-            console.log(data.shippingCosts);
+            
             localStorage.setItem("cart_shipping_costs", data.shippingCosts);
             navigate('/delivery');
         })
         .catch(error => {
             if (error.response) {
-                console.log(error.response.data.message);
+               
                 setAlert({ message: error.response.data.message, type: "error" });
             } else {
                 console.log(error.message);

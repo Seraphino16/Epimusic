@@ -7,7 +7,6 @@ import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 import ProductColors from "../ProductDetails/ProductColors";
 import ProductSizes from "../ProductDetails/ProductSizes";
 import ProductFilter from "../Filtered/ProductFilter";
-import { useCart } from '../../context/CartContext';
 
 const ProductList = () => {
     const { categoryId, category } = useParams();
@@ -18,7 +17,6 @@ const ProductList = () => {
     const [selectedSizes, setSelectedSizes] = useState({});
     const [error, setError] = useState("");
     const [alert, setAlert] = useState("");
-    const { updateItemCount } = useCart();
 
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [filters, setFilters] = useState({
@@ -107,7 +105,7 @@ const ProductList = () => {
                 queryParams.append('search', filters.search);  
             }
             const response = await axios.get(
-                `http://localhost:8000/api/products/category/${categoryId}?${queryParams.toString()}` //localhost
+                `http://localhost:8000/api/products/category/${categoryId}?${queryParams.toString()}`
             );
 
             setProducts(response.data);
@@ -288,16 +286,13 @@ const ProductList = () => {
         }
 
         axios
-            .post(`http://localhost:8000/api/cart/add/${product.id}`, data) //localhost
+            .post(`http://localhost:8000/api/cart/add/${product.id}`, data)
             .then((response) => {
                 setAlert("Produit ajouté au panier !");
                 if (response.data.token) {
                     localStorage.setItem("cart_token", response.data.token);
                 }
-
-                updateItemCount(); 
-
-                    })
+            })
             .catch(() => {
                 setAlert("Erreur lors de l'ajout du produit au panier.");
             });
@@ -395,7 +390,7 @@ const ProductList = () => {
                                                 filteredModel.images.length >
                                                     0 ? (
                                                     <img
-                                                        src={`http://localhost:8000${ //localhost
+                                                        src={`http://localhost:8000${
                                                             filteredModel.images.find(
                                                                 (img) =>
                                                                     img.is_main

@@ -22,7 +22,7 @@ class AdminOrderItem
     private ?Product $product = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: true)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'CASCADE')]
     private ?Model $model = null;
 
     #[ORM\Column(type: 'integer', nullable: true)]

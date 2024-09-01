@@ -4,11 +4,6 @@ import FilterOptions from './FilterOptions';
 
 const FilterDisclosure = ({ section }) => {
   
-  console.log('FilterDisclosure section id:', section.id);
-  console.log('FilterDisclosure section name:', section.name);
-  console.log('FilterDisclosure section options:', section.options);
-  console.log('FilterDisclosure section component:', section.component);
-
     return (
         <div className="border-t border-gray-200 px-4 py-6 lg:py-0 lg:border-0">
             <h3 className="border mx-2 my-3 flow-root rounded-lg">
