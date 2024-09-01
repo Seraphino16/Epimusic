@@ -165,140 +165,140 @@ class ProductController extends AbstractController
     }
 
     #[Route('/products/category/{categoryId}', name: 'products_by_category', methods: ['GET'])]
-public function productsByCategory(EntityManagerInterface $entityManager, Request $request, $categoryId): JsonResponse
-{
-    $filters = $this->getFilters($request);
-
-    if (!preg_match('/^[\p{L}\p{N}\s\'\"“”‘’]*$/u', $filters['search'])) {
-        return new JsonResponse(['error' => 'Votre recherche contient des caractères invalides'], 400);
-    }
-
-    $queryBuilder = $entityManager->createQueryBuilder();
-    $queryBuilder
-        ->select('p')
-        ->from(Product::class, 'p')
-        ->leftJoin('p.models', 'm')
-        ->leftJoin('m.color', 'c')
-        ->leftJoin('m.size', 's');
-        
-    if ($categoryId !== null && $categoryId !== '' && $categoryId !== 'undefined') {
-        $queryBuilder->where('p.category = :category')
-                    ->setParameter('category', $categoryId);
-    }
-
-    if ($filters['search']) {
-        $queryBuilder->andWhere('p.name LIKE :search')
-            ->setParameter('search', '%' . $filters['search'] . '%');
-    }
-
-    if ($filters['color']) {
-        $queryBuilder->andWhere('c.name = :color')
-            ->setParameter('color', $filters['color']);
-    }
-    if ($filters['size']) {
-        $queryBuilder->andWhere('s.value = :size')
-            ->setParameter('size', $filters['size']);
-    }
-    if ($filters['minWeight']) {
-        $queryBuilder->andWhere('m.weight >= :minWeight')
-            ->setParameter('minWeight', $filters['minWeight']);
-    }
-    if ($filters['maxWeight']) {
-        $queryBuilder->andWhere('m.weight <= :maxWeight')
-            ->setParameter('maxWeight', $filters['maxWeight']);
-    }
-    if ($filters['minPrice']) {
-        $queryBuilder->andWhere('m.price >= :minPrice')
-            ->setParameter('minPrice', $filters['minPrice']);
-    }
-    if ($filters['maxPrice']) {
-        $queryBuilder->andWhere('m.price <= :maxPrice')
-            ->setParameter('maxPrice', $filters['maxPrice']);
-    }
-
-    $products = $queryBuilder->getQuery()->getResult();
-    $now = new \DateTime();
-    $data = [];
-
-    foreach ($products as $product) {
-        $promotions = $entityManager->getRepository(Promotion::class)
-        ->createQueryBuilder('p')
-        ->where('p.product = :product')
-        ->andWhere('p.start_date <= :now')
-        ->andWhere('p.end_date >= :now')
-        ->setParameter('product', $product)
-        ->setParameter('now', $now)
-        ->getQuery()
-        ->getResult();
-
-    $promoDetails = [];
-    foreach ($promotions as $promotion) {
-        if ($promotion->isActive()) {
-            $promoDetails[] = [
-                'promo_price' => $promotion->getPromoPrice(),
-                'start_date' => $promotion->getStartDate()->format('Y-m-d'),
-                'end_date' => $promotion->getEndDate()->format('Y-m-d')
-            ];
+    public function productsByCategory(EntityManagerInterface $entityManager, Request $request, $categoryId): JsonResponse
+    {
+        $filters = $this->getFilters($request);
+    
+        if (!preg_match('/^[\p{L}\p{N}\s\'\"“”‘’]*$/u', $filters['search'])) {
+            return new JsonResponse(['error' => 'Votre recherche contient des caractères invalides'], 400);
         }
-    }
-        $models = [];
-        foreach ($product->getModels() as $model) {
-            if (($filters['color'] && $filters['color'] !== $model->getColor()?->getName()) ||
-                ($filters['size'] && $filters['size'] !== $model->getSize()?->getValue()) ||
-                ($filters['minWeight'] && $filters['minWeight'] > $model->getWeight()) ||
-                ($filters['maxWeight'] && $filters['maxWeight'] < $model->getWeight()) ||
-                ($filters['minPrice'] && $filters['minPrice'] > $model->getPrice()) ||
-                ($filters['maxPrice'] && $filters['maxPrice'] < $model->getPrice())) {
-                continue;
-            }
-
-            $images = [];
-            foreach ($model->getImage() as $image) {
-                $images[] = [
-                    'path' => $image->getPath(),
-                    'is_main' => $image->isMain(),
+    
+        $queryBuilder = $entityManager->createQueryBuilder();
+        $queryBuilder
+            ->select('p')
+            ->from(Product::class, 'p')
+            ->leftJoin('p.models', 'm')
+            ->leftJoin('m.color', 'c')
+            ->leftJoin('m.size', 's');
+            
+        if ($categoryId !== null && $categoryId !== '' && $categoryId !== 'undefined') {
+            $queryBuilder->where('p.category = :category')
+                        ->setParameter('category', $categoryId);
+        }
+    
+        if ($filters['search']) {
+            $queryBuilder->andWhere('p.name LIKE :search')
+                ->setParameter('search', '%' . $filters['search'] . '%');
+        }
+    
+        if ($filters['color']) {
+            $queryBuilder->andWhere('c.name = :color')
+                ->setParameter('color', $filters['color']);
+        }
+        if ($filters['size']) {
+            $queryBuilder->andWhere('s.value = :size')
+                ->setParameter('size', $filters['size']);
+        }
+        if ($filters['minWeight']) {
+            $queryBuilder->andWhere('m.weight >= :minWeight')
+                ->setParameter('minWeight', $filters['minWeight']);
+        }
+        if ($filters['maxWeight']) {
+            $queryBuilder->andWhere('m.weight <= :maxWeight')
+                ->setParameter('maxWeight', $filters['maxWeight']);
+        }
+        if ($filters['minPrice']) {
+            $queryBuilder->andWhere('m.price >= :minPrice')
+                ->setParameter('minPrice', $filters['minPrice']);
+        }
+        if ($filters['maxPrice']) {
+            $queryBuilder->andWhere('m.price <= :maxPrice')
+                ->setParameter('maxPrice', $filters['maxPrice']);
+        }
+    
+        $products = $queryBuilder->getQuery()->getResult();
+        $now = new \DateTime();
+        $data = [];
+    
+        foreach ($products as $product) {
+            $promotions = $entityManager->getRepository(Promotion::class)
+            ->createQueryBuilder('p')
+            ->where('p.product = :product')
+            ->andWhere('p.start_date <= :now')
+            ->andWhere('p.end_date >= :now')
+            ->setParameter('product', $product)
+            ->setParameter('now', $now)
+            ->getQuery()
+            ->getResult();
+    
+        $promoDetails = [];
+        foreach ($promotions as $promotion) {
+            if ($promotion->isActive()) {
+                $promoDetails[] = [
+                    'promo_price' => $promotion->getPromoPrice(),
+                    'start_date' => $promotion->getStartDate()->format('Y-m-d'),
+                    'end_date' => $promotion->getEndDate()->format('Y-m-d')
                 ];
             }
-
-            $stock = $entityManager->getRepository(Stock::class)->findOneBy([
-                'product' => $product,
-                'color' => $model->getColor(),
-                'size' => $model->getSize(),
-            ]);
-            $quantity = $stock ? $stock->getQuantity() : 0;
-
-            $models[] = [
-                'model_id' => $model->getId(),
-                'color' => $model->getColor() ? $model->getColor()->getName() : null,
-                'size' => $model->getSize() ? $model->getSize()->getValue() : null,
-                'price' => $model->getPrice(),
-                'images' => $images,
-                'weight' => $model->getWeight(),
-                'stock' => $quantity,
+        }
+            $models = [];
+            foreach ($product->getModels() as $model) {
+                if (($filters['color'] && $filters['color'] !== $model->getColor()?->getName()) ||
+                    ($filters['size'] && $filters['size'] !== $model->getSize()?->getValue()) ||
+                    ($filters['minWeight'] && $filters['minWeight'] > $model->getWeight()) ||
+                    ($filters['maxWeight'] && $filters['maxWeight'] < $model->getWeight()) ||
+                    ($filters['minPrice'] && $filters['minPrice'] > $model->getPrice()) ||
+                    ($filters['maxPrice'] && $filters['maxPrice'] < $model->getPrice())) {
+                    continue;
+                }
+    
+                $images = [];
+                foreach ($model->getImage() as $image) {
+                    $images[] = [
+                        'path' => $image->getPath(),
+                        'is_main' => $image->isMain(),
+                    ];
+                }
+    
+                $stock = $entityManager->getRepository(Stock::class)->findOneBy([
+                    'product' => $product,
+                    'color' => $model->getColor(),
+                    'size' => $model->getSize(),
+                ]);
+                $quantity = $stock ? $stock->getQuantity() : 0;
+    
+                $models[] = [
+                    'model_id' => $model->getId(),
+                    'color' => $model->getColor() ? $model->getColor()->getName() : null,
+                    'size' => $model->getSize() ? $model->getSize()->getValue() : null,
+                    'price' => $model->getPrice(),
+                    'images' => $images,
+                    'weight' => $model->getWeight(),
+                    'stock' => $quantity,
+                ];
+            }
+    
+            $brands = $product->getCategory()->getId() === 1
+                ? $product->getBrands()->map(fn($brand) => $brand->getName())->toArray()
+                : [];
+    
+            $tags = $product->getTags()->map(fn($tag) => $tag->getName())->toArray();
+    
+            $data[] = [
+                'id' => $product->getId(),
+                'name' => $product->getName(),
+                'description' => $product->getDescription(),
+                'category' => $product->getCategory()->getName(),
+                'models' => $models,
+                'brands' => $brands,
+                'tags' => $tags,
+                'weight' => $product->getWeights()->first()?->getValue() ?? 0,
+                'promotions' => $promoDetails,
             ];
         }
-
-        $brands = $product->getCategory()->getId() === 1
-            ? $product->getBrands()->map(fn($brand) => $brand->getName())->toArray()
-            : [];
-
-        $tags = $product->getTags()->map(fn($tag) => $tag->getName())->toArray();
-
-        $data[] = [
-            'id' => $product->getId(),
-            'name' => $product->getName(),
-            'description' => $product->getDescription(),
-            'category' => $product->getCategory()->getName(),
-            'models' => $models,
-            'brands' => $brands,
-            'tags' => $tags,
-            'weight' => $product->getWeights()->first()?->getValue() ?? 0,
-            'promotions' => $promoDetails,
-        ];
+    
+        return new JsonResponse($data);
     }
-
-    return new JsonResponse($data);
-}
 
     
 }
