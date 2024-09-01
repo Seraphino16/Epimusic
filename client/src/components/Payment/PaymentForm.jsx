@@ -10,6 +10,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
 
 const CARD_ELEMENT_OPTIONS = {
   style: {
@@ -38,6 +39,7 @@ const PaymentForm = ({ orderPrice, orderId }) => {
   const [paymentSuccess, setPAymentSuccess] = useState(false);
   const [userId, setUserId] = useState();
   const [cartToken, setCartToken] = useState();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -130,6 +132,11 @@ const PaymentForm = ({ orderPrice, orderId }) => {
           localStorage.removeItem('cart_token');
         }
       })
+      .then(
+        setTimeout(() => {
+          navigate('/');
+        }, 8000)
+      )
       .catch((error) => console.log(error));
   }, [paymentSuccess]);
 
@@ -143,6 +150,7 @@ const PaymentForm = ({ orderPrice, orderId }) => {
           />
           <p className="text-2xl mt-8 mb-4">Paiement réussi</p>
           <p className="text-2xl">Merci d'avoir commandé chez Epimusic !</p>
+          <p className="text-xl mt-2">Vous allez être redirigés dans quelques instants</p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6 max-w-md mx-auto">
