@@ -72,9 +72,14 @@ const UserOrdersList = () => {
         setSelectedOrderDetails(null);
     };
 
-    const handleDownload = () => {
-        if (!selectedOrderDetails) return;
-        generateOrderPDF(selectedOrderDetails);  // Utilisez la fonction importée pour générer le PDF
+    // Modifiez handleDownload pour accepter un orderId
+    const handleDownload = async (orderId) => {
+        try {
+            const response = await axios.get(`http://localhost:8000/api/order/${orderId}/details`);
+            generateOrderPDF(response.data);  // Utilisez la fonction importée pour générer le PDF
+        } catch (error) {
+            console.error("Erreur lors du téléchargement du PDF : ", error);
+        }
     };
 
     return (
@@ -103,9 +108,10 @@ const UserOrdersList = () => {
                                 </span>
                             </p>
                             <div className="flex mt-4">
+                                {/* Passez l'orderId à handleDownload */}
                                 <button
                                     className="mt-2 bg-blue-500 text-white p-3 rounded-full"
-                                    onClick={handleDownload}
+                                    onClick={() => handleDownload(order.id)}
                                 >
                                     <FaDownload className="text-base"/>
                                 </button>
@@ -154,7 +160,7 @@ const UserOrdersList = () => {
                         <div className="mt-4 flex justify-end">
                             <button
                                 className="bg-blue-500 text-white p-3 rounded-full"
-                                onClick={handleDownload}
+                                onClick={() => handleDownload(selectedOrderDetails.id)}
                             >
                                 <FaDownload className="text-base"/>
                             </button>
