@@ -8,7 +8,7 @@ const OrdersAdminList = () => {
     const fetchOrders = async () => {
         try {
             const response = await fetch(
-                "http://localhost:8000/api/admin/replenish-orders",
+                "http://localhost:8000/api/admin/replenish-orders", //localhost
                 {
                     method: "GET",
                     headers: {

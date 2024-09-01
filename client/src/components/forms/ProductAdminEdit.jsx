@@ -65,7 +65,6 @@ const ProductAdminEdit = () => {
 
             
                 }
-                
 
                 if (productData.category.id === 2 || productData.category.id === 3) {
                     axios.get(`http://localhost:8000/api/admin/sizes/category/${productData.category.id}`)

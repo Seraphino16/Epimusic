@@ -533,7 +533,7 @@ const ProductList = () => {
                                             onClick={() =>
                                                 handleAddToCart(product)
                                             }
-                                            disabled={filteredModel?.stock <= 5}
+                                            disabled={filteredModel?.stock <= 0}
                                         >
                                             <FontAwesomeIcon
                                                 icon={faShoppingCart}

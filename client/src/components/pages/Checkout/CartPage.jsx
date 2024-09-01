@@ -99,7 +99,7 @@ const CartPage = () => {
             return;
         }
         
-        axios.post("http://localhost:8000/api/order/", {
+        axios.post("http://localhost:8000/api/order/", { //localhost
             userId: userId,
             token: cartToken
         })

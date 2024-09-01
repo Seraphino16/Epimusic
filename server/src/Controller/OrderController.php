@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Order;
 use App\Controller\CartController;
 use App\Entity\OrderItems;
+use App\Entity\Stock;
 use App\Entity\User;
 use App\Repository\AnonymousCartRepository;
 use App\Repository\CartItemRepository;
@@ -15,12 +16,14 @@ use App\Repository\StockRepository;
 use App\Repository\UserRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use JsonSerializable;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api/order')]
 class OrderController extends AbstractController
@@ -87,8 +90,8 @@ class OrderController extends AbstractController
 
         $cartItems = $cart->getItems();
         $order = new Order();
-        $order->setStatus('pending');
-        $order->setPaymentStatus('pending');
+        $order->setStatus('Pending');
+        $order->setPaymentStatus('Pending');
         $orderTotal = 0;
         $orderTotalWithPromo = 0;
 
@@ -120,7 +123,8 @@ class OrderController extends AbstractController
             $orderItem->setQuantity($quantity);
             $orderItem->setUnitPrice($unitPrice);
             $orderItem->setTotalPrice($formattedTotal);
-            $orderItem->setGiftWrap(false);
+            $orderItem->setGiftWrap($cartItem->isGiftWrap());
+            $orderItem->setProduct($cartItem->getProduct());
             $order->addOrderItem($orderItem);
         }
 
@@ -144,6 +148,81 @@ class OrderController extends AbstractController
         return new JsonResponse(['message' => 'Commande créée avec succès', 'orderId' => $order->getId()], Response::HTTP_CREATED);
     }
 
+    #[Route('/{orderId}', name: 'get_order_by_id', methods: ['GET'])]
+    public function getOrderById(int $orderId, SerializerInterface $serializer): JsonResponse
+    {
+        $order = $this->entityManager->getRepository(Order::class)
+            ->find($orderId);
+
+        if (!$order) {
+            return new JsonResponse(['error' => 'Order not found', 404]);
+        }
+
+        $orderItems = $order->getOrderItems();
+        $orderItemsCount = 0;
+
+        foreach ($orderItems as $orderItem) {
+            $orderItemsCount += $orderItem->getQuantity();
+        }
+
+        $data = [
+            'totalPrice' => $order->getTotalPrice(),
+            'shippingCost' => $order->getShippingCost(),
+            'totalWithPromo' => $order->getTotalWithPromo(),
+            'totalWithShippingCost' => $order->getTotalWithShippingCost(),
+            'itemsQuantity' => $orderItemsCount,
+            'status' => $order->getStatus()
+        ];
+
+        return new JsonResponse($data);
+    }
+
+    #[Route('/validate/{orderId}', name: 'validate_order', methods: ['PATCH'])]
+    public function validateOrder(int $orderId): JsonResponse
+    {
+        $order = $this->entityManager->getRepository(Order::class)
+            ->find($orderId);
+
+        $order->setStatus('En préparation');
+        $order->setPaymentMethod('Credit Card');
+        $order->setUpdatedAt(new \DateTime());
+
+        $orderItems = $order->getOrderItems();
+        foreach ($orderItems as $orderItem) {
+            $soldQuantity = $orderItem->getQuantity();
+
+            $product = $orderItem->getProduct();
+
+            $color = $orderItem->getColor();
+            $size = $orderItem->getSize();
+
+            $criteria = ['product' => $product];
+            if ($color !== null) {
+                $criteria['color'] = $color;
+            }
+            if ($size !== null) {
+                $criteria['size'] = $size;
+            }
+
+            $stock = $this->entityManager->getRepository(Stock::class)
+                ->findOneBy($criteria);
+
+            $newQuantity = $stock->getQuantity() - $soldQuantity;
+
+            if ($newQuantity < 0) {
+                return new JsonResponse(['error' => "Ce produit n'est pas disponible pour cette quantité"], 400);
+            }
+
+            $stock->setQuantity($newQuantity);
+            $this->entityManager->persist($stock);
+        }
+
+        $this->entityManager->persist($order);
+        $this->entityManager->flush();
+
+        return new JsonResponse(['success' => true]);
+    }
+  
     #[Route('/{userId}/orders', name: 'api_user_orders', methods: ['GET'])]
     public function getUserOrders($userId, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -153,7 +232,15 @@ class OrderController extends AbstractController
             return new JsonResponse(['error' => 'Utilisateur non trouvé'], 404);
         }
 
-        $orders = $entityManager->getRepository(Order::class)->findBy(['user' => $user]);
+        $queryBuilder = $entityManager->getRepository(Order::class)->createQueryBuilder('o');
+
+        $queryBuilder
+            ->where('o.user = :user')
+            ->andWhere('o.status != :status')
+            ->setParameter('user', $user)
+            ->setParameter('status', 'pending');
+
+        $orders = $queryBuilder->getQuery()->getResult();
 
         $data = [];
         foreach ($orders as $order) {

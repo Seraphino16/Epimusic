@@ -18,7 +18,7 @@ const ProvidersAdminList = () => {
     const fetchProviders = async () => {
         try {
             const response = await fetch(
-                "http://localhost:8000/api/providers",
+                "http://localhost:8000/api/providers", //localhost
                 {
                     method: "GET",
                     headers: {
@@ -57,7 +57,7 @@ const ProvidersAdminList = () => {
         if (window.confirm("Voulez-vous vraiment supprimer ce prestataire ?")) {
             try {
                 const response = await fetch(
-                    `http://localhost:8000/api/provider/${id}`,
+                    `http://localhost:8000/api/provider/${id}`, //localhost
                     {
                         method: "DELETE",
                         headers: {

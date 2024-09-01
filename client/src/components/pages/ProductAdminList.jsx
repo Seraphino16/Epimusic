@@ -67,7 +67,7 @@ const ProductAdminList = () => {
     };
 
     const editProduct = (id) => {
-        navigate(`/admin/edit-product/${id}`);
+        navigate(`http://localhost:8000/admin/edit-product/${id}`); //localhost
     };
 
     const handleSelectProduct = (id) => {
@@ -197,7 +197,7 @@ const ProductAdminList = () => {
                                     className="mr-2"
                                 />
                                 <img
-                                    src={`http://localhost:8000${filteredModel?.images?.find(image => image.is_main)?.path || '/default-image.jpg'}`}
+                                    src={`${filteredModel?.images?.find(image => image.is_main)?.path || '/default-image.jpg'}`} //localhost
                                     alt={`Image principale du produit ${product.name}`}
                                     className="w-32 h-32 object-cover mb-2 rounded"
                                 />
