@@ -168,16 +168,24 @@ class OrderController extends AbstractController
     }
 
     #[Route('/{orderId}/details', name: 'api_order_details', methods: ['GET'])]
-    public function getOrderDetails($orderId, EntityManagerInterface $entityManager): JsonResponse
+    public function getOrderDetails($orderId): JsonResponse
     {
-        $order = $entityManager->getRepository(Order::class)->find($orderId);
+        $order = $this->entityManager->getRepository(Order::class)->find($orderId);
 
         if (!$order) {
             return new JsonResponse(['error' => 'Commande non trouvée'], 404);
         }
 
         $user = $order->getUser();
-        $orderAddress = $order->getOrderAddress();
+        $primaryBillingAddress = null;
+        $deliveryAddress = $order->getOrderAddress();
+
+        foreach ($user->getAddresses() as $address) {
+            if ($address->isPrimary()) {
+                $primaryBillingAddress = $address;
+                break;
+            }
+        }
 
         $orderItems = $order->getOrderItems();
         $orderItemsData = [];
@@ -189,6 +197,8 @@ class OrderController extends AbstractController
                 'size' => $item->getSize(),
                 'quantity' => $item->getQuantity(),
                 'unitPrice' => $item->getUnitPrice(),
+                'totalPrice' => $item->getTotalPrice(),
+                'discount' => $item->getTotalPromoPrice() ? $item->getTotalPromoPrice() : null,
             ];
         }
 
@@ -196,20 +206,31 @@ class OrderController extends AbstractController
             'id' => $order->getId(),
             'status' => $order->getStatus(),
             'createdAt' => $order->getCreatedAt()->format('d/m/Y'),
-            'totalPrice' => $order->getTotalPrice(),
+            'dueDate' => $order->getCreatedAt()->modify('+30 days')->format('d/m/Y'),
+            'subTotal' => $order->getTotalPrice(),
+            'vatAmount' => $order->getTotalPrice() * 0.2,
             'ShippingCost' => $order->getShippingCost(),
             'totalWithShippingCost' => $order->getTotalWithShippingCost(),
-            'firstName' => $user ? $user->getFirstName() : null,
-            'lastName' => $user ? $user->getLastName() : null,
-            'address' => $orderAddress ? [
-                'name' => $orderAddress->getName(),
-                'telephone' => $orderAddress->getTelephone(),
-                'email' => $orderAddress->getEmail(),
-                'address' => $orderAddress->getAddress(),
-                'complement' => $orderAddress->getComplement(),
-                'postalCode' => $orderAddress->getPostalCode(),
-                'city' => $orderAddress->getCity(),
-                'country' => $orderAddress->getCountry(),
+            'firstName' => $user->getFirstName(),
+            'lastName' => $user->getLastName(),
+            'billingAddress' => $primaryBillingAddress ? [
+                'name' => $primaryBillingAddress->getName(),
+                'telephone' => $primaryBillingAddress->getTelephone(),
+                'address' => $primaryBillingAddress->getAddress(),
+                'complement' => $primaryBillingAddress->getComplement(),
+                'postalCode' => $primaryBillingAddress->getPostalCode(),
+                'city' => $primaryBillingAddress->getCity(),
+                'country' => $primaryBillingAddress->getCountry(),
+            ] : null,
+            'deliveryAddress' => $deliveryAddress ? [
+                'name' => $deliveryAddress->getName(),
+                'telephone' => $deliveryAddress->getTelephone(),
+                'email' => $deliveryAddress->getEmail(),
+                'address' => $deliveryAddress->getAddress(),
+                'complement' => $deliveryAddress->getComplement(),
+                'postalCode' => $deliveryAddress->getPostalCode(),
+                'city' => $deliveryAddress->getCity(),
+                'country' => $deliveryAddress->getCountry(),
             ] : null,
             'items' => $orderItemsData,
         ];
