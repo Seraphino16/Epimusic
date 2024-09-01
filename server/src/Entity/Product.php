@@ -128,7 +128,7 @@ class Product
     public function removeModel(Model $model): static
     {
         if ($this->models->removeElement($model)) {
-            // set the owning side to null (unless already changed)
+            
             if ($model->getProduct() === $this) {
                 $model->setProduct(null);
             }
@@ -158,7 +158,7 @@ class Product
     public function removeStock(Stock $stock): static
     {
         if ($this->stocks->removeElement($stock)) {
-            // set the owning side to null (unless already changed)
+          
             if ($stock->getProduct() === $this) {
                 $stock->setProduct(null);
             }
@@ -301,7 +301,7 @@ class Product
     public function removePromotion(Promotion $promotion): static
     {
         if ($this->promotions->removeElement($promotion)) {
-            // set the owning side to null (unless already changed)
+            
             if ($promotion->getProduct() === $this) {
                 $promotion->setProduct(null);
             }

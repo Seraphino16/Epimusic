@@ -52,9 +52,7 @@ const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
             .catch((error) => console.log(error));
     };
 
-    if (item) {
-        console.log(item)
-    }
+    
 
     const cartPrice = parseFloat(localStorage.getItem("cart_price")) || 0;
     const cartPromoTotal =

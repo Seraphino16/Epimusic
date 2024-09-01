@@ -184,7 +184,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setMusicoin(Musicoin $musicoin): static
     {
-        // set the owning side of the relation if necessary
+      
         if ($musicoin->getUser() !== $this) {
             $musicoin->setUser($this);
         }
@@ -215,7 +215,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeOrder(Order $order): self
     {
         if ($this->orders->removeElement($order)) {
-            // set the owning side to null (unless already changed)
+            
             if ($order->getUser() === $this) {
                 $order->setUser(null);
             }

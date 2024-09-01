@@ -148,7 +148,7 @@ class Model
 
     public function setPromotion(Promotion $promotion): static
     {
-        // set the owning side of the relation if necessary
+       
         if ($promotion->getModel() !== $this) {
             $promotion->setModel($this);
         }

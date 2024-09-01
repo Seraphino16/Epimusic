@@ -131,7 +131,7 @@ class AdminOrderItem
         return $this;
     }
 
-    // Example method to access the product name
+
     public function getProductName(): ?string
     {
         return $this->product ? $this->product->getName() : null;

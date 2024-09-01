@@ -92,7 +92,7 @@ class Size
     public function removeModel(Model $model): static
     {
         if ($this->models->removeElement($model)) {
-            // set the owning side to null (unless already changed)
+          
             if ($model->getSize() === $this) {
                 $model->setSize(null);
             }
@@ -135,7 +135,7 @@ class Size
 
     public function setDimension(Dimension $dimension): static
     {
-        // set the owning side of the relation if necessary
+        
         if ($dimension->getSize() !== $this) {
             $dimension->setSize($this);
         }

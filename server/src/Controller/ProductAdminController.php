@@ -152,11 +152,10 @@ class ProductAdminController extends AbstractController
         $product->setDescription($data['description']);
         $product->setCategory($category);
 
-        // Persist the product to get its ID
+      
         $entityManager->persist($product);
         $entityManager->flush();
 
-        // Create a new model
         $model = new Model();
         $model->setProduct($product);
         if ($color) $model->setColor($color);
@@ -165,14 +164,12 @@ class ProductAdminController extends AbstractController
 
         $entityManager->persist($model);
 
-        // Handle weight
         $weight = new Weight();
         $weight->setValue($data['weight']);
         $weight->setProduct($product);
 
         $entityManager->persist($weight);
 
-        // Handle photo paths
         $photoPaths = $data['photoPaths'];
         foreach ($photoPaths as $index => $path) {
             $originalFilePath = $this->getParameter('uploads_directory') . '/' . basename($path);
@@ -192,7 +189,7 @@ class ProductAdminController extends AbstractController
             $entityManager->persist($image);
         }
 
-        // Handle stock
+
         $stock = new Stock();
         $stock->setProduct($product);
         $stock->setQuantity($data['stock']);
@@ -201,7 +198,7 @@ class ProductAdminController extends AbstractController
 
         $entityManager->persist($stock);
 
-        // Handle brand
+
         if ($category->getId() == 1 && isset($data['brand'])) {
             $brand = new Brand();
             $brand->setName($data['brand']);
@@ -209,7 +206,7 @@ class ProductAdminController extends AbstractController
             $entityManager->persist($brand);
         }
 
-        // Handle tags
+
         foreach ($data['tags'] as $tagName) {
             $tag = new Tag();
             $tag->setName($tagName);
@@ -225,18 +222,18 @@ class ProductAdminController extends AbstractController
     #[Route('/api/admin/products/{id}', name: 'api_product_delete', methods: ['DELETE'])]
     public function delete(Product $product, EntityManagerInterface $entityManager): JsonResponse
     {
-        // Remove the product images from the file system and the database
+       
         foreach ($product->getModels() as $model) {
             foreach ($model->getImage() as $image) {
                 $imagePath = $this->getParameter('uploads_directory') . '/' . basename($image->getPath());
                 if (file_exists($imagePath)) {
                     unlink($imagePath);
                 }
-                $entityManager->remove($image); // Remove image from the database
+                $entityManager->remove($image); 
             }
         }
 
-        // Remove related brands and tags
+      
         foreach ($product->getBrands() as $brand) {
             $entityManager->remove($brand);
         }
@@ -357,10 +354,9 @@ public function update(Request $request, Product $product, EntityManagerInterfac
         $entityManager->persist($weight);
     }
 
-    // Assurez-vous d'obtenir tous les modèles existants
     $existingModels = $product->getModels();
 
-    // Stocker les nouveaux stocks pour éviter les doublons
+ 
     $newStocks = [];
 
     foreach ($data['models'] as $index => $modelData) {
@@ -375,7 +371,7 @@ public function update(Request $request, Product $product, EntityManagerInterfac
             return new JsonResponse(['error' => 'Le prix doit être supérieur à zéro et le stock ne peut pas être négatifs !'], 400);
         }
 
-        // Trouver ou créer le modèle
+      
         $model = $index < count($existingModels) ? $existingModels[$index] : new Model();
         if (!$model->getId()) {
             $product->addModel($model);
@@ -388,7 +384,7 @@ public function update(Request $request, Product $product, EntityManagerInterfac
         $model->setSize($size);
         $model->setPrice($modelData['price']);
 
-        // Gestion des images
+      
         foreach ($model->getImage() as $image) {
             if (!in_array($image->getPath(), $modelData['photoPaths'])) {
                 $existingImagePath = $this->getParameter('uploads_directory') . '/' . basename($image->getPath());
@@ -427,7 +423,7 @@ public function update(Request $request, Product $product, EntityManagerInterfac
             }
         }
 
-        // Gérer le stock pour chaque modèle
+       
         $stock = $entityManager->getRepository(Stock::class)->findOneBy([
             'product' => $product,
             'color' => $color,
@@ -444,13 +440,13 @@ public function update(Request $request, Product $product, EntityManagerInterfac
         $stock->setQuantity($modelData['stock']);
         $newStocks[] = $stock;
 
-        // Enregistrer le modèle
+     
         if (!$model->getId()) {
             $entityManager->persist($model);
         }
     }
 
-    // Supprimer les stocks non utilisés
+
     $existingStocks = $entityManager->getRepository(Stock::class)->findBy(['product' => $product]);
     foreach ($existingStocks as $existingStock) {
         if (!in_array($existingStock, $newStocks, true)) {
@@ -458,12 +454,12 @@ public function update(Request $request, Product $product, EntityManagerInterfac
         }
     }
 
-    // Enregistrer tous les stocks mis à jour
+
     foreach ($newStocks as $stock) {
         $entityManager->persist($stock);
     }
 
-    // Mettre à jour les marques et les tags
+
     foreach ($product->getBrands() as $brand) {
         $entityManager->remove($brand);
     }
@@ -484,7 +480,6 @@ public function update(Request $request, Product $product, EntityManagerInterfac
         $entityManager->persist($tag);
     }
 
-    // Gérer le poids
 
 
     $entityManager->persist($product);
@@ -494,8 +489,6 @@ public function update(Request $request, Product $product, EntityManagerInterfac
 }
 
 
-
-    // New endpoint to rename uploaded files
     #[Route('/rename-upload', name: 'rename_upload', methods: ['POST'])]
     public function renameUpload(Request $request): JsonResponse
     {
@@ -793,12 +786,12 @@ public function update(Request $request, Product $product, EntityManagerInterfac
             return new JsonResponse(['error' => 'Invalid data'], 400);
         }
         
-        // Créer une nouvelle commande
+       
         $order = new AdminOrder();
-        $order->setOrderNumber($this->generateOrderNumber()); // Générer un order_number de 13 caractères        
-        $order->setStatus('livré'); // Définir le statut par défaut
-        $order->setCreatedAt(new \DateTime()); // Définir la date de création
-        $order->setUpdateAt(new \DateTime()); // Définir la date de mise à jour
+        $order->setOrderNumber($this->generateOrderNumber());       
+        $order->setStatus('livré');
+        $order->setCreatedAt(new \DateTime()); 
+        $order->setUpdateAt(new \DateTime());
         
         $entityManager->persist($order);
 
@@ -822,7 +815,7 @@ public function update(Request $request, Product $product, EntityManagerInterfac
                         $entityManager->persist($stock);
                     }
                     
-                    // Créer un nouvel AdminOrderItem pour chaque modèle commandé
+           
                     $orderItem = new AdminOrderItem();
                     $orderItem->setAdminOrder($order);
                     $orderItem->setProduct($product);
@@ -896,19 +889,19 @@ public function update(Request $request, Product $product, EntityManagerInterfac
     #[Route('/api/admin/replenish-orders', name: 'api_admin_replenish_orders', methods: ['GET'])]
     public function getReplenishOrders(EntityManagerInterface $entityManager): JsonResponse
     {
-        // Récupère toutes les commandes d'administration (AdminOrder)
+       
         $orders = $entityManager->getRepository(AdminOrder::class)->findAll();
 
         $orderDetails = [];
         foreach ($orders as $order) {
-            // Récupère les items associés à cette commande
+         
             $orderItems = $order->getOrderItems();
 
             foreach ($orderItems as $item) {
                 $product = $item->getProduct();
                 $model = $item->getModel();
 
-                // Récupère le stock actuel du produit et du modèle après la commande
+               
                 $stock = $entityManager->getRepository(Stock::class)->findOneBy([
                     'product' => $product,
                     'color' => $model->getColor(),

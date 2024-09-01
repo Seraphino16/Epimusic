@@ -73,7 +73,7 @@ class OrderController extends AbstractController
             return new JsonResponse(['error' => "Aucune donnée n'a été trouvée"], Response::HTTP_BAD_REQUEST);
         }
 
-        // Récupérer le panier basé sur le token ou l'utilisateur
+       
         if ($token) {
             $cart = $this->anonymousCartRepository->findOneBy(['token' => $token]);
         } elseif ($userId) {
@@ -137,7 +137,7 @@ class OrderController extends AbstractController
         $order->setCreatedAt($now);
         $order->setUpdatedAt($now);
 
-        // Associer l'utilisateur à la commande si l'utilisateur est authentifié
+     
         if (isset($user)) {
             $order->setUser($user);
         }

@@ -88,7 +88,7 @@ class ReviewController extends AbstractController
                     Response::HTTP_NOT_FOUND);
             }
 
-            // Vérifiez si l'utilisateur a déjà posté un avis pour ce produit
+
             $existingReview = $this->reviewRepository->findOneBy([
                 'user' => $user,
                 'product' => $product
@@ -101,7 +101,6 @@ class ReviewController extends AbstractController
                 );
             }
 
-            // Vérifiez si l'utilisateur a le produit dans son panier
             $cart = $cartRepository->findOneBy(['user' => $user]);
             if (!$cart || !$cart->getItems()->exists(fn($key, $item) => $item->getProduct()->getId() === $productId)) {
                 return new JsonResponse(

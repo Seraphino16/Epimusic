@@ -76,7 +76,6 @@ class AddressController extends AbstractController
         $address->setCountry($data['country']);
         $address->setIsPrimary($data['isPrimary'] ?? false);
 
-        // Associer l'adresse à l'utilisateur
         $address->setUser($user);
 
         $entityManager->persist($address);
@@ -163,7 +162,7 @@ class AddressController extends AbstractController
         }
 
         if (isset($data['isPrimary']) && $data['isPrimary']) {
-            // Désactiver l'adresse principale existante pour cet utilisateur
+           
             $existingAddresses = $entityManager->getRepository(Address::class)->findBy(['user' => $user]);
             foreach ($existingAddresses as $existingAddress) {
                 if ($existingAddress->isPrimary()) {

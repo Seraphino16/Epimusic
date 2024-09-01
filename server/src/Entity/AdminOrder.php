@@ -1,5 +1,5 @@
 <?php
-// server/src/Entity/AdminOrder.php
+
 
 namespace App\Entity;
 

@@ -104,7 +104,7 @@ const CartPage = () => {
             token: cartToken
         })
         .then(response => {
-            console.log(response.data)
+           
             const orderId = response.data.orderId;
             setOrderId(orderId);
             localStorage.setItem("orderId", orderId);
