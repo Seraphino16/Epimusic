@@ -38,7 +38,15 @@ const ShippingPage = () => {
             }) 
     }, [orderId]);
 
-    if (order) console.log(order);
+    useEffect(() => {
+        if (!order) {
+          return;
+        }
+    
+        if (order.status !== "pending") {
+          navigate("/");
+        }
+      }, [order]);
 
     useEffect(() => {
         if (!cartPrice || !shipppingCosts) {

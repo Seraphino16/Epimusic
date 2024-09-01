@@ -373,4 +373,28 @@ class CartController extends AbstractController
             Response::HTTP_OK
         );
     }
+
+    #[Route('/', name:'delete_cart', methods:['DELETE'])]
+    public function deleteCart(Request $request)
+    {
+        $token = $request->query->get('token');
+        $userId = $request->query->get('userId');
+
+        if (!$token && !$userId) {
+            return new JsonResponse(['error' => "Aucune donnéee n'a été trouvée"], Response::HTTP_BAD_REQUEST);
+        }
+
+        if ($token) {
+            $cart = $this->anonymousCartRepository->findOneBy(['token' => $token]);
+        }
+
+        if ($userId) {
+            $cart = $this->cartRepository->findOneBy(['user' => $userId]);
+        }
+
+        $this->entityManager->remove($cart);
+        $this->entityManager->flush();
+
+        return new JsonResponse(['success' => true]);
+    }
 }

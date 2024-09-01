@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Order;
 use App\Controller\CartController;
 use App\Entity\OrderItems;
+use App\Entity\Stock;
 use App\Repository\AnonymousCartRepository;
 use App\Repository\CartItemRepository;
 use App\Repository\CartRepository;
@@ -14,6 +15,7 @@ use App\Repository\StockRepository;
 use App\Repository\UserRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use JsonSerializable;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -57,7 +59,7 @@ class OrderController extends AbstractController
         $this->userRepository = $userRepository;
         $this->session = $requestStack->getSession();
     }
-    
+
     #[Route('/', name: 'create_order', methods: ['POST'])]
     public function createOrder(Request $request)
     {
@@ -120,6 +122,7 @@ class OrderController extends AbstractController
             $orderItem->setUnitPrice($unitPrice);
             $orderItem->setTotalPrice($formattedTotal);
             $orderItem->setGiftWrap(false);
+            $orderItem->setProduct($cartItem->getProduct());
             $order->addOrderItem($orderItem);
         }
 
@@ -143,12 +146,12 @@ class OrderController extends AbstractController
         return new JsonResponse(['message' => 'Commande créée avec succès', 'orderId' => $order->getId()], Response::HTTP_CREATED);
     }
 
-    #[Route('/{orderId}', name:'get_order_by_id', methods:['GET'])]
+    #[Route('/{orderId}', name: 'get_order_by_id', methods: ['GET'])]
     public function getOrderById(int $orderId, SerializerInterface $serializer): JsonResponse
     {
         $order = $this->entityManager->getRepository(Order::class)
             ->find($orderId);
-        
+
         if (!$order) {
             return new JsonResponse(['error' => 'Order not found', 404]);
         }
@@ -159,15 +162,62 @@ class OrderController extends AbstractController
         foreach ($orderItems as $orderItem) {
             $orderItemsCount += $orderItem->getQuantity();
         }
-        
+
         $data = [
             'totalPrice' => $order->getTotalPrice(),
             'shippingCost' => $order->getShippingCost(),
             'totalWithPromo' => $order->getTotalWithPromo(),
             'totalWithShippingCost' => $order->getTotalWithShippingCost(),
-            'itemsQuantity' => $orderItemsCount
+            'itemsQuantity' => $orderItemsCount,
+            'status' => $order->getStatus()
         ];
 
         return new JsonResponse($data);
+    }
+
+    #[Route('/validate/{orderId}', name: 'validate_order', methods: ['PATCH'])]
+    public function validateOrder(int $orderId): JsonResponse
+    {
+        $order = $this->entityManager->getRepository(Order::class)
+            ->find($orderId);
+
+        $order->setStatus('In preparation');
+        $order->setPaymentMethod('Credit Card');
+        $order->setUpdatedAt(new \DateTime());
+
+        $orderItems = $order->getOrderItems();
+        foreach ($orderItems as $orderItem) {
+            $soldQuantity = $orderItem->getQuantity();
+
+            $product = $orderItem->getProduct();
+
+            $color = $orderItem->getColor();
+            $size = $orderItem->getSize();
+
+            $criteria = ['product' => $product];
+            if ($color !== null) {
+                $criteria['color'] = $color;
+            }
+            if ($size !== null) {
+                $criteria['size'] = $size;
+            }
+
+            $stock = $this->entityManager->getRepository(Stock::class)
+                ->findOneBy($criteria);
+
+            $newQuantity = $stock->getQuantity() - $soldQuantity;
+
+            if ($newQuantity < 0) {
+                return new JsonResponse(['error' => "Ce produit n'est pas disponible pour cette quantité"], 400);
+            }
+
+            $stock->setQuantity($newQuantity);
+            $this->entityManager->persist($stock);
+        }
+
+        $this->entityManager->persist($order);
+        $this->entityManager->flush();
+
+        return new JsonResponse(['success' => true]);
     }
 }

@@ -3,6 +3,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import PaymentForm from "../../Payment/PaymentForm";
 import { loadStripe } from "@stripe/stripe-js";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const stripePromise = loadStripe(
   "pk_test_51PqupeCKzysEQIbT5aIFcS1ML0ajqFDNutYJqEHAsnO4qJTY9HQNr6T79788Cy6Wa4poZQGBDJLjyo39Ejwq9P1K00f0KYpJsH"
@@ -11,6 +12,7 @@ const stripePromise = loadStripe(
 const PaymentPage = () => {
   const [orderId, setOrderId] = useState(localStorage.getItem("orderId"));
   const [order, setOrder] = useState();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!orderId) {
@@ -26,6 +28,16 @@ const PaymentPage = () => {
         console.log(error);
       });
   }, [orderId]);
+
+  useEffect(() => {
+    if (!order) {
+      return;
+    }
+
+    if (order.status !== "pending") {
+      navigate("/");
+    }
+  }, [order]);
 
   return (
     <div className="w-9/12 m-auto">
