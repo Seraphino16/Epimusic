@@ -211,6 +211,7 @@ class OrderController extends AbstractController
             'vatAmount' => $order->getTotalPrice() * 0.2,
             'ShippingCost' => $order->getShippingCost(),
             'totalWithShippingCost' => $order->getTotalWithShippingCost(),
+            'totalPrice' => $order->getTotalWithShippingCost(), // Ajoutez cette ligne
             'firstName' => $user->getFirstName(),
             'lastName' => $user->getLastName(),
             'billingAddress' => $primaryBillingAddress ? [
