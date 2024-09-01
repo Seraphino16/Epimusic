@@ -233,7 +233,15 @@ class OrderController extends AbstractController
             return new JsonResponse(['error' => 'Utilisateur non trouvé'], 404);
         }
 
-        $orders = $entityManager->getRepository(Order::class)->findBy(['user' => $user]);
+        $queryBuilder = $entityManager->getRepository(Order::class)->createQueryBuilder('o');
+
+        $queryBuilder
+            ->where('o.user = :user')
+            ->andWhere('o.status != :status')
+            ->setParameter('user', $user)
+            ->setParameter('status', 'pending');
+
+        $orders = $queryBuilder->getQuery()->getResult();
 
         $data = [];
         foreach ($orders as $order) {
