@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Order;
 use App\Controller\CartController;
 use App\Entity\OrderItems;
+use App\Entity\User;
 use App\Repository\AnonymousCartRepository;
 use App\Repository\CartItemRepository;
 use App\Repository\CartRepository;
@@ -44,6 +45,7 @@ class OrderController extends AbstractController
         AnonymousCartRepository $anonymousCartRepository,
         CartItemRepository $cartItemRepository,
         UserRepository $userRepository,
+
         RequestStack $requestStack
     ) {
         $this->cartRepository = $cartRepository;
@@ -56,44 +58,45 @@ class OrderController extends AbstractController
         $this->userRepository = $userRepository;
         $this->session = $requestStack->getSession();
     }
-    
+
     #[Route('/', name: 'create_order', methods: ['POST'])]
     public function createOrder(Request $request)
     {
         $data = json_decode($request->getContent(), true);
         $userId = isset($data['userId']) ? (int)$data['userId'] : null;
-
         $token = isset($data['token']) ? $data['token'] : null;
 
         if (!$token && !$userId) {
-            return new JsonResponse(['error' => "Aucune donnéee n'a été trouvée"], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(['error' => "Aucune donnée n'a été trouvée"], Response::HTTP_BAD_REQUEST);
         }
 
+        // Récupérer le panier basé sur le token ou l'utilisateur
         if ($token) {
             $cart = $this->anonymousCartRepository->findOneBy(['token' => $token]);
+        } elseif ($userId) {
+            $user = $this->userRepository->find($userId);
+            if (!$user) {
+                return new JsonResponse(['error' => "Utilisateur non trouvé"], Response::HTTP_NOT_FOUND);
+            }
+            $cart = $this->cartRepository->findOneBy(['user' => $user]);
         }
 
-        if ($userId) {
-            $cart = $this->cartRepository->findOneBy(['user' => $userId]);
+        if (!$cart) {
+            return new JsonResponse(['error' => "Panier non trouvé"], Response::HTTP_NOT_FOUND);
         }
 
         $cartItems = $cart->getItems();
-
         $order = new Order();
         $order->setStatus('pending');
         $order->setPaymentStatus('pending');
-
         $orderTotal = 0;
         $orderTotalWithPromo = 0;
 
         foreach ($cartItems as $cartItem) {
             $orderItem = new OrderItems();
-
             $quantity = $cartItem->getQuantity();
             $unitPrice = $cartItem->getModel()->getPrice();
-
             $totalItem = $quantity * $unitPrice;
-
             $unitPromoPrice = $cartItem->getPromoPrice();
 
             if ($unitPromoPrice) {
@@ -101,15 +104,13 @@ class OrderController extends AbstractController
                 $formattedPromoPrice = number_format($totalPromo, 2, '.', '');
                 $orderItem->setUnitPromoPrice($unitPromoPrice);
                 $orderItem->setTotalPromoPrice($formattedPromoPrice);
-                
                 $orderTotalWithPromo += $totalPromo;
             } else {
-                $orderTotalWithPromo += $totalItem; 
+                $orderTotalWithPromo += $totalItem;
             }
 
-            $orderTotal += $totalItem;    
+            $orderTotal += $totalItem;
             $formattedTotal = number_format($totalItem, 2, '.', '');
-
             $orderItem->setProductName($cartItem->getProduct()->getName());
 
             $color = $cartItem->getModel()->getColor();
@@ -120,7 +121,6 @@ class OrderController extends AbstractController
             $orderItem->setUnitPrice($unitPrice);
             $orderItem->setTotalPrice($formattedTotal);
             $orderItem->setGiftWrap(false);
-
             $order->addOrderItem($orderItem);
         }
 
@@ -133,9 +133,109 @@ class OrderController extends AbstractController
         $order->setCreatedAt($now);
         $order->setUpdatedAt($now);
 
+        // Associer l'utilisateur à la commande si l'utilisateur est authentifié
+        if (isset($user)) {
+            $order->setUser($user);
+        }
+
         $this->entityManager->persist($order);
         $this->entityManager->flush();
 
         return new JsonResponse(['message' => 'Commande créée avec succès', 'orderId' => $order->getId()], Response::HTTP_CREATED);
+    }
+
+    #[Route('/{userId}/orders', name: 'api_user_orders', methods: ['GET'])]
+    public function getUserOrders($userId, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $entityManager->getRepository(User::class)->find($userId);
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'Utilisateur non trouvé'], 404);
+        }
+
+        $orders = $entityManager->getRepository(Order::class)->findBy(['user' => $user]);
+
+        $data = [];
+        foreach ($orders as $order) {
+            $data[] = [
+                'id' => $order->getId(),
+                'status' => $order->getStatus(),
+                'createdAt' => $order->getCreatedAt()->format('d/m/Y'),
+            ];
+        }
+
+        return new JsonResponse($data);
+    }
+
+    #[Route('/{orderId}/details', name: 'api_order_details', methods: ['GET'])]
+    public function getOrderDetails($orderId): JsonResponse
+    {
+        $order = $this->entityManager->getRepository(Order::class)->find($orderId);
+
+        if (!$order) {
+            return new JsonResponse(['error' => 'Commande non trouvée'], 404);
+        }
+
+        $user = $order->getUser();
+        $primaryBillingAddress = null;
+        $deliveryAddress = $order->getOrderAddress();
+
+        foreach ($user->getAddresses() as $address) {
+            if ($address->isPrimary()) {
+                $primaryBillingAddress = $address;
+                break;
+            }
+        }
+
+        $orderItems = $order->getOrderItems();
+        $orderItemsData = [];
+
+        foreach ($orderItems as $item) {
+            $orderItemsData[] = [
+                'productName' => $item->getProductName(),
+                'color' => $item->getColor(),
+                'size' => $item->getSize(),
+                'quantity' => $item->getQuantity(),
+                'unitPrice' => $item->getUnitPrice(),
+                'totalPrice' => $item->getTotalPrice(),
+                'discount' => $item->getTotalPromoPrice() ? $item->getTotalPromoPrice() : null,
+            ];
+        }
+
+        $orderData = [
+            'id' => $order->getId(),
+            'status' => $order->getStatus(),
+            'createdAt' => $order->getCreatedAt()->format('d/m/Y'),
+            'dueDate' => $order->getCreatedAt()->modify('+30 days')->format('d/m/Y'),
+            'subTotal' => $order->getTotalPrice(),
+            'vatAmount' => $order->getTotalPrice() * 0.2,
+            'ShippingCost' => $order->getShippingCost(),
+            'totalWithShippingCost' => $order->getTotalWithShippingCost(),
+            'totalPrice' => $order->getTotalWithShippingCost(),
+            'firstName' => $user->getFirstName(),
+            'lastName' => $user->getLastName(),
+            'billingAddress' => $primaryBillingAddress ? [
+                'name' => $primaryBillingAddress->getName(),
+                'telephone' => $primaryBillingAddress->getTelephone(),
+                'address' => $primaryBillingAddress->getAddress(),
+                'complement' => $primaryBillingAddress->getComplement(),
+                'postalCode' => $primaryBillingAddress->getPostalCode(),
+                'city' => $primaryBillingAddress->getCity(),
+                'country' => $primaryBillingAddress->getCountry(),
+            ] : null,
+            'deliveryAddress' => $deliveryAddress ? [
+                'name' => $deliveryAddress->getName(),
+                'telephone' => $deliveryAddress->getTelephone(),
+                'email' => $deliveryAddress->getEmail(),
+                'address' => $deliveryAddress->getAddress(),
+                'complement' => $deliveryAddress->getComplement(),
+                'postalCode' => $deliveryAddress->getPostalCode(),
+                'city' => $deliveryAddress->getCity(),
+                'country' => $deliveryAddress->getCountry(),
+            ] : null,
+            'items' => $orderItemsData,
+        ];
+
+        return new JsonResponse($orderData);
     }
 }
