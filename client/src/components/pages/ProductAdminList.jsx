@@ -45,7 +45,7 @@ const ProductAdminList = () => {
             .get("http://localhost:8000/api/admin/products")
             .then((response) => {
                 setProducts(response.data);
-               
+                console.log(response.data);
             })
             .catch(error => {
                 setError("Erreur lors de la récupération des produits !");
@@ -67,7 +67,7 @@ const ProductAdminList = () => {
     };
 
     const editProduct = (id) => {
-        navigate(`http://localhost:8000/admin/edit-product/${id}`); //localhost
+        navigate(`/admin/edit-product/${id}`);
     };
 
     const handleSelectProduct = (id) => {
@@ -197,7 +197,7 @@ const ProductAdminList = () => {
                                     className="mr-2"
                                 />
                                 <img
-                                    src={`${filteredModel?.images?.find(image => image.is_main)?.path || '/default-image.jpg'}`} //localhost
+                                    src={`http://localhost:8000${filteredModel?.images?.find(image => image.is_main)?.path || '/default-image.jpg'}`}
                                     alt={`Image principale du produit ${product.name}`}
                                     className="w-32 h-32 object-cover mb-2 rounded"
                                 />
