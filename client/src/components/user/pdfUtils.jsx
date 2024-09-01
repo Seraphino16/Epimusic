@@ -30,7 +30,7 @@ export const generateOrderPDF = (orderDetails) => {
     if (orderDetails.billingAddress) {
         doc.setFontSize(10);
         doc.setFont('helvetica', 'bold');
-        doc.setTextColor(0, 0, 0); // Couleur du texte en noir
+        doc.setTextColor(0, 0, 0);
         doc.text('Adresse de facturation', marginLeft, marginTop);
         doc.setFont('helvetica', 'normal');
         doc.text(orderDetails.billingAddress.name, marginLeft, marginTop + 5);
