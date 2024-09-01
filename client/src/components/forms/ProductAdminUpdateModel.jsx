@@ -31,7 +31,7 @@ const ProductAdminUpdateModel = ({ isOpen, onClose, modelId, productCategoryId, 
 
     const fetchModelData = useCallback(async (id) => {
         try {
-            const response = await fetch(`http://localhost:8000/api/admin/model/${id}`);
+            const response = await fetch(`http://localhost:8000/api/admin/model/${id}`); //localhost
             const data = await response.json();
             
             if (data) {
@@ -55,7 +55,7 @@ const ProductAdminUpdateModel = ({ isOpen, onClose, modelId, productCategoryId, 
 
     const fetchColors = useCallback(async () => {
         try {
-            const response = await fetch('http://localhost:8000/api/admin/colors');
+            const response = await fetch('http://localhost:8000/api/admin/colors'); //localhost
             const data = await response.json();
             setColors(data);
         } catch (error) {
@@ -66,7 +66,7 @@ const ProductAdminUpdateModel = ({ isOpen, onClose, modelId, productCategoryId, 
 
     const fetchSizes = useCallback(async (categoryId) => {
         try {
-            const response = await fetch(`http://localhost:8000/api/admin/sizes/category/${categoryId}`);
+            const response = await fetch(`http://localhost:8000/api/admin/sizes/category/${categoryId}`); //localhost
             const data = await response.json();
             setSizes(data);
         } catch (error) {
@@ -114,7 +114,7 @@ const ProductAdminUpdateModel = ({ isOpen, onClose, modelId, productCategoryId, 
         formData.append("file", file);
 
         try {
-            const response = await fetch("http://localhost:8000/upload", {
+            const response = await fetch("http://localhost:8000/upload", { //localhost
                 method: 'POST',
                 body: formData,
             });
@@ -164,9 +164,8 @@ const ProductAdminUpdateModel = ({ isOpen, onClose, modelId, productCategoryId, 
                 deletedPhotos: deletedPhotos
             };
 
-            console.log('Updated Product:', updatedProduct);
 
-            const response = await fetch(`http://localhost:8000/api/admin/model/${modelId}`, {
+            const response = await fetch(`http://localhost:8000/api/admin/model/${modelId}`, { //localhost
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -182,7 +181,7 @@ const ProductAdminUpdateModel = ({ isOpen, onClose, modelId, productCategoryId, 
 
             setAlert({ type: 'success', message: 'Produit mis à jour avec succès.' });
             onClose();
-            navigate(`/admin`);
+            navigate(`/admin/products`);
         } catch (error) {
             console.error('Erreur lors de la mise à jour du produit:', error);
         }

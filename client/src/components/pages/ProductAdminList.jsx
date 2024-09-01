@@ -45,7 +45,7 @@ const ProductAdminList = () => {
             .get("http://localhost:8000/api/admin/products")
             .then((response) => {
                 setProducts(response.data);
-                console.log(response.data);
+            
             })
             .catch(error => {
                 setError("Erreur lors de la récupération des produits !");
@@ -225,7 +225,7 @@ const ProductAdminList = () => {
                                     {filteredModel.stock > 0 && filteredModel.stock <= 5 ? (
                                         <>
                                             <p>Stock : {filteredModel.stock}</p>
-                                            <p className="text-yellow-500">Bientôt épuisé</p>
+                                            <p className="text-yellow-500">Réapprovisionnement</p>
                                         </>
                                     ) : filteredModel.stock > 5 ? (
                                         <>

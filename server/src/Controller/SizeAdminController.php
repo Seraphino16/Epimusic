@@ -1,5 +1,4 @@
 <?php
-// src/Controller/SizeAdminController.php
 
 namespace App\Controller;
 

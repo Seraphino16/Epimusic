@@ -25,7 +25,7 @@ const ProductAdminAddModel = () => {
     const getCategoryId = async (category) => {
         try {
             const response = await fetch(
-                `http://localhost:8000/api/admin/get/catergoryId?name=${category}`
+                `http://localhost:8000/api/admin/get/catergoryId?name=${category}` //localhost
             );
             if (!response.ok) {
                 setAlert({ type: "error", message: response.message });
@@ -44,7 +44,7 @@ const ProductAdminAddModel = () => {
     const getColors = async () => {
         try {
             const response = await fetch(
-                `http://localhost:8000/api/admin/colors`
+                `http://localhost:8000/api/admin/colors` //localhost
             );
             if (!response.ok) {
                 setAlert({ type: "error", message: response.message });
@@ -63,7 +63,7 @@ const ProductAdminAddModel = () => {
     const getSizes = async (categoryId) => {
         try {
             const response = await fetch(
-                `http://localhost:8000/api/admin/sizes/category/${categoryId}`
+                `http://localhost:8000/api/admin/sizes/category/${categoryId}` //localhost
             );
             if (!response.ok) {
                 setAlert({ type: "error", message: response.message });
@@ -91,7 +91,7 @@ const ProductAdminAddModel = () => {
         const formData = new FormData();
         formData.append("file", file);
 
-        const response = await fetch("http://localhost:8000/upload", {
+        const response = await fetch("http://localhost:8000/upload", { //localhost
             method: "POST",
             body: formData,
         });
@@ -141,7 +141,7 @@ const ProductAdminAddModel = () => {
             };
 
             const response = await fetch(
-                `http://localhost:8000/api/admin/addModel`,
+                `http://localhost:8000/api/admin/addModel`, //localhost
                 {
                     method: "POST",
                     headers: {
@@ -158,7 +158,7 @@ const ProductAdminAddModel = () => {
                     setExistingModelId(data.existingModelId);
                     setShowModal(true);
                     setModalMessage(data.error);
-                    console.log(data);
+                  
                 }
 
                 setAlert({ type: "error", message: data.message });
@@ -170,7 +170,7 @@ const ProductAdminAddModel = () => {
                 navigate(`/admin/products`);
             }
         } catch (error) {
-            console.log("Erreur:", error);
+    
             setAlert({
                 type: "error",
                 message: "Erreur lors de la création du modèle",

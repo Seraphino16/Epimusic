@@ -13,7 +13,7 @@ const ProvidersProductsModal = ({ isOpen, onClose, providerId }) => {
 
     const fetchProducts = async (providerId) => {
         try {
-            const response = await fetch(`http://localhost:8000/api/provider/${providerId}/products`, {
+            const response = await fetch(`/api/provider/${providerId}/products`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'

@@ -13,7 +13,7 @@ const ProductCategoriesList = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await axios.get("http://localhost:8000/api/admin/categories");
+                const response = await axios.get("http://localhost:8000/api/admin/categories"); //localhost
                 setCategories(response.data);
             } catch (error) {
                 console.error("Erreur lors de la récupération des catégories : ", error);
@@ -30,7 +30,7 @@ const ProductCategoriesList = () => {
             {categories.map((category) => (
                 <CategoryCard
                     key={category.id}
-                    imageSrc={`http://localhost:8000${category.imagePath}`}
+                    imageSrc={`http://localhost:8000${category.imagePath}`} //localhost
                     categoryName={category.name}
                     categoryId={category.id}
                 />

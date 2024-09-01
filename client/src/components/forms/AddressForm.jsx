@@ -10,7 +10,7 @@ const AddressForm = () => {
     const [postalCode, setPostalCode] = useState("");
     const [city, setCity] = useState("");
     const [country, setCountry] = useState("");
-    const [isPrimary, setIsPrimary] = useState(false);  // Ajout du state pour isPrimary
+    const [isPrimary, setIsPrimary] = useState(false);
     const [error, setError] = useState("");
     const [message, setMessage] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,8 +20,8 @@ const AddressForm = () => {
         e.preventDefault();
         setIsSubmitting(true);
 
-        const user = JSON.parse(localStorage.getItem('user')); // Récupérer les infos du user connecté
-        const userId = user.id; // Récupérer l'ID de l'utilisateur
+        const user = JSON.parse(localStorage.getItem('user')); 
+        const userId = user.id; 
 
         const newAddress = {
             name,
@@ -31,11 +31,11 @@ const AddressForm = () => {
             postalCode,
             city,
             country,
-            isPrimary,  // Ajouter l'état isPrimary
+            isPrimary,
         };
 
         try {
-            await axios.post(`http://localhost:8000/api/user/${userId}/addresses`, newAddress, {
+            await axios.post(`http://localhost:8000/api/user/${userId}/addresses`, newAddress, { //localhost
                 headers: {
                     "Content-Type": "application/json",
                 },

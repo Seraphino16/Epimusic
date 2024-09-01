@@ -1,5 +1,4 @@
 <?php
-// src/Controller/ColorAdminController.php
 
 namespace App\Controller;
 

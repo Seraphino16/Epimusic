@@ -212,15 +212,14 @@ const FilteredArticles = () => {
             </h2>
 
             <div className="grid grid-cols-1 gap-x-8 gap-y-10">
-              {/* Filters */}
+              
               <form className="hidden lg:block">
                 {filters.map((section) => (
                   <FilterDisclosure key={section.id} section={section} />
                 
                 ))}
               </form>
-              {/* Product grid */}
-              <div className="lg:col-span-3">{/* Your content */}</div>
+          
             </div>
           </section>
         </main>

@@ -105,7 +105,7 @@ class CartController extends AbstractController
             ->getQuery()
             ->getResult();
 
-            if (!empty($promotions)) {
+        if (!empty($promotions)) {
             foreach ($promotions as $promotion) {
                 if ($now >= $promotion->getStartDate() && $now <= $promotion->getEndDate()) {
                     $promoPrice = $promotion->getPromoPrice();
@@ -132,8 +132,10 @@ class CartController extends AbstractController
 
             $anonymousCart = $this->anonymousCartRepository->findOneBy(['token' => $token]);
             if (!$anonymousCart) {
-                return new JsonResponse(['error' => 'Panier anonyme non trouvé'],
-                                            Response::HTTP_NOT_FOUND);
+                return new JsonResponse(
+                    ['error' => 'Panier anonyme non trouvé'],
+                    Response::HTTP_NOT_FOUND
+                );
             }
             $cart = $anonymousCart;
         } else {
@@ -152,6 +154,7 @@ class CartController extends AbstractController
             $cartItem->setQuantity($quantity);
             $cartItem->setPrice($model->getPrice());
             $cartItem->setAnonymousCart($cart);
+            $cartItem->setGiftWrap(false);
 
             $this->entityManager->persist($cartItem);
             $cart->calculateTotal();
@@ -176,8 +179,10 @@ class CartController extends AbstractController
         if ($cartItem) {
             $newQuantity = $cartItem->getQuantity() + $quantity;
             if ($newQuantity > $stock) {
-                return new JsonResponse(['error' => 'La quantité dépasse le stock disponible'],
-                                         Response::HTTP_BAD_REQUEST);
+                return new JsonResponse(
+                    ['error' => 'La quantité dépasse le stock disponible'],
+                    Response::HTTP_BAD_REQUEST
+                );
             }
             $cartItem->setQuantity($newQuantity);
         } else {
@@ -209,8 +214,7 @@ class CartController extends AbstractController
         ], Response::HTTP_OK);
     }
 
-    #[Route('/', name: 'cart_get_items', methods: ["GET"])]
-    public function getCartItems(Request $request): JsonResponse
+    public function getCartItems(Request $request)
     {
         $token = $request->query->get('token');
         $userId = $request->query->get('userId');
@@ -220,7 +224,7 @@ class CartController extends AbstractController
         }
 
         if ($token) {
-            $cart = $this->anonymousCartRepository->findOneBy(['token' => $token]);        
+            $cart = $this->anonymousCartRepository->findOneBy(['token' => $token]);
         }
 
         if ($userId) {
@@ -229,7 +233,30 @@ class CartController extends AbstractController
 
         $cartItems = $cart->getItems();
 
-        
+        return $cartItems;
+    }
+
+    #[Route('/', name: 'cart_get_items', methods: ["GET"])]
+    public function getJsonCartItems(Request $request): JsonResponse
+    {
+        $token = $request->query->get('token');
+        $userId = $request->query->get('userId');
+
+        if (!$token && !$userId) {
+            return new JsonResponse(['error' => "Aucune donnéee n'a été trouvée"], Response::HTTP_BAD_REQUEST);
+        }
+
+        if ($token) {
+            $cart = $this->anonymousCartRepository->findOneBy(['token' => $token]);
+        }
+
+        if ($userId) {
+            $cart = $this->cartRepository->findOneBy(['user' => $userId]);
+        }
+
+        $cartItems = $cart->getItems();
+
+
         $itemsData = [];
         foreach ($cartItems as $cartItem) {
 
@@ -260,7 +287,8 @@ class CartController extends AbstractController
                 'price' => $cartItem->getPrice(),
                 'promo_price' => $cartItem->getPromoPrice(),
                 'total' => $formattedTotal,
-                'total_promotion' => $formattedTotalPromotion
+                'total_promotion' => $formattedTotalPromotion,
+                'isGift' => $cartItem->isGiftWrap(),
             ];
         }
 
@@ -292,9 +320,9 @@ class CartController extends AbstractController
         } else if ($quantity > $stock) {
             return new JsonResponse(['error' => "Il ne reste plus d'autres articles disponibles"], 400);
         }
-        
+
         $cartItem->setQuantity($quantity);
-        
+
         $entityManager->persist($cartItem);
         $entityManager->flush();
 
@@ -309,14 +337,14 @@ class CartController extends AbstractController
         $formattedTotalPromotion = $promoPrice !== null ? number_format($totalPromotions, 2, '.', '') : null;
 
         $itemData = [
-                'id' => $cartItem->getId(),
-                'product' => $cartItem->getProduct()->getName(),
-                'product_id' => $cartItem->getProduct()->getId(),
-                'quantity' => $cartItem->getQuantity(),
-                'promo_price' => $cartItem->getPromoPrice(),
-                'price' => $cartItem->getModel()->getPrice(),
-                'total' => $formattedTotal,
-                'total_promotion' => $formattedTotalPromotion
+            'id' => $cartItem->getId(),
+            'product' => $cartItem->getProduct()->getName(),
+            'product_id' => $cartItem->getProduct()->getId(),
+            'quantity' => $cartItem->getQuantity(),
+            'promo_price' => $cartItem->getPromoPrice(),
+            'price' => $cartItem->getModel()->getPrice(),
+            'total' => $formattedTotal,
+            'total_promotion' => $formattedTotalPromotion
         ];
 
         $data = [
@@ -347,4 +375,78 @@ class CartController extends AbstractController
             Response::HTTP_OK
         );
     }
+
+    #[Route('/item/gift/{itemId}', name:'update_item_gift', methods:['PATCH'])]
+    public function updateIsGift(int $itemId, EntityManagerInterface $entityManager, Request $request): JsonResponse
+    {
+        $cartItem = $entityManager->getRepository(CartItem::class)->find($itemId);
+
+        if (!$cartItem) {
+            return new JsonResponse(['error' => "Le produit n'a pas été trouvé"], 404);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        $isGift = $data['isGift'];
+
+        $cartItem->setGiftWrap($isGift);
+
+        $entityManager->persist($cartItem);
+        $entityManager->flush();
+
+        return new JsonResponse(['success' => true]);
+    }
+
+    #[Route('/', name:'delete_cart', methods:['DELETE'])]
+    public function deleteCart(Request $request)
+    {
+        $token = $request->query->get('token');
+        $userId = $request->query->get('userId');
+
+        if (!$token && !$userId) {
+            return new JsonResponse(['error' => "Aucune donnéee n'a été trouvée"], Response::HTTP_BAD_REQUEST);
+        }
+
+        if ($token) {
+            $cart = $this->anonymousCartRepository->findOneBy(['token' => $token]);
+        }
+
+        if ($userId) {
+            $cart = $this->cartRepository->findOneBy(['user' => $userId]);
+        }
+
+        $this->entityManager->remove($cart);
+        $this->entityManager->flush();
+
+        return new JsonResponse(['success' => true]);
+    }
+
+    #[Route('/items/count', name: 'cart_items_count', methods: ['GET'])]
+    public function countCartItems(Request $request) : JsonResponse {
+        $userId = $request->query->get('userId');
+        $token = $request->query->get('token');
+
+        if (!$userId && !$token) {
+            return new JsonResponse(['error' => 'User ID or Token is required'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $cart = null;
+        if ($userId) {
+            $cart = $this->cartRepository->findOneBy(['user' => $userId]);
+        } elseif ($token) {
+            $cart = $this->anonymousCartRepository->findOneBy(['token' => $token]);
+        }
+
+        if (!$cart) {
+            return new JsonResponse(['itemCount' => 0], Response::HTTP_OK);
+        }
+
+        $cartItems = $cart->getItems()->toArray();
+
+        $itemCount = array_reduce($cartItems, function($count, $item) {
+            return $count + $item->getQuantity();
+        }, 0);
+
+        return new JsonResponse(['itemCount' => $itemCount], Response::HTTP_OK);
+    }
+
 }

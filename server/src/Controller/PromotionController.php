@@ -15,16 +15,16 @@ class PromotionController extends AbstractController
     #[Route('/promotion/{id}', name: 'get_promotion', methods: ['GET'])]
     public function getPromotion(int $id, EntityManagerInterface $em): JsonResponse
     {
-        // Récupération de la promotion par son ID
+     
         $promotion = $em->getRepository(Promotion::class)->find($id);
 
         if (!$promotion) {
             return new JsonResponse(['message' => 'Promotion not found'], 404);
         }
 
-        // Mise à jour de l'état actif de la promotion en fonction de la date de fin
+     
         $this->updatePromotionStatus($promotion);
-        $em->flush(); // Sauvegarde de la mise à jour du statut
+        $em->flush(); 
 
         return new JsonResponse([
             'id' => $promotion->getId(),
@@ -47,29 +47,23 @@ class PromotionController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        // Récupération du produit par son ID
         $product = $em->getRepository(Product::class)->find($data['product_id']);
 
         if (!$product) {
             return new JsonResponse(['message' => 'Invalid product'], 400);
         }
 
-        // Création d'une nouvelle promotion
+ 
         $promotion = new Promotion();
         $promotion->setPromoPrice($data['promo_price']);
         $promotion->setStartDate(new \DateTime($data['start_date']));
         $promotion->setEndDate(new \DateTime($data['end_date']));
         $promotion->setProduct($product);
 
-        // Mise à jour de l'état actif de la promotion
         $this->updatePromotionStatus($promotion);
 
         $em->persist($promotion);
 
-        // Appliquer le prix promotionnel à tous les modèles du produit
-        // foreach ($product->getModels() as $model) {
-        //     $model->setPrice($promotion->getPromoPrice());
-        // }
 
         $em->flush();
 
@@ -78,7 +72,7 @@ class PromotionController extends AbstractController
 
     private function updatePromotionStatus(Promotion $promotion): void
     {
-        // Mise à jour de l'état actif en fonction de la date de fin
+        
         $now = new \DateTime();
         if ($promotion->getEndDate() < $now) {
             $promotion->setIsActive(false);

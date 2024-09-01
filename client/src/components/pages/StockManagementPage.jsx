@@ -13,7 +13,7 @@ const StockManagementPage = () => {
     }, []);
 
     const fetchProducts = () => {
-        axios.get('http://localhost:8000/api/admin/products')
+        axios.get('/api/admin/products')
             .then(response => {
                 const filteredProducts = response.data.filter(product =>
                     product.models.some(model => model.stock === 0 || model.stock <= 5)
@@ -52,7 +52,7 @@ const StockManagementPage = () => {
 
       
 
-        axios.post('http://localhost:8000/api/admin/products/replenish', { products: productsToReplenish })
+        axios.post('http://localhost:8000/api/admin/products/replenish', { products: productsToReplenish }) //localhost
             .then(response => {
                 setMessage("Stock mis à jour avec succès !");
                 fetchProducts(); // Recharger les produits pour voir les mises à jour dans l'interface
@@ -105,7 +105,7 @@ const StockManagementPage = () => {
                                 className="mr-2"
                             />
                             <img
-                                src={`http://localhost:8000${product.models[0]?.images?.find(image => image.is_main)?.path || '/default-image.jpg'}`}
+                                src={`${product.models[0]?.images?.find(image => image.is_main)?.path || '/default-image.jpg'}`}
                                 alt={`Image principale du produit ${product.name}`}
                                 className="w-32 h-32 object-cover mb-2 rounded"
                             />

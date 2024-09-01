@@ -32,7 +32,7 @@ class OrderItems
     private $totalPrice;
 
     #[ORM\Column(type: 'float', nullable: true)]
-    private $promoPrice;
+    private $totalPromoPrice;
 
     #[ORM\Column(type: 'boolean')]
     private $giftWrap;
@@ -40,6 +40,13 @@ class OrderItems
     #[ORM\ManyToOne(targetEntity: Order::class, inversedBy: 'orderItems')]
     #[ORM\JoinColumn(nullable: false)]
     private $order;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $unitPromoPrice = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Product $product = null;
 
 
     public function getId(): ?int
@@ -119,14 +126,14 @@ class OrderItems
         return $this;
     }
 
-    public function getPromoPrice(): ?float
+    public function getTotalPromoPrice(): ?float
     {
-        return $this->promoPrice;
+        return $this->totalPromoPrice;
     }
 
-    public function setPromoPrice(?float $promoPrice): self
+    public function setTotalPromoPrice(?float $totalPromoPrice): self
     {
-        $this->promoPrice = $promoPrice;
+        $this->totalPromoPrice = $totalPromoPrice;
 
         return $this;
     }
@@ -151,6 +158,30 @@ class OrderItems
     public function setOrder(?Order $order): self
     {
         $this->order = $order;
+
+        return $this;
+    }
+
+    public function getUnitPromoPrice(): ?float
+    {
+        return $this->unitPromoPrice;
+    }
+
+    public function setUnitPromoPrice(?float $unitPromoPrice): static
+    {
+        $this->unitPromoPrice = $unitPromoPrice;
+
+        return $this;
+    }
+
+    public function getProduct(): ?Product
+    {
+        return $this->product;
+    }
+
+    public function setProduct(?Product $product): static
+    {
+        $this->product = $product;
 
         return $this;
     }

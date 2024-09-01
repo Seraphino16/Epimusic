@@ -67,7 +67,7 @@ class Color
     public function removeModel(Model $model): static
     {
         if ($this->models->removeElement($model)) {
-            // set the owning side to null (unless already changed)
+           
             if ($model->getColor() === $this) {
                 $model->setColor(null);
             }

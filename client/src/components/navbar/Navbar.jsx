@@ -5,6 +5,7 @@ import SearchBar from "./SearchBar";
 import logo from "../../assets/logo.png";
 import { FaUserTie, FaUser, FaShoppingCart, FaGamepad } from "react-icons/fa";
 import { IoLogInOutline } from "react-icons/io5";
+import { useCart } from "../../context/CartContext"; 
 
 const Navbar = () => {
     const location = useLocation();
@@ -13,6 +14,7 @@ const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [userRole, setUserRole] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const { itemCount } = useCart();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -76,7 +78,14 @@ const Navbar = () => {
                     {userRole === "ROLE_USER" && (
                         <NavbarItem icon={<FaUser size={24} />} href="/profile/user-card" />
                     )}
-                    <NavbarItem icon={<FaShoppingCart size={24}/>} href="/cart" />
+                    <div className="relative">
+                        <NavbarItem icon={<FaShoppingCart size={24} />} href="/cart" />
+                        {itemCount > 0 && (
+                            <span className="absolute top-0 right-0 -translate-x-1/2 -translate-y-1/2 px-2 py-1 text-xs font-bold text-white bg-green-500 rounded-full">
+                                {itemCount}
+                            </span>
+                        )}
+                    </div>
                     {!isLoggedIn && (
                         <NavbarItem icon={<IoLogInOutline size={24} />} href="/login" />
                     )}

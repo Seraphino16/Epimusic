@@ -1,16 +1,20 @@
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Select from "react-select";
 import ButtonDelete from "./ButtonDelete";
+import { useCart } from '../../context/CartContext';
 
 const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
+    // const priceDifference = item.total - item.total_promotion;
     const [selectedOption, setSelectedOption] = useState({
         value: item.quantity,
         label: item.quantity,
     });
     const [total, setTotal] = useState(item.total);
     const [totalPromotion, setTotalPromotion] = useState(item.total_promotion);
+    const { updateItemCount } = useCart();
+    const [isGift, setIsGift] = useState(item.isGift);
 
     const options = Array.from({ length: 10 }, (v, k) => ({
         value: k + 1,
@@ -22,7 +26,7 @@ const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
 
         axios
             .patch(
-                `http://localhost:8000/api/cart/item/${item.id}`,
+                `http://localhost:8000/api/cart/item/${item.id}`, //localhost
                 {
                     quantity: selectedOption.value,
                 },
@@ -42,20 +46,34 @@ const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
                     item.total,
                     item.total_promotion
                 );
+
+                updateItemCount();
             })
             .catch((error) => console.log(error));
     };
+
+    
 
     const cartPrice = parseFloat(localStorage.getItem("cart_price")) || 0;
     const cartPromoTotal =
         parseFloat(localStorage.getItem("cart_promo_total")) || 0;
     const priceDifference = cartPrice - cartPromoTotal;
 
+    const handleGiftChange = (event) => {
+        const isChecked = event.target.checked;
+        setIsGift(isChecked);
+
+        axios.patch(`http://localhost:8000/api/cart/item/gift/${item.id}`, { //localhost
+            isGift: isChecked
+        })
+        .then(response => console.log(response.data))
+    }
+
     return (
         <div className="max-w-xl bg-white p-4 m-4 rounded-lg flex">
             <div className="w-32 h-32">
                 <img
-                    src={`http://localhost:8000${item.image_path}`}
+                    src={`http://localhost:8000${item.image_path}`} //localhost
                     alt={`${item.product}`}
                     className="w-full h-full object-contain"
                 />
@@ -99,7 +117,7 @@ const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
                 </div>
                 {item.category !== "Instrument" && priceDifference >= 15 && (
                     <div className="text-right flex items-center mt-3">
-                        <input type="checkbox" name="wrapping" />
+                        <input type="checkbox" name="wrapping" onChange={handleGiftChange} checked={isGift} />
                         <p className="text-sm ml-3 font-medium text-gray-900">
                             Expédier ce produit dans un emballage cadeau
                         </p>

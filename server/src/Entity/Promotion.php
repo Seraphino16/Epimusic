@@ -28,7 +28,7 @@ class Promotion
     private ?Product $product = null;
 
     #[ORM\OneToOne(inversedBy: 'promotion', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: true)] // Rendre nullable
+    #[ORM\JoinColumn(nullable: true)] 
     private ?Model $model = null;
 
 

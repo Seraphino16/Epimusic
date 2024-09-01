@@ -26,7 +26,7 @@ const ReplenishForm = ({ product, onClose }) => {
             })),
         };
 
-        axios.post("http://localhost:8000/api/admin/products/replenish", { products: [updatedProduct] })
+        axios.post("/api/admin/products/replenish", { products: [updatedProduct] })
             .then((response) => {
                 alert("Stocks mis à jour avec succès !");
                 onClose();

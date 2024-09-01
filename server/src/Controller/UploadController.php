@@ -21,7 +21,7 @@ class UploadController extends AbstractController
             return new JsonResponse(['error' => 'No file uploaded'], Response::HTTP_BAD_REQUEST);
         }
 
-        // Vérifiez si le fichier dépasse 25 Mo
+        
         if ($file->getSize() > 25 * 1024 * 1024) {
             return new JsonResponse(['error' => 'File size exceeds 25MB'], Response::HTTP_BAD_REQUEST);
         }

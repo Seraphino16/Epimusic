@@ -2,17 +2,20 @@ import React from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashCan } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
+import { useCart } from '../../context/CartContext';
 
 const ButtonDelete = ({ id, onDeleteItem }) => {
+    const { updateItemCount } = useCart();
 
     const handleDelete = () => {
-        axios.delete(`http://localhost:8000/api/cart/item/delete/${id}`)
+        axios.delete(`http://localhost:8000/api/cart/item/delete/${id}`) //localhost
             .then((response) => {
-                console.log(response.data.message);
+        
                 onDeleteItem(response.data.message, id)
+                updateItemCount();
             })
             .catch((error) => {
-                console.log(error.message);
+        
                 onDeleteItem(error.message)
             })
     }

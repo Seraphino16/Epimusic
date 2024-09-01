@@ -13,6 +13,8 @@ use App\Entity\Brand;
 use App\Entity\Tag;
 use App\Entity\Weight;
 use App\Entity\Promotion;
+use App\Entity\AdminOrder;
+use App\Entity\AdminOrderItem;
 use App\Repository\ProductRepository;
 use App\Repository\ModelRepository;
 use App\Repository\PromotionRepository;
@@ -27,100 +29,100 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 class ProductAdminController extends AbstractController
 {
     #[Route('/api/admin/products', name: 'api_products', methods: ['GET'])]
-public function getProducts(EntityManagerInterface $entityManager): JsonResponse
-{
-    $now = new \DateTime();
-    $products = $entityManager->getRepository(Product::class)->findAll();
-    $data = [];
+    public function getProducts(EntityManagerInterface $entityManager): JsonResponse
+    {
+        $now = new \DateTime();
+        $products = $entityManager->getRepository(Product::class)->findAll();
+        $data = [];
 
-    foreach ($products as $product) {
-        $models = [];
+        foreach ($products as $product) {
+            $models = [];
 
-        $promotions = $entityManager->getRepository(Promotion::class)
-            ->createQueryBuilder('p')
-            ->where('p.product = :product')
-            ->andWhere('p.start_date <= :now')
-            ->andWhere('p.end_date >= :now')
-            ->setParameter('product', $product)
-            ->setParameter('now', $now)
-            ->getQuery()
-            ->getResult();
+            $promotions = $entityManager->getRepository(Promotion::class)
+                ->createQueryBuilder('p')
+                ->where('p.product = :product')
+                ->andWhere('p.start_date <= :now')
+                ->andWhere('p.end_date >= :now')
+                ->setParameter('product', $product)
+                ->setParameter('now', $now)
+                ->getQuery()
+                ->getResult();
 
-        $promoDetails = [];
-        foreach ($promotions as $promotion) {
-            if ($promotion->isActive()) {
-                $promoDetails[] = [
-                    'promo_price' => $promotion->getPromoPrice(),
-                    'start_date' => $promotion->getStartDate()->format('Y-m-d'),
-                    'end_date' => $promotion->getEndDate()->format('Y-m-d')
+            $promoDetails = [];
+            foreach ($promotions as $promotion) {
+                if ($promotion->isActive()) {
+                    $promoDetails[] = [
+                        'promo_price' => $promotion->getPromoPrice(),
+                        'start_date' => $promotion->getStartDate()->format('Y-m-d'),
+                        'end_date' => $promotion->getEndDate()->format('Y-m-d')
+                    ];
+                }
+            }
+
+            foreach ($product->getModels() as $model) {
+                $images = [];
+                foreach ($model->getImage() as $image) {
+                    $images[] = [
+                        'path' => $image->getPath(),
+                        'is_main' => $image->isMain(),
+                    ];
+                }
+
+                $stock = $entityManager->getRepository(Stock::class)->findOneBy([
+                    'product' => $product,
+                    'color' => $model->getColor(),
+                    'size' => $model->getSize(),
+                ]);
+                $quantity = $stock ? $stock->getQuantity() : 0;
+
+                $promoPrice = null;
+                if (!empty($promoDetails)) {
+                    $promoPrice = $promoDetails[0]['promo_price'];
+                }
+
+                $models[] = [
+                    'model_id' => $model->getId(),
+                    'color' => $model->getColor() ? $model->getColor()->getName() : null,
+                    'size' => $model->getSize() ? $model->getSize()->getValue() : null,
+                    'price' => $model->getPrice(),
+                    'promo_price' => $promoPrice,
+                    'images' => $images,
+                    'stock' => $quantity,
                 ];
             }
-        }
 
-        foreach ($product->getModels() as $model) {
-            $images = [];
-            foreach ($model->getImage() as $image) {
-                $images[] = [
-                    'path' => $image->getPath(),
-                    'is_main' => $image->isMain(),
+            $stocks = $product->getStocks();
+            $stockData = [];
+            foreach ($stocks as $stock) {
+                $stockData[] = [
+                    'color' => $stock->getColor()?->getName(),
+                    'size' => $stock->getSize()?->getValue(),
+                    'quantity' => $stock->getQuantity(),
                 ];
             }
 
-            $stock = $entityManager->getRepository(Stock::class)->findOneBy([
-                'product' => $product,
-                'color' => $model->getColor(),
-                'size' => $model->getSize(),
-            ]);
-            $quantity = $stock ? $stock->getQuantity() : 0;
+            $brands = $product->getCategory()->getId() === 1
+                ? $product->getBrands()->map(fn($brand) => $brand->getName())->toArray()
+                : [];
 
-            $promoPrice = null;
-            if (!empty($promoDetails)) {
-                $promoPrice = $promoDetails[0]['promo_price'];
-            }
+            $tags = $product->getTags()->map(fn($tag) => $tag->getName())->toArray();
 
-            $models[] = [
-                'model_id' => $model->getId(),
-                'color' => $model->getColor() ? $model->getColor()->getName() : null,
-                'size' => $model->getSize() ? $model->getSize()->getValue() : null,
-                'price' => $model->getPrice(),
-                'promo_price' => $promoPrice,
-                'images' => $images,
-                'stock' => $quantity,
+            $data[] = [
+                'id' => $product->getId(),
+                'name' => $product->getName(),
+                'description' => $product->getDescription(),
+                'category' => $product->getCategory()->getName(),
+                'weight' => $product->getWeights()->first()?->getValue() ?? 0,
+                'models' => $models,
+                'stocks' => $stockData,
+                'brands' => $brands,
+                'tags' => $tags,
+                'promotions' => $promoDetails,
             ];
         }
 
-        $stocks = $product->getStocks();
-        $stockData = [];
-        foreach ($stocks as $stock) {
-            $stockData[] = [
-                'color' => $stock->getColor()?->getName(),
-                'size' => $stock->getSize()?->getValue(),
-                'quantity' => $stock->getQuantity(),
-            ];
-        }
-
-        $brands = $product->getCategory()->getId() === 1
-            ? $product->getBrands()->map(fn($brand) => $brand->getName())->toArray()
-            : [];
-
-        $tags = $product->getTags()->map(fn($tag) => $tag->getName())->toArray();
-
-        $data[] = [
-            'id' => $product->getId(),
-            'name' => $product->getName(),
-            'description' => $product->getDescription(),
-            'category' => $product->getCategory()->getName(),
-            'weight' => $product->getWeights()->first()?->getValue() ?? 0,
-            'models' => $models,
-            'stocks' => $stockData,
-            'brands' => $brands,
-            'tags' => $tags,
-            'promotions' => $promoDetails,
-        ];
+        return new JsonResponse($data);
     }
-
-    return new JsonResponse($data);
-}
 
 
 
@@ -150,11 +152,10 @@ public function getProducts(EntityManagerInterface $entityManager): JsonResponse
         $product->setDescription($data['description']);
         $product->setCategory($category);
 
-        // Persist the product to get its ID
+      
         $entityManager->persist($product);
         $entityManager->flush();
 
-        // Create a new model
         $model = new Model();
         $model->setProduct($product);
         if ($color) $model->setColor($color);
@@ -163,14 +164,12 @@ public function getProducts(EntityManagerInterface $entityManager): JsonResponse
 
         $entityManager->persist($model);
 
-        // Handle weight
         $weight = new Weight();
         $weight->setValue($data['weight']);
         $weight->setProduct($product);
 
         $entityManager->persist($weight);
 
-        // Handle photo paths
         $photoPaths = $data['photoPaths'];
         foreach ($photoPaths as $index => $path) {
             $originalFilePath = $this->getParameter('uploads_directory') . '/' . basename($path);
@@ -190,7 +189,7 @@ public function getProducts(EntityManagerInterface $entityManager): JsonResponse
             $entityManager->persist($image);
         }
 
-        // Handle stock
+
         $stock = new Stock();
         $stock->setProduct($product);
         $stock->setQuantity($data['stock']);
@@ -199,7 +198,7 @@ public function getProducts(EntityManagerInterface $entityManager): JsonResponse
 
         $entityManager->persist($stock);
 
-        // Handle brand
+
         if ($category->getId() == 1 && isset($data['brand'])) {
             $brand = new Brand();
             $brand->setName($data['brand']);
@@ -207,7 +206,7 @@ public function getProducts(EntityManagerInterface $entityManager): JsonResponse
             $entityManager->persist($brand);
         }
 
-        // Handle tags
+
         foreach ($data['tags'] as $tagName) {
             $tag = new Tag();
             $tag->setName($tagName);
@@ -223,18 +222,18 @@ public function getProducts(EntityManagerInterface $entityManager): JsonResponse
     #[Route('/api/admin/products/{id}', name: 'api_product_delete', methods: ['DELETE'])]
     public function delete(Product $product, EntityManagerInterface $entityManager): JsonResponse
     {
-        // Remove the product images from the file system and the database
+       
         foreach ($product->getModels() as $model) {
             foreach ($model->getImage() as $image) {
                 $imagePath = $this->getParameter('uploads_directory') . '/' . basename($image->getPath());
                 if (file_exists($imagePath)) {
                     unlink($imagePath);
                 }
-                $entityManager->remove($image); // Remove image from the database
+                $entityManager->remove($image); 
             }
         }
 
-        // Remove related brands and tags
+      
         foreach ($product->getBrands() as $brand) {
             $entityManager->remove($brand);
         }
@@ -355,10 +354,9 @@ public function update(Request $request, Product $product, EntityManagerInterfac
         $entityManager->persist($weight);
     }
 
-    // Assurez-vous d'obtenir tous les modèles existants
     $existingModels = $product->getModels();
 
-    // Stocker les nouveaux stocks pour éviter les doublons
+ 
     $newStocks = [];
 
     foreach ($data['models'] as $index => $modelData) {
@@ -373,7 +371,7 @@ public function update(Request $request, Product $product, EntityManagerInterfac
             return new JsonResponse(['error' => 'Le prix doit être supérieur à zéro et le stock ne peut pas être négatifs !'], 400);
         }
 
-        // Trouver ou créer le modèle
+      
         $model = $index < count($existingModels) ? $existingModels[$index] : new Model();
         if (!$model->getId()) {
             $product->addModel($model);
@@ -386,7 +384,7 @@ public function update(Request $request, Product $product, EntityManagerInterfac
         $model->setSize($size);
         $model->setPrice($modelData['price']);
 
-        // Gestion des images
+      
         foreach ($model->getImage() as $image) {
             if (!in_array($image->getPath(), $modelData['photoPaths'])) {
                 $existingImagePath = $this->getParameter('uploads_directory') . '/' . basename($image->getPath());
@@ -425,7 +423,7 @@ public function update(Request $request, Product $product, EntityManagerInterfac
             }
         }
 
-        // Gérer le stock pour chaque modèle
+       
         $stock = $entityManager->getRepository(Stock::class)->findOneBy([
             'product' => $product,
             'color' => $color,
@@ -442,13 +440,13 @@ public function update(Request $request, Product $product, EntityManagerInterfac
         $stock->setQuantity($modelData['stock']);
         $newStocks[] = $stock;
 
-        // Enregistrer le modèle
+     
         if (!$model->getId()) {
             $entityManager->persist($model);
         }
     }
 
-    // Supprimer les stocks non utilisés
+
     $existingStocks = $entityManager->getRepository(Stock::class)->findBy(['product' => $product]);
     foreach ($existingStocks as $existingStock) {
         if (!in_array($existingStock, $newStocks, true)) {
@@ -456,12 +454,12 @@ public function update(Request $request, Product $product, EntityManagerInterfac
         }
     }
 
-    // Enregistrer tous les stocks mis à jour
+
     foreach ($newStocks as $stock) {
         $entityManager->persist($stock);
     }
 
-    // Mettre à jour les marques et les tags
+
     foreach ($product->getBrands() as $brand) {
         $entityManager->remove($brand);
     }
@@ -482,7 +480,6 @@ public function update(Request $request, Product $product, EntityManagerInterfac
         $entityManager->persist($tag);
     }
 
-    // Gérer le poids
 
 
     $entityManager->persist($product);
@@ -492,7 +489,6 @@ public function update(Request $request, Product $product, EntityManagerInterfac
 }
 
 
-    // New endpoint to rename uploaded files
     #[Route('/rename-upload', name: 'rename_upload', methods: ['POST'])]
     public function renameUpload(Request $request): JsonResponse
     {
@@ -529,7 +525,7 @@ public function update(Request $request, Product $product, EntityManagerInterfac
             }
 
             if ($data['price'] <= 0 || $data['stock'] < 0) {
-                return new JsonResponse(['error' => 'Le prix doit être supérieur à zéro et le stock ne peut pas être négatifs !'], Response::HTTP_BAD_REQUEST);
+                return new JsonResponse(['error' => 'Le prix doit être supérieur à zéro, le stock et le poids ne peuvent pas être négatifs !'], Response::HTTP_BAD_REQUEST);
             }
 
             $productId = $data['productId'];
@@ -569,12 +565,14 @@ public function update(Request $request, Product $product, EntityManagerInterfac
             $entityManager->persist($model);
             $entityManager->persist($product);
 
+            $entityManager->flush();
+
             $photoPaths = $data['photoPaths'];
             foreach ($photoPaths as $index => $path) {
                 $originalFilePath = $this->getParameter('uploads_directory') . '/' . basename($path);
                 $fileExtension = pathinfo($originalFilePath, PATHINFO_EXTENSION);
-                $uniqueId = uniqid();
-                $newFileName = $product->getId() . '_' . $model->getId() . '_' . $index . '_' . $uniqueId . '.' . $fileExtension;
+            
+                $newFileName = $product->getId() . '_' . $model->getId() . '_' . $index . '.' . $fileExtension;
                 $newFilePath = $this->getParameter('uploads_directory') . '/' . $newFileName;
 
                 try {
@@ -652,29 +650,28 @@ public function update(Request $request, Product $product, EntityManagerInterfac
      
         $model = $entityManager->getRepository(Model::class)->find($id);
         if (!$model) {
-            return new JsonResponse(['error' => 'Model not found'], JsonResponse::HTTP_NOT_FOUND);
+            return new JsonResponse(['error' => 'Modele non trouvé'], JsonResponse::HTTP_NOT_FOUND);
         }
     
     
         $product = $model->getProduct();
         if (!$product) {
-            return new JsonResponse(['error' => 'Product not found'], JsonResponse::HTTP_NOT_FOUND);
+            return new JsonResponse(['error' => 'Produit non trouvé'], JsonResponse::HTTP_NOT_FOUND);
         }
     
         $color = $model->getColor();
         $size = $model->getSize();
     
         $data = json_decode($request->getContent(), true);
-        if (!isset($data['price'], $data['stock'], $data['weight'], $data['photoPaths'], $data['mainImageIndex'])) {
-            return new JsonResponse(['error' => 'Invalid data'], 400);
+        if (!isset($data['price'], $data['stock'], $data['photoPaths'], $data['mainImageIndex'])) {
+            return new JsonResponse(['error' => 'Données invalides'], 400);
         }
     
-        if ($data['price'] <= 0 || $data['stock'] < 0 || $data['weight'] < 0) {
-            return new JsonResponse(['error' => 'The price must be greater than zero, stock and weight cannot be negative!'], 400);
+        if ($data['price'] <= 0 || $data['stock'] < 0) {
+            return new JsonResponse(['error' => 'Le prix doit être supérieur à zéro, le stock et le poids ne peuvent pas être négatifs !'], 400);
         }
     
         $model->setPrice($data['price']);
-        $model->setWeight($data['weight']);
         $color = isset($data['color']) ? $entityManager->getRepository(Color::class)->find($data['color']) : $model->getColor();
         $size = isset($data['size']) ? $entityManager->getRepository(Size::class)->find($data['size']) : $model->getSize();
     
@@ -766,43 +763,163 @@ public function update(Request $request, Product $product, EntityManagerInterfac
         ]);
     }
     
-
-#[Route('/api/admin/products/replenish', name: 'api_replenish_products', methods: ['POST'])]
-public function replenishProducts(Request $request, EntityManagerInterface $entityManager): JsonResponse
-{
-    $data = json_decode($request->getContent(), true);
-    
-    if (!isset($data['products']) || !is_array($data['products'])) {
-        return new JsonResponse(['error' => 'Invalid data'], 400);
+    private function generateOrderNumber(): string
+    {
+        $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $orderNumber = '';
+        for ($i = 0; $i < 13; $i++) {
+            $orderNumber .= $characters[random_int(0, strlen($characters) - 1)];
+        }
+        return $orderNumber;
     }
-    
-    foreach ($data['products'] as $productData) {
-        $product = $entityManager->getRepository(Product::class)->find($productData['id']);
-        if (!$product) {
-            continue; 
+
+    /*Route qui permet de passer une commande et généré les informations lié à la commande: date, numérode commande, quantité etc...*/
+    #[Route('/api/admin/products/replenish', name: 'api_replenish_products', methods: ['POST'])]
+    public function replenishProducts(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        // dd($data);
+
+        
+        if (!isset($data['products']) || !is_array($data['products'])) {
+            return new JsonResponse(['error' => 'Invalid data'], 400);
         }
         
-        foreach ($productData['models'] as $modelData) {
-            $model = $entityManager->getRepository(Model::class)->find($modelData['model_id']);
-            if ($model) {
-                $stock = $entityManager->getRepository(Stock::class)->findOneBy([
-                    'product' => $product,
-                    'color' => $model->getColor(),
-                    'size' => $model->getSize()
-                ]);
-                if ($stock) {
-                    $stock->setQuantity($modelData['stock']);
-                    $entityManager->persist($stock);
+       
+        $order = new AdminOrder();
+        $order->setOrderNumber($this->generateOrderNumber());       
+        $order->setStatus('livré');
+        $order->setCreatedAt(new \DateTime()); 
+        $order->setUpdateAt(new \DateTime());
+        
+        $entityManager->persist($order);
+
+    
+        foreach ($data['products'] as $productData) {
+            $product = $entityManager->getRepository(Product::class)->find($productData['id']);
+            if (!$product) {
+                continue; 
+            }
+            
+            foreach ($productData['models'] as $modelData) {
+                $model = $entityManager->getRepository(Model::class)->find($modelData['model_id']);
+                if ($model) {
+                    $stock = $entityManager->getRepository(Stock::class)->findOneBy([
+                        'product' => $product,
+                        'color' => $model->getColor(),
+                        'size' => $model->getSize()
+                    ]);
+                    if ($stock) {
+                        $stock->setQuantity($modelData['stock']);
+                        $entityManager->persist($stock);
+                    }
+                    
+           
+                    $orderItem = new AdminOrderItem();
+                    $orderItem->setAdminOrder($order);
+                    $orderItem->setProduct($product);
+                    $orderItem->setModel($model);
+                    $orderItem->setModelColor($model->getColor() ? $model->getColor()->getName() : null);
+                    $orderItem->setModelSize($model->getSize() ? $model->getSize()->getValue() : null);
+                    $orderItem->setQuantity($modelData['stock']);
+                    $orderItem->setIsMain(true); 
+    
+                    $entityManager->persist($orderItem);
                 }
             }
         }
+        
+        $entityManager->flush();
+    
+        return new JsonResponse(['status' => 'Stock updated and order created successfully'], 200);
     }
     
-    $entityManager->flush();
+    /*Route qui permet de mettre à jour le status de la commande: Livré, en cours de préparation, nouvelle commande*/
+    #[Route('/api/admin/orders/track-all', name: 'api_track_all_orders', methods: ['GET'])]
+    public function trackAllOrders(EntityManagerInterface $entityManager): JsonResponse
+    {
+        $orders = $entityManager->getRepository(AdminOrder::class)->findAll();
+        $currentDate = new \DateTime();
+        $updatedOrders = [];
+    
+        foreach ($orders as $order) {
+            $deliveryDate = $order->getDeliveryDate();
+            if (!$deliveryDate) {
+                $deliveryDate = $order->getCreatedAt(); 
+            }
+            $interval = $deliveryDate->diff($currentDate);
+            $daysElapsed = $interval->days;
+    
+            switch (true) {
+                case ($daysElapsed >= 7):
+                    $order->setStatus('Livré');
+                    $order->setDeliveryDate($currentDate);
+                    break;
+                case ($daysElapsed >= 4):
+                    $order->setStatus('En cours de livraison');
+                    break;
+                case ($daysElapsed >= 1):
+                    $order->setStatus('En préparation');
+                    break;
+                default:
+                    $order->setStatus('Nouvelle commande');
+                    break;
+            }
+    
+            $entityManager->persist($order);
+    
+            $updatedOrders[] = [
+                'order_id' => $order->getId(),
+                'status' => $order->getStatus(),
+                'created_at' => $order->getCreatedAt()->format('Y-m-d H:i:s'),
+                'delivery_date' => $order->getDeliveryDate() ? $order->getDeliveryDate()->format('Y-m-d H:i:s') : null,
+                'days_elapsed' => $daysElapsed,
+            ];
+        }
+    
+        $entityManager->flush();
+    
+        return new JsonResponse([
+            'orders' => $updatedOrders,
+        ], 200);
+    }
 
-    return new JsonResponse(['status' => 'Stock updated successfully'], 200);
-}
+    /*Recupération du details des produits commandé, c'est l'historique des produits commandés*/
+    #[Route('/api/admin/replenish-orders', name: 'api_admin_replenish_orders', methods: ['GET'])]
+    public function getReplenishOrders(EntityManagerInterface $entityManager): JsonResponse
+    {
+       
+        $orders = $entityManager->getRepository(AdminOrder::class)->findAll();
 
+        $orderDetails = [];
+        foreach ($orders as $order) {
+         
+            $orderItems = $order->getOrderItems();
 
+            foreach ($orderItems as $item) {
+                $product = $item->getProduct();
+                $model = $item->getModel();
 
+               
+                $stock = $entityManager->getRepository(Stock::class)->findOneBy([
+                    'product' => $product,
+                    'color' => $model->getColor(),
+                    'size' => $model->getSize(),
+                ]);
+
+                $orderDetails[] = [
+                    'order_number' => $order->getOrderNumber(),
+                    'product_name' => $product->getName(),
+                    'model_id' => $model->getId(),
+                    'current_stock' => $stock ? $stock->getQuantity() : 0,
+                    'order_date' => $order->getCreatedAt()->format('Y-m-d H:i:s'),
+                    'order_status' => $order->getStatus(),
+                    'quantity_ordered' => $item->getQuantity(),
+                ];
+            }
+        }
+
+        return new JsonResponse($orderDetails);
+    }
 }
