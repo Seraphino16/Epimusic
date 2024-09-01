@@ -58,7 +58,7 @@ const PaymentForm = ({ orderPrice, orderId }) => {
 
     axios
       .post(
-        "/api/payment/create-intent", //localhost
+        "http://localhost:8000/api/payment/create-intent", //localhost
         {
           amount: Math.round(orderPrice * 100),
         },
@@ -114,14 +114,14 @@ const PaymentForm = ({ orderPrice, orderId }) => {
     }
 
     axios
-      .patch(`/api/order/validate/${orderId}`) //localhost
+      .patch(`http://localhost:8000/api/order/validate/${orderId}`) //localhost
       .then((response) => {
         console.log(response.data);
       })
       .catch((error) => console.log(error));
 
     axios
-      .delete(`/api/cart/`, {    //localhost
+      .delete(`http://localhost:8000/api/cart/`, {    //localhost
         params: {
           userId: userId,
           token: cartToken,
@@ -135,7 +135,7 @@ const PaymentForm = ({ orderPrice, orderId }) => {
       .then(
         setTimeout(() => {
           navigate('/');
-        }, 8000)
+        }, 6000)
       )
       .catch((error) => console.log(error));
   }, [paymentSuccess]);

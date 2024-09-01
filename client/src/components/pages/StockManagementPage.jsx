@@ -52,7 +52,7 @@ const StockManagementPage = () => {
 
       
 
-        axios.post('/api/admin/products/replenish', { products: productsToReplenish }) //localhost
+        axios.post('http://localhost:8000/api/admin/products/replenish', { products: productsToReplenish }) //localhost
             .then(response => {
                 setMessage("Stock mis à jour avec succès !");
                 fetchProducts(); // Recharger les produits pour voir les mises à jour dans l'interface

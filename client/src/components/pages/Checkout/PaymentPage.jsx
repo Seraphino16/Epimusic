@@ -20,7 +20,7 @@ const PaymentPage = () => {
     }
 
     axios
-      .get(`/api/order/${orderId}`) //localhost
+      .get(`http://localhost:8000/api/order/${orderId}`) //localhost
       .then((response) => {
         setOrder(response.data);
       })

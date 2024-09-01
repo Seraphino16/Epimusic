@@ -10,7 +10,7 @@ export const CartProvider = ({ children }) => {
         try {
             const user = JSON.parse(localStorage.getItem('user'));
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:8000/api/cart/items/count', {
+            const response = await axios.get('http://localhost:8000/api/cart/items/count', { //localhost
                 params: {
                     userId: user ? user.id : null,
                     token: token || null

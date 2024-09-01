@@ -29,7 +29,7 @@ const ShippingPage = () => {
             return;
         }
 
-        axios.get(`/api/order/${orderId}`) //localhost
+        axios.get(`http://localhost:8000/api/order/${orderId}`) //localhost
             .then(response => {
                 setOrder(response.data);
             })
@@ -57,7 +57,7 @@ const ShippingPage = () => {
     }, [cartPrice, shipppingCosts]);
 
     const handlePaymentRedirection = () => {
-        navigate('/checkout/payment');
+        navigate('/delivery/home-delivery');
     }
 
     return (
@@ -68,14 +68,12 @@ const ShippingPage = () => {
             <div className="flex flex-wrap justify-evenly">
                 <div className="w-2/5">
                     <h3 className="text-2xl">Méthodes de livraisons</h3>
-                    <a href="/delivery/home-delivery">
                         <div className="w-full max-w-xl bg-white hover:bg-gray-100 p-8 mt-4 rounded-lg">
                             <div className="flex items-center text-xl px-4">
                                 <FaShippingFast />
                                 <p className="ml-4">Livraison à domicile</p>
                             </div>
                         </div>
-                    </a>
                 </div>
 
                 <div className="w-1/3">

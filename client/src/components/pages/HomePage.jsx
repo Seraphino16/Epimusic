@@ -36,7 +36,7 @@ const HomePage = () => {
 
     useEffect(() => {
         axios
-            .get("/api/admin/categories") //localhost
+            .get("http://localhost:8000/api/admin/categories") //localhost
             .then((response) => {
                 setCategories(response.data);
             })

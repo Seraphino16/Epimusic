@@ -14,7 +14,7 @@ const CategoryAdminEdit = () => {
     useEffect(() => {
         const fetchCategory = async () => {
             try {
-                const response = await axios.get(`/api/admin/categories/${id}`); //localhost
+                const response = await axios.get(`http://localhost:8000/api/admin/categories/${id}`); //localhost
                 const categoryData = response.data;
                 setName(categoryData.name);
                 setExistingImagePath(categoryData.imagePath);
@@ -37,7 +37,7 @@ const CategoryAdminEdit = () => {
             formData.append("file", image);
 
             try {
-                const uploadResponse = await axios.post("/upload", formData, { //localhost
+                const uploadResponse = await axios.post("http://localhost:8000/upload", formData, { //localhost
                     headers: {
                         "Content-Type": "multipart/form-data",
                     },
@@ -50,7 +50,7 @@ const CategoryAdminEdit = () => {
                     newPath: `/uploads/${newFileName}`,
                 };
 
-                await axios.post("/rename-upload", renameData, { //localhost
+                await axios.post("http://localhost:8000/rename-upload", renameData, { //localhost
                     headers: {
                         "Content-Type": "application/json",
                     },
@@ -70,7 +70,7 @@ const CategoryAdminEdit = () => {
         };
 
         try {
-            await axios.put(`/api/admin/categories/${id}`, updateData, { //localhost
+            await axios.put(`http://localhost:8000/api/admin/categories/${id}`, updateData, { //localhost
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -127,7 +127,7 @@ const CategoryAdminEdit = () => {
                                 {existingImagePath && (
                                     <div className="mb-4 flex justify-center">
                                         <img
-                                            src={`${existingImagePath}`} //localhost
+                                            src={`http://localhost:8000${existingImagePath}`} //localhost
                                             alt="Catégorie actuelle"
                                             style={{maxWidth: "300px", height: "auto"}}
                                             className="rounded"

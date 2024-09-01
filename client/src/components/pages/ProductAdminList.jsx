@@ -42,7 +42,7 @@ const ProductAdminList = () => {
 
     const fetchProducts = () => {
         axios
-            .get("/api/admin/products") //localhost
+            .get("http://localhost:8000/api/admin/products") //localhost
             .then((response) => {
                 setProducts(response.data);
                 console.log(response.data);
@@ -54,7 +54,7 @@ const ProductAdminList = () => {
 
     const deleteProduct = (id) => {
         return axios
-            .delete(`/api/admin/products/${id}`) //localhost
+            .delete(`http://localhost:8000/api/admin/products/${id}`) //localhost
             .then((response) => {
                 setProducts(products.filter((product) => product.id !== id));
                 setMessage("Produit supprimé avec succès !");
@@ -67,7 +67,7 @@ const ProductAdminList = () => {
     };
 
     const editProduct = (id) => {
-        navigate(`/admin/edit-product/${id}`);
+        navigate(`http://localhost:8000/admin/edit-product/${id}`); //localhost
     };
 
     const handleSelectProduct = (id) => {

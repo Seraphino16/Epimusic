@@ -287,7 +287,8 @@ class CartController extends AbstractController
                 'price' => $cartItem->getPrice(),
                 'promo_price' => $cartItem->getPromoPrice(),
                 'total' => $formattedTotal,
-                'total_promotion' => $formattedTotalPromotion
+                'total_promotion' => $formattedTotalPromotion,
+                'isGift' => $cartItem->isGiftWrap(),
             ];
         }
 

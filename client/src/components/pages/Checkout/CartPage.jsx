@@ -31,7 +31,7 @@ const CartPage = () => {
         if (!userId && !cartToken) {
             return;
         }
-        axios.get("/api/cart", { //localhost
+        axios.get("http://localhost:8000/api/cart", { //localhost
             params: {
                 userId: userId,
                 token: cartToken
@@ -99,7 +99,7 @@ const CartPage = () => {
             return;
         }
         
-        axios.post("/api/order/", { //localhost
+        axios.post("http://localhost:8000/api/order/", { //localhost
             userId: userId,
             token: cartToken
         })
@@ -109,7 +109,7 @@ const CartPage = () => {
             setOrderId(orderId);
             localStorage.setItem("orderId", orderId);
 
-            return axios.get("/api/shipping/cost", { //localhost
+            return axios.get("http://localhost:8000/api/shipping/cost", { //localhost
                 params: {
                     userId: userId,
                     token: cartToken,

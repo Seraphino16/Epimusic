@@ -37,7 +37,7 @@ const DeliveryHomePage = () => {
         const fetchAddresses = async () => {
             try {
                 const response = await axios.get(
-                    `http://localhost:8000/api/user/${user.id}/addresses`
+                    `http://localhost:8000/api/user/${user.id}/addresses` //localhost
                 );
                 setAddresses(response.data);
             } catch (error) {
@@ -54,7 +54,7 @@ const DeliveryHomePage = () => {
             setLastname(user.lastname);
             setEmail(user.email);
             fetchAddresses();
-            setDisplayState(true);
+            setDisplayState(true);  
         }
     }, []);
 
@@ -82,7 +82,7 @@ const DeliveryHomePage = () => {
 
         try {
             const response = await axios.post(
-                `http://localhost:8000/api/order/${orderId}/address`,
+                `http://localhost:8000/api/order/${orderId}/address`, //localhost
                 {
                     name: `${firstname} ${lastname}`,
                     telephone,
@@ -95,7 +95,7 @@ const DeliveryHomePage = () => {
                 }
             );
             setMessage("Adresse enregistrée avec succès !");
-            navigate("checkout/payment");
+            navigate("/checkout/payment");
         } catch (error) {
             console.error(
                 "Erreur lors de l'enregistrement de l'adresse : ",
