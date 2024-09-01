@@ -121,7 +121,7 @@ class OrderController extends AbstractController
             $orderItem->setQuantity($quantity);
             $orderItem->setUnitPrice($unitPrice);
             $orderItem->setTotalPrice($formattedTotal);
-            $orderItem->setGiftWrap(false);
+            $orderItem->setGiftWrap($cartItem->isGiftWrap());
             $orderItem->setProduct($cartItem->getProduct());
             $order->addOrderItem($orderItem);
         }

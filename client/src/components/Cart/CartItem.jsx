@@ -39,6 +39,14 @@ const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
         .catch((error) => console.log(error))
     }
 
+    const handleGiftChange = (event) => {
+        const isChecked = event.target.checked;
+
+        axios.patch(`api/cart/item/gift/${item.id}`, {
+            isGift: isChecked
+        });
+    }
+
     return (
         <div className="max-w-xl bg-white p-4 m-4 rounded-lg flex">
             <div className="w-32 h-32">
@@ -87,7 +95,7 @@ const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
                 </div>
                 {item.category !== "Instrument" && priceDifference >= 15 && (
                     <div className="text-right flex items-center mt-3">
-                        <input type="checkbox" name="wrapping" />
+                        <input type="checkbox" name="wrapping" onChange={handleGiftChange} />
                         <p className="text-sm ml-3 font-medium text-gray-900">
                             Expédier ce produit dans un emballage cadeau
                         </p>

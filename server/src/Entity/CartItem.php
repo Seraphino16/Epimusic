@@ -37,6 +37,9 @@ class CartItem
     #[ORM\Column(type: 'float', nullable: true)]
     private ?float $promoPrice = null;
 
+    #[ORM\Column]
+    private ?bool $giftWrap = false;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -135,6 +138,18 @@ class CartItem
     public function setPromoPrice(?float $promoPrice): self {
 
         $this->promoPrice = $promoPrice;
+        return $this;
+    }
+
+    public function isGiftWrap(): ?bool
+    {
+        return $this->giftWrap;
+    }
+
+    public function setGiftWrap(bool $giftWrap): static
+    {
+        $this->giftWrap = $giftWrap;
+
         return $this;
     }
 }
