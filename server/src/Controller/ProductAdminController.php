@@ -667,16 +667,15 @@ public function update(Request $request, Product $product, EntityManagerInterfac
         $size = $model->getSize();
     
         $data = json_decode($request->getContent(), true);
-        if (!isset($data['price'], $data['stock'], $data['weight'], $data['photoPaths'], $data['mainImageIndex'])) {
+        if (!isset($data['price'], $data['stock'])) {
             return new JsonResponse(['error' => 'Invalid data'], 400);
         }
     
-        if ($data['price'] <= 0 || $data['stock'] < 0 || $data['weight'] < 0) {
+        if ($data['price'] <= 0 || $data['stock'] < 0) {
             return new JsonResponse(['error' => 'The price must be greater than zero, stock and weight cannot be negative!'], 400);
         }
     
         $model->setPrice($data['price']);
-        $model->setWeight($data['weight']);
         $color = isset($data['color']) ? $entityManager->getRepository(Color::class)->find($data['color']) : $model->getColor();
         $size = isset($data['size']) ? $entityManager->getRepository(Size::class)->find($data['size']) : $model->getSize();
     
@@ -784,6 +783,7 @@ public function update(Request $request, Product $product, EntityManagerInterfac
     {
         $data = json_decode($request->getContent(), true);
 
+        // dd($data);
 
         
         if (!isset($data['products']) || !is_array($data['products'])) {

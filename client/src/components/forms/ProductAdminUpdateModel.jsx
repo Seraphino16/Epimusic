@@ -182,7 +182,7 @@ const ProductAdminUpdateModel = ({ isOpen, onClose, modelId, productCategoryId, 
 
             setAlert({ type: 'success', message: 'Produit mis à jour avec succès.' });
             onClose();
-            navigate(`/admin`);
+            navigate(`/admin/products`);
         } catch (error) {
             console.error('Erreur lors de la mise à jour du produit:', error);
         }
