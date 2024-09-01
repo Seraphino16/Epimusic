@@ -154,6 +154,7 @@ class CartController extends AbstractController
             $cartItem->setQuantity($quantity);
             $cartItem->setPrice($model->getPrice());
             $cartItem->setAnonymousCart($cart);
+            $cartItem->setGiftWrap(false);
 
             $this->entityManager->persist($cartItem);
             $cart->calculateTotal();
@@ -372,6 +373,50 @@ class CartController extends AbstractController
             ['message' => "Le produit a été enlevé de votre panier"],
             Response::HTTP_OK
         );
+    }
+
+    #[Route('/item/gift/{itemId}', name:'update_item_gift', methods:['PATCH'])]
+    public function updateIsGift(int $itemId, EntityManagerInterface $entityManager, Request $request): JsonResponse
+    {
+        $cartItem = $entityManager->getRepository(CartItem::class)->find($itemId);
+
+        if (!$cartItem) {
+            return new JsonResponse(['error' => "Le produit n'a pas été trouvé"], 404);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        $isGift = $data['isGift'];
+
+        $cartItem->setGiftWrap($isGift);
+
+        $entityManager->persist($cartItem);
+        $entityManager->flush();
+
+        return new JsonResponse(['success' => true]);
+    }
+
+    #[Route('/', name:'delete_cart', methods:['DELETE'])]
+    public function deleteCart(Request $request)
+    {
+        $token = $request->query->get('token');
+        $userId = $request->query->get('userId');
+
+        if (!$token && !$userId) {
+            return new JsonResponse(['error' => "Aucune donnéee n'a été trouvée"], Response::HTTP_BAD_REQUEST);
+        }
+
+        if ($token) {
+            $cart = $this->anonymousCartRepository->findOneBy(['token' => $token]);
+        }
+
+        if ($userId) {
+            $cart = $this->cartRepository->findOneBy(['user' => $userId]);
+        }
+
+        $this->entityManager->remove($cart);
+        $this->entityManager->flush();
+
+        return new JsonResponse(['success' => true]);
     }
 
     #[Route('/items/count', name: 'cart_items_count', methods: ['GET'])]

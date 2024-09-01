@@ -21,7 +21,7 @@ const ProviderEditModal = ({ isOpen, onClose, providerId}) => {
 
     const fetchProviderData = async (id) => {
         try {
-            const response = await fetch(`http://localhost:8000/api/provider/${id}`, {
+            const response = await fetch(`/api/provider/${id}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -58,7 +58,7 @@ const ProviderEditModal = ({ isOpen, onClose, providerId}) => {
         e.preventDefault();
 
         try {
-            const response = await fetch(`http://localhost:8000/api/provider/${providerId}`, {
+            const response = await fetch(`/api/provider/${providerId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'

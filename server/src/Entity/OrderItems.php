@@ -44,6 +44,10 @@ class OrderItems
     #[ORM\Column(nullable: true)]
     private ?float $unitPromoPrice = null;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Product $product = null;
+
 
     public function getId(): ?int
     {
@@ -166,6 +170,18 @@ class OrderItems
     public function setUnitPromoPrice(?float $unitPromoPrice): static
     {
         $this->unitPromoPrice = $unitPromoPrice;
+
+        return $this;
+    }
+
+    public function getProduct(): ?Product
+    {
+        return $this->product;
+    }
+
+    public function setProduct(?Product $product): static
+    {
+        $this->product = $product;
 
         return $this;
     }

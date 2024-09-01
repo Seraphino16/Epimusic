@@ -26,7 +26,7 @@ const ProductAdminForm = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get("http://localhost:8000/api/admin/categories") //localhost
+        axios.get("/api/admin/categories") //localhost
             .then((response) => {
                 setCategories(response.data);
             })
@@ -34,7 +34,7 @@ const ProductAdminForm = () => {
                 console.error("Erreur lors de la récupération des catégories !", error);
             });
 
-        axios.get("http://localhost:8000/api/admin/colors") //localhost
+        axios.get("/api/admin/colors") //localhost
             .then((response) => {
                 setColors(response.data);
             })
@@ -77,7 +77,7 @@ const ProductAdminForm = () => {
             for (let i = 0; i < photoFiles.length; i++) {
                 const formData = new FormData();
                 formData.append("file", photoFiles[i]);
-                const response = await axios.post("http://localhost:8000/upload", formData, { //localhost
+                const response = await axios.post("/upload", formData, { //localhost
                     headers: {
                         "Content-Type": "multipart/form-data",
                     },
@@ -101,7 +101,7 @@ const ProductAdminForm = () => {
             };
 
             console.log(newProduct);
-            await axios.post("http://localhost:8000/api/admin/products", newProduct); //localhost
+            await axios.post("/api/admin/products", newProduct); //localhost
 
             setMessage("Produit créé avec succès !");
             setError("");
@@ -121,7 +121,7 @@ const ProductAdminForm = () => {
         setCategory(selectedCategory);
 
         if (selectedCategory === "2" || selectedCategory === "3") {
-            axios.get(`http://localhost:8000/api/admin/sizes/category/${selectedCategory}`) //localhost
+            axios.get(`/api/admin/sizes/category/${selectedCategory}`) //localhost
                 .then((response) => {
                     setSizes(response.data);
                     setSize("");

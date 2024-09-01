@@ -25,7 +25,7 @@ const ProductAdminAddModel = () => {
     const getCategoryId = async (category) => {
         try {
             const response = await fetch(
-                `http://localhost:8000/api/admin/get/catergoryId?name=${category}` //localhost
+                `/api/admin/get/catergoryId?name=${category}` //localhost
             );
             if (!response.ok) {
                 setAlert({ type: "error", message: response.message });
@@ -44,7 +44,7 @@ const ProductAdminAddModel = () => {
     const getColors = async () => {
         try {
             const response = await fetch(
-                `http://localhost:8000/api/admin/colors` //localhost
+                `/api/admin/colors` //localhost
             );
             if (!response.ok) {
                 setAlert({ type: "error", message: response.message });
@@ -63,7 +63,7 @@ const ProductAdminAddModel = () => {
     const getSizes = async (categoryId) => {
         try {
             const response = await fetch(
-                `http://localhost:8000/api/admin/sizes/category/${categoryId}` //localhost
+                `/api/admin/sizes/category/${categoryId}` //localhost
             );
             if (!response.ok) {
                 setAlert({ type: "error", message: response.message });
@@ -91,7 +91,7 @@ const ProductAdminAddModel = () => {
         const formData = new FormData();
         formData.append("file", file);
 
-        const response = await fetch("http://localhost:8000/upload", { //localhost
+        const response = await fetch("/upload", { //localhost
             method: "POST",
             body: formData,
         });
@@ -141,7 +141,7 @@ const ProductAdminAddModel = () => {
             };
 
             const response = await fetch(
-                `http://localhost:8000/api/admin/addModel`, //localhost
+                `/api/admin/addModel`, //localhost
                 {
                     method: "POST",
                     headers: {

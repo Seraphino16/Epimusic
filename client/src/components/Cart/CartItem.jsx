@@ -60,7 +60,7 @@ const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
         <div className="max-w-xl bg-white p-4 m-4 rounded-lg flex">
             <div className="w-32 h-32">
                 <img
-                    src={`http://localhost:8000${item.image_path}`} //localhost
+                    src={`${item.image_path}`} //localhost
                     alt={`${item.product}`}
                     className="w-full h-full object-contain"
                 />
@@ -104,7 +104,7 @@ const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
                 </div>
                 {item.category !== "Instrument" && priceDifference >= 15 && (
                     <div className="text-right flex items-center mt-3">
-                        <input type="checkbox" name="wrapping" />
+                        <input type="checkbox" name="wrapping" onChange={handleGiftChange} />
                         <p className="text-sm ml-3 font-medium text-gray-900">
                             Expédier ce produit dans un emballage cadeau
                         </p>
