@@ -6,7 +6,7 @@ import ButtonDelete from "./ButtonDelete";
 import { useCart } from '../../context/CartContext';
 
 const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
-    const priceDifference = item.total - item.total_promotion;
+    // const priceDifference = item.total - item.total_promotion;
     const [selectedOption, setSelectedOption] = useState({
         value: item.quantity,
         label: item.quantity,
