@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Select from "react-select";
 import ButtonDelete from "./ButtonDelete";
+import { useCart } from '../../context/CartContext';
 
 const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
     const priceDifference = item.total - item.total_promotion;
@@ -12,6 +13,7 @@ const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
     });
     const [total, setTotal] = useState(item.total);
     const [totalPromotion, setTotalPromotion] = useState(item.total_promotion);
+    const { updateItemCount } = useCart();
 
     const options = Array.from({ length: 10 }, (v, k) => ({
         value: k + 1,
@@ -21,23 +23,38 @@ const CartItem = ({ item, onQuantityChange, onDeleteItem }) => {
     const handleChangeQuantity = (selectedOption) => {
         setSelectedOption(selectedOption);
 
-        axios.patch(`http://localhost:8000/api/cart/item/${item.id}`, { //localhost
-            quantity: selectedOption.value
-        },  {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then((response) => {
-            return response.data.item;
-        })
-        .then((item) => {
-            setTotal(item.total);
-            setTotalPromotion(item.total_promotion);
-            onQuantityChange(item.id, selectedOption.value, item.total, item.total_promotion);
-        })
-        .catch((error) => console.log(error))
-    }
+        axios
+            .patch(
+                `http://localhost:8000/api/cart/item/${item.id}`,
+                {
+                    quantity: selectedOption.value,
+                },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            )
+            .then((response) => response.data.item)
+            .then((item) => {
+                setTotal(item.total);
+                setTotalPromotion(item.total_promotion);
+                onQuantityChange(
+                    item.id,
+                    selectedOption.value,
+                    item.total,
+                    item.total_promotion
+                );
+
+                updateItemCount();
+            })
+            .catch((error) => console.log(error));
+    };
+
+    const cartPrice = parseFloat(localStorage.getItem("cart_price")) || 0;
+    const cartPromoTotal =
+        parseFloat(localStorage.getItem("cart_promo_total")) || 0;
+    const priceDifference = cartPrice - cartPromoTotal;
 
     return (
         <div className="max-w-xl bg-white p-4 m-4 rounded-lg flex">

@@ -23,11 +23,13 @@ import ShippingPage from './components/pages/Checkout/ShippingPage';
 import DeliveryHomePage from './components/pages/Checkout/DeliveryHomePage';
 import StockManagementPage from './components/pages/StockManagementPage';
 import { SearchProvider } from './context/SearchContext'; 
+import { CartProvider } from './context/CartContext';
 import PaymentPage from './components/pages/Checkout/PaymentPage';
 
 const App = () => (
     <Router>
         <SearchProvider>
+        <CartProvider>
         <BackgroundWrapper>
             <div className="flex flex-col min-h-screen">
                 <Navbar />
@@ -37,6 +39,7 @@ const App = () => (
                 <Footer />
             </div>
         </BackgroundWrapper>
+        </CartProvider>
         </SearchProvider>
     </Router>
     

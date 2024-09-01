@@ -9,6 +9,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faShoppingCart, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { useCart } from '../../context/CartContext';
 
 const ProductDetailsPage = () => {
     const { id } = useParams();
@@ -24,6 +25,7 @@ const ProductDetailsPage = () => {
     const [canPostReview, setCanPostReview] = useState(false);
     const [hasPostedReview, setHasPostedReview] = useState(false);
     const [refresh, setRefresh] = useState(false);
+    const { updateItemCount } = useCart();
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -94,6 +96,9 @@ const ProductDetailsPage = () => {
                 if (response.data.token) {
                     localStorage.setItem('cart_token', response.data.token);
                 }
+                
+                updateItemCount();
+
                 checkIfProductInCartAndReview();
 
                 setTimeout(() => {

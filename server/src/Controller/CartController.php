@@ -373,4 +373,34 @@ class CartController extends AbstractController
             Response::HTTP_OK
         );
     }
+
+    #[Route('/items/count', name: 'cart_items_count', methods: ['GET'])]
+    public function countCartItems(Request $request) : JsonResponse {
+        $userId = $request->query->get('userId');
+        $token = $request->query->get('token');
+
+        if (!$userId && !$token) {
+            return new JsonResponse(['error' => 'User ID or Token is required'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $cart = null;
+        if ($userId) {
+            $cart = $this->cartRepository->findOneBy(['user' => $userId]);
+        } elseif ($token) {
+            $cart = $this->anonymousCartRepository->findOneBy(['token' => $token]);
+        }
+
+        if (!$cart) {
+            return new JsonResponse(['itemCount' => 0], Response::HTTP_OK);
+        }
+
+        $cartItems = $cart->getItems()->toArray();
+
+        $itemCount = array_reduce($cartItems, function($count, $item) {
+            return $count + $item->getQuantity();
+        }, 0);
+
+        return new JsonResponse(['itemCount' => $itemCount], Response::HTTP_OK);
+    }
+
 }

@@ -7,6 +7,7 @@ import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 import ProductColors from "../ProductDetails/ProductColors";
 import ProductSizes from "../ProductDetails/ProductSizes";
 import ProductFilter from "../Filtered/ProductFilter";
+import { useCart } from '../../context/CartContext';
 
 const ProductList = () => {
     const { categoryId, category } = useParams();
@@ -17,6 +18,7 @@ const ProductList = () => {
     const [selectedSizes, setSelectedSizes] = useState({});
     const [error, setError] = useState("");
     const [alert, setAlert] = useState("");
+    const { updateItemCount } = useCart();
 
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [filters, setFilters] = useState({
@@ -292,7 +294,10 @@ const ProductList = () => {
                 if (response.data.token) {
                     localStorage.setItem("cart_token", response.data.token);
                 }
-            })
+
+                updateItemCount(); 
+
+                    })
             .catch(() => {
                 setAlert("Erreur lors de l'ajout du produit au panier.");
             });
