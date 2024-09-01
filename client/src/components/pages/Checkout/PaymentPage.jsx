@@ -34,7 +34,7 @@ const PaymentPage = () => {
       return;
     }
 
-    if (order.status !== "pending") {
+    if (order.status !== "Pending") {
       navigate("/");
     }
   }, [order]);

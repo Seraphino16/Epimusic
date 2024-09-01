@@ -90,8 +90,8 @@ class OrderController extends AbstractController
 
         $cartItems = $cart->getItems();
         $order = new Order();
-        $order->setStatus('pending');
-        $order->setPaymentStatus('pending');
+        $order->setStatus('Pending');
+        $order->setPaymentStatus('Pending');
         $orderTotal = 0;
         $orderTotalWithPromo = 0;
 
@@ -183,7 +183,7 @@ class OrderController extends AbstractController
         $order = $this->entityManager->getRepository(Order::class)
             ->find($orderId);
 
-        $order->setStatus('In preparation');
+        $order->setStatus('En préparation');
         $order->setPaymentMethod('Credit Card');
         $order->setUpdatedAt(new \DateTime());
 
